@@ -115,7 +115,7 @@ ionic serve
 
 ## 👥 Autores
 
-Tu nombre aquí
+Angel Fernández
 
 ## 📄 Licencia
 
