@@ -1,0 +1,11 @@
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-toggle {
+    --handle-width: 26px;
+    --handle-height: 26px;
+    --handle-spacing: 4px;
+}

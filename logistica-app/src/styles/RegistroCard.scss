@@ -1,0 +1,108 @@
+.registro-card {
+    margin: 12px 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border-left: 4px solid var(--ion-color-primary);
+
+    &:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    ion-card-content {
+        padding: 16px;
+    }
+}
+
+.registro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .area-badge {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 20px;
+    }
+
+    ion-button {
+        --padding-start: 8px;
+        --padding-end: 8px;
+    }
+}
+
+.registro-body {
+    .registro-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        background: var(--ion-color-light);
+        border-radius: 12px;
+        transition: all 0.2s ease;
+
+        &.highlight {
+            background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.1), rgba(var(--ion-color-secondary-rgb), 0.1));
+            border: 2px solid var(--ion-color-primary-tint);
+        }
+
+        .info-icon {
+            color: var(--ion-color-primary);
+            font-size: 1.1rem;
+            min-width: 20px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--ion-color-medium);
+            font-size: 0.85rem;
+            min-width: 70px;
+        }
+
+        .info-value {
+            flex: 1;
+            font-weight: 500;
+            color: var(--ion-color-dark);
+            font-size: 0.95rem;
+
+            &.cantidad {
+                font-size: 1.5rem;
+                font-weight: 700;
+                background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .registro-card {
+        margin: 8px 0;
+    }
+
+    .info-item {
+        .info-label {
+            min-width: 60px;
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+
+            &.cantidad {
+                font-size: 1.3rem;
+            }
+        }
+    }
+}
