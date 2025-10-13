@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://mpolog.onrender.com/api';
 
 // Crear instancia de axios con configuración base
 const api = axios.create({
@@ -57,7 +57,7 @@ export const conteoService = {
         const params = new URLSearchParams();
         if (fecha) params.append('fecha', fecha);
         if (area) params.append('area', area);
-        
+
         const response = await api.get(`/conteo?${params.toString()}`);
         return response.data;
     },
@@ -71,7 +71,7 @@ export const conteoService = {
         const params = new URLSearchParams();
         if (fechaInicio) params.append('fechaInicio', fechaInicio);
         if (fechaFin) params.append('fechaFin', fechaFin);
-        
+
         const response = await api.get(`/conteo/estadisticas?${params.toString()}`);
         return response.data;
     },
