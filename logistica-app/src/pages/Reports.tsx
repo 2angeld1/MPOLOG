@@ -9,6 +9,7 @@ import {
     IonCardContent,
 } from '@ionic/react';
 import { motion } from 'framer-motion';
+import { easeOut, easeInOut } from 'framer-motion'; // Importa las funciones de easing
 import Lottie from 'lottie-react';
 import ThemeToggle from '../components/ThemeToggle';
 import comingSoonAnimation from '../assets/lottie/coming-soon.json';
@@ -34,7 +35,7 @@ const Reports: React.FC = () => {
             y: 0,
             transition: {
                 duration: 0.6,
-                ease: "easeOut"
+                ease: easeOut // Usa la función importada
             }
         }
     };
@@ -44,7 +45,7 @@ const Reports: React.FC = () => {
         transition: {
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: easeInOut // Usa la función importada
         }
     };
 
@@ -76,7 +77,7 @@ const Reports: React.FC = () => {
                     <motion.div variants={itemVariants} className="coming-soon-content">
                         <IonCard className="coming-soon-card">
                             <IonCardContent>
-                                <motion.h1 
+                                <motion.h1
                                     className="coming-soon-title"
                                     animate={pulseVariants}
                                 >
@@ -86,7 +87,7 @@ const Reports: React.FC = () => {
                                     Estamos trabajando en esta sección
                                 </p>
                                 <div className="features-list">
-                                    <motion.div 
+                                    <motion.div
                                         className="feature-item"
                                         variants={itemVariants}
                                     >
@@ -96,7 +97,7 @@ const Reports: React.FC = () => {
                                             <p>Visualiza estadísticas completas por fechas y áreas</p>
                                         </div>
                                     </motion.div>
-                                    <motion.div 
+                                    <motion.div
                                         className="feature-item"
                                         variants={itemVariants}
                                     >
@@ -107,7 +108,7 @@ const Reports: React.FC = () => {
                                         </div>
                                     </motion.div>
                                 </div>
-                                <motion.div 
+                                <motion.div
                                     className="timeline"
                                     variants={itemVariants}
                                 >
