@@ -25,8 +25,12 @@ const LoginPage: React.FC = () => {
     const history = useHistory();
     const { login } = useAuth();
 
-    const handleLogin = async () => {
-        if (!username || !password) {
+    const handleLogin = async (e?: React.FormEvent) => {
+        e?.preventDefault(); // Previene recarga de página si es un form
+
+        console.log('🔍 Debug - Username:', username, 'Password:', password);
+
+        if (!username || !password || username.trim() === '' || password.trim() === '') {
             setToastMessage('Por favor ingresa usuario y contraseña');
             setShowToast(true);
             return;
@@ -41,12 +45,6 @@ const LoginPage: React.FC = () => {
             setShowToast(true);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleLogin();
         }
     };
 
@@ -106,15 +104,18 @@ const LoginPage: React.FC = () => {
                         <p>Inicia sesión para continuar</p>
                     </motion.div>
 
-                    <div className="login-form">
+                    <form onSubmit={handleLogin} className="login-form"> {/* Agrega form */}
                         <motion.div variants={itemVariants}>
                             <IonItem lines="none" className="form-item">
                                 <IonInput
                                     label="Usuario"
                                     labelPlacement="floating"
                                     value={username}
-                                    onIonChange={(e) => setUsername(e.detail.value!)}
-                                    onKeyPress={handleKeyPress}
+                                    onIonInput={(e) => { // <-- CAMBIO AQUÍ
+                                        const value = e.detail.value || '';
+                                        console.log('📝 Username input:', value);
+                                        setUsername(value);
+                                    }}
                                     disabled={loading}
                                 ></IonInput>
                             </IonItem>
@@ -127,8 +128,11 @@ const LoginPage: React.FC = () => {
                                     labelPlacement="floating"
                                     type="password"
                                     value={password}
-                                    onIonChange={(e) => setPassword(e.detail.value!)}
-                                    onKeyPress={handleKeyPress}
+                                    onIonInput={(e) => { // <-- CAMBIO AQUÍ
+                                        const value = e.detail.value || '';
+                                        console.log('🔒 Password input:', value);
+                                        setPassword(value);
+                                    }}
                                     disabled={loading}
                                 ></IonInput>
                             </IonItem>
@@ -141,7 +145,7 @@ const LoginPage: React.FC = () => {
                         >
                             <IonButton
                                 expand="block"
-                                onClick={handleLogin}
+                                type="submit" // Cambia a type="submit"
                                 className="login-button"
                                 shape="round"
                                 disabled={loading}
@@ -166,7 +170,7 @@ const LoginPage: React.FC = () => {
                                 <a href="#">Recuperar</a>
                             </p>
                         </motion.div>
-                    </div>
+                    </form> {/* Cierra form */}
                 </motion.div>
 
                 <IonToast
