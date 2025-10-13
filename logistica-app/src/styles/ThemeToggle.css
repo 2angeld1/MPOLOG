@@ -1,11 +1,122 @@
 .theme-toggle-container {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-container:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .theme-toggle {
-    --handle-width: 26px;
-    --handle-height: 26px;
-    --handle-spacing: 4px;
+    --background: transparent;
+    --background-checked: transparent;
+    --handle-background: var(--ion-color-primary);
+    --handle-background-checked: var(--ion-color-secondary);
+    --border-radius: 20px;
+    --handle-border-radius: 50%;
+    --handle-width: 24px;
+    --handle-height: 24px;
+    --track-width: 50px;
+    --track-height: 28px;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.toggle-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--ion-color-primary-contrast);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.toggle-icon ion-icon {
+    font-size: 14px;
+    color: var(--ion-color-primary);
+    transition: all 0.3s ease;
+}
+
+.toggle-icon .sun-icon {
+    color: #ffd700;
+    /* Dorado para el sol */
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
+}
+
+.toggle-icon .moon-icon {
+    color: #c0c0c0;
+    /* Plateado para la luna */
+    filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.6));
+}
+
+.theme-toggle.toggle-checked .toggle-icon {
+    transform: translate(-50%, -50%) translateX(12px);
+    /* Mover a la derecha */
+}
+
+.theme-toggle:not(.toggle-checked) .toggle-icon {
+    transform: translate(-50%, -50%) translateX(-12px);
+    /* Mover a la izquierda */
+}
+
+/* Animación de rotación para el icono */
+@keyframes rotateIcon {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .theme-toggle-container {
+        padding: 6px;
+    }
+
+    .theme-toggle-container:hover {
+        transform: scale(1.05);
+    }
+
+    .theme-toggle {
+        --track-width: 45px;
+        --track-height: 25px;
+        --handle-width: 20px;
+        --handle-height: 20px;
+    }
+
+    .toggle-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .toggle-icon ion-icon {
+        font-size: 12px;
+    }
+
+    .theme-toggle.toggle-checked .toggle-icon {
+        transform: translate(-50%, -50%) translateX(10px);
+    }
+
+    .theme-toggle:not(.toggle-checked) .toggle-icon {
+        transform: translate(-50%, -50%) translateX(-10px);
+    }
 }

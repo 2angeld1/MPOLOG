@@ -1,8 +1,7 @@
 .custom-tab-bar {
-    //--background: var(--ion-background-color);
-    border-top: 1px solid var(--ion-color-light-shade);
+    border-top: 1px solid var(--ion-border-color); // Usa variable de Ionic
     padding: 8px 0 12px 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 20px var(--ion-box-shadow-color); // Usa variable de Ionic
     position: relative;
 
     &::before {
@@ -12,13 +11,13 @@
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient(90deg, var(--ion-color-primary), var(--ion-color-secondary), var(--ion-color-tertiary));
-        opacity: 0.6;
+        background: linear-gradient(90deg, var(--ion-color-primary), var(--ion-color-secondary), var(--ion-color-tertiary)); // Usa variables de Ionic
+        opacity: 0.8;
     }
 
     ion-tab-button {
-        --color: var(--ion-color-light-shade);
-        --color-selected: var(--ion-color-primary);
+        --color: var(--ion-text-color); // Color de texto que cambia con el tema
+        --color-selected: var(--ion-text-color); // Blanco en oscuro, negro en claro
         font-weight: 500;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
@@ -33,14 +32,15 @@
             transform: translateX(-50%) scaleX(0);
             width: 40px;
             height: 3px;
-            background: var(--ion-color-primary);
+            background: var(--ion-color-primary); // Usa variable de Ionic
             border-radius: 3px 3px 0 0;
             transition: transform 0.3s ease;
         }
 
         &.tab-selected {
             transform: translateY(-4px);
-            --color-selected: var(--ion-color-primary);
+            --color-selected: var(--ion-text-color);
+            background: var(--ion-item-background); // Fondo que cambia con el tema
 
             &::before {
                 transform: translateX(-50%) scaleX(1);
@@ -48,7 +48,7 @@
 
             svg {
                 transform: scale(1.2);
-                filter: drop-shadow(0 2px 4px rgba(var(--ion-color-primary-rgb), 0.4));
+                filter: drop-shadow(0 2px 4px var(--ion-color-primary)); // Usa variable
             }
 
             ion-label {
@@ -57,21 +57,24 @@
         }
 
         &.add-button {
-            --color-selected: var(--ion-color-tertiary);
+            --color-selected: var(--ion-color-secondary); // Verde azulado
 
             &::before {
                 background: var(--ion-color-secondary);
             }
 
             &.tab-selected {
-                svg {
-                    filter: drop-shadow(0 2px 4px rgba(var(--ion-color-secondary-rgb), 0.4));
-                }
+                background: var(--ion-color-secondary-contrast); // Fondo sutil
+            }
+
+            svg {
+                font-size: 1.5rem; // Aumenta el tamaño del icono de agregar
             }
         }
 
         &:hover:not(.tab-selected) {
             transform: translateY(-2px);
+            --color: var(--ion-text-color); // Asegura contraste
 
             svg {
                 transform: scale(1.1);
@@ -91,13 +94,19 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
     }
+
+    .center-tab-icon {
+        ion-icon {
+            font-size: 1.5rem;
+        }
+    }
 }
 
 // Animación para el tab central (Agregar)
 .custom-tab-bar {
     ion-tab-button.add-button {
         &.tab-selected {
-            background: linear-gradient(135deg, rgba(var(--ion-color-secondary-rgb), 0.1), rgba(var(--ion-color-secondary-rgb), 0.05));
+            background: var(--ion-color-secondary-contrast);
         }
     }
 }
