@@ -3,8 +3,12 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Tabs from './pages/Tabs';
 import LoginPage from './pages/LoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import RegisterPage from './pages/RegisterPage';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { DataProvider } from './context/DataContext'; // Agrega import
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -40,12 +44,21 @@ setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-    <AuthProvider>
-      <ThemeProvider>
-        <IonReactRouter>
+    <IonReactRouter>
+      <DataProvider> {/* Agrega DataProvider */}
+        <AuthProvider>
           <IonRouterOutlet>
             <Route exact path="/login">
               <LoginPage />
+            </Route>
+            <Route exact path="/register">
+              <RegisterPage />
+            </Route>
+            <Route exact path="/forgot-password">
+              <ForgotPasswordPage />
+            </Route>
+            <Route exact path="/reset-password">
+              <ResetPasswordPage />
             </Route>
             <Route path="/tabs">
               <Tabs />
@@ -54,9 +67,9 @@ const App: React.FC = () => (
               <Redirect to="/login" />
             </Route>
           </IonRouterOutlet>
-        </IonReactRouter>
-      </ThemeProvider>
-    </AuthProvider>
+        </AuthProvider>
+      </DataProvider> {/* Cierra DataProvider */}
+    </IonReactRouter>
   </IonApp>
 );
 

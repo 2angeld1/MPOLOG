@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+// Obtener la URL de la API desde variables de entorno
+const API_MODE = import.meta.env.VITE_API_MODE || 'local';
+const API_URL = import.meta.env.VITE_API_URL || (API_MODE === 'remote' ? 'https://mpolog.onrender.com/api' : 'http://localhost:5000/api');
 
 // Crear instancia de axios con configuración base
 const api = axios.create({
@@ -26,12 +28,8 @@ api.interceptors.request.use(
 
 // Servicios de autenticación
 export const authService = {
-    login: async (username: string, password: string) => {
-        const response = await api.post('/auth/login', { username, password });
-        if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-        }
+    login: async (email: string, password: string) => { // Cambia username por email
+        const response = await api.post('/auth/login', { email, password });
         return response.data;
     },
 
@@ -43,6 +41,21 @@ export const authService = {
     getCurrentUser: () => {
         const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
+    },
+
+    forgotPassword: async (email: string) => {
+        const response = await api.post('/auth/forgot-password', { email });
+        return response.data;
+    },
+
+    resetPassword: async (token: string, password: string) => {
+        const response = await api.post('/auth/reset-password', { token, password });
+        return response.data;
+    },
+
+    register: async (userData: { username: string; email: string; password: string; nombre: string; rol?: string }) => {
+        const response = await api.post('/auth/register', userData);
+        return response.data;
     },
 };
 

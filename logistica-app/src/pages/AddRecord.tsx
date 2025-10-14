@@ -33,6 +33,7 @@ import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import ThemeToggle from '../components/ThemeToggle';
 import RegistroCard from '../components/RegistroCard';
 import { conteoService } from '../services/api';
+import { useData } from '../context/DataContext'; // Agrega import
 import '../styles/AddRecord.scss';
 import '../styles/Toolbar.scss';
 
@@ -55,6 +56,7 @@ const AddRecord: React.FC = () => {
     const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
     const [loading, setLoading] = useState(false);
     const [loadingAreas, setLoadingAreas] = useState(true);
+    const { refreshData } = useData(); // Agrega hook
 
     // Cargar áreas al montar el componente
     useEffect(() => {
@@ -87,10 +89,10 @@ const AddRecord: React.FC = () => {
         try {
             const fechaFormateada = new Date(fecha).toISOString().split('T')[0];
             console.log('🔍 Cargando registros para fecha:', fechaFormateada);
-            
+
             const response = await conteoService.obtener(fechaFormateada);
             console.log('📦 Respuesta del servidor:', response);
-            
+
             const registrosFormateados = response.data.map((item: any, index: number) => ({
                 _id: item._id,
                 id: index + 1,
@@ -98,7 +100,7 @@ const AddRecord: React.FC = () => {
                 cantidad: item.cantidad,
                 area: item.area,
             }));
-            
+
             console.log('✅ Registros formateados:', registrosFormateados);
             setRegistros(registrosFormateados);
         } catch (error: any) {
@@ -109,7 +111,7 @@ const AddRecord: React.FC = () => {
 
     const handleAddRecord = async () => {
         console.log('📝 Valores actuales:', { cantidad, area });
-        
+
         if (!cantidad || cantidad <= 0) {
             setToastMessage('Por favor ingresa una cantidad válida');
             setToastColor('danger');
@@ -139,13 +141,14 @@ const AddRecord: React.FC = () => {
             });
 
             await cargarRegistros();
-            
+
             setCantidad(undefined);
             setArea('');
-            
+
             setToastMessage('Registro agregado correctamente');
             setToastColor('success');
             setShowToast(true);
+            refreshData();
         } catch (error: any) {
             console.error('❌ Error al agregar:', error);
             setToastMessage(error.response?.data?.message || 'Error al agregar registro');
@@ -162,7 +165,7 @@ const AddRecord: React.FC = () => {
         try {
             await conteoService.eliminar(id);
             await cargarRegistros();
-            
+
             setToastMessage('Registro eliminado correctamente');
             setToastColor('success');
             setShowToast(true);
@@ -286,8 +289,8 @@ const AddRecord: React.FC = () => {
 
                                     <IonRow>
                                         <IonCol>
-                                            <motion.div 
-                                                whileHover={{ scale: loading ? 1 : 1.02 }} 
+                                            <motion.div
+                                                whileHover={{ scale: loading ? 1 : 1.02 }}
                                                 whileTap={{ scale: loading ? 1 : 0.98 }}
                                             >
                                                 <IonButton
@@ -346,7 +349,7 @@ const AddRecord: React.FC = () => {
 
                     {/* Lista de Registros con Tarjetas */}
                     {registros.length > 0 && (
-                        <motion.div 
+                        <motion.div
                             className="registros-list"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -370,7 +373,7 @@ const AddRecord: React.FC = () => {
 
                     {/* Mensaje vacío */}
                     {registros.length === 0 && (
-                        <motion.div 
+                        <motion.div
                             className="empty-state"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}

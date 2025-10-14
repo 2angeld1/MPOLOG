@@ -8,38 +8,37 @@ import {
     IonSpinner,
 } from '@ionic/react';
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom'; // Cambia useNavigate por useHistory
 import { motion } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChurch } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/AuthContext';
 import '../styles/LoginPage.scss';
+import { authService } from '../services/api';
 
 const LoginPage: React.FC = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState(''); // Cambia username por email
     const [password, setPassword] = useState('');
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    const history = useHistory();
+    const history = useHistory(); // Cambia navigate por history
     const { login } = useAuth();
 
     const handleLogin = async (e?: React.FormEvent) => {
-        e?.preventDefault(); // Previene recarga de página si es un form
+        e?.preventDefault();
 
-        console.log('🔍 Debug - Username:', username, 'Password:', password);
-
-        if (!username || !password || username.trim() === '' || password.trim() === '') {
-            setToastMessage('Por favor ingresa usuario y contraseña');
+        if (!email || !password) {
+            setToastMessage('Por favor ingresa email y contraseña');
             setShowToast(true);
             return;
         }
 
         setLoading(true);
         try {
-            await login(username, password);
-            history.replace('/tabs/home');
+            await login(email, password); // Cambia authService.login por login del contexto
+            // El contexto maneja el toast de éxito y la redirección
         } catch (error: any) {
             setToastMessage(error.message || 'Error al iniciar sesión');
             setShowToast(true);
@@ -108,15 +107,13 @@ const LoginPage: React.FC = () => {
                         <motion.div variants={itemVariants}>
                             <IonItem lines="none" className="form-item">
                                 <IonInput
-                                    label="Usuario"
+                                    label="Email" // Cambia "Usuario" por "Email"
                                     labelPlacement="floating"
-                                    value={username}
-                                    onIonInput={(e) => { // <-- CAMBIO AQUÍ
-                                        const value = e.detail.value || '';
-                                        console.log('📝 Username input:', value);
-                                        setUsername(value);
-                                    }}
+                                    type="email" // Agrega type="email"
+                                    value={email} // Cambia username por email
+                                    onIonInput={(e) => setEmail(e.detail.value || '')} // Cambia setUsername por setEmail
                                     disabled={loading}
+                                    required
                                 ></IonInput>
                             </IonItem>
                         </motion.div>
@@ -128,9 +125,8 @@ const LoginPage: React.FC = () => {
                                     labelPlacement="floating"
                                     type="password"
                                     value={password}
-                                    onIonInput={(e) => { // <-- CAMBIO AQUÍ
+                                    onIonInput={(e) => { // Quita el console.log
                                         const value = e.detail.value || '';
-                                        console.log('🔒 Password input:', value);
                                         setPassword(value);
                                     }}
                                     disabled={loading}
@@ -167,7 +163,29 @@ const LoginPage: React.FC = () => {
                         >
                             <p>
                                 ¿Olvidaste tu contraseña?{' '}
-                                <a href="#">Recuperar</a>
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        history.push('/forgot-password'); // Cambia navigate por history.push
+                                    }}
+                                    className="forgot-password-link"
+                                >
+                                    Recuperar
+                                </a>
+                            </p>
+                            <p>
+                                ¿No tienes cuenta?{' '}
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        history.push('/register'); // Cambia navigate por history.push
+                                    }}
+                                    className="register-link"
+                                >
+                                    Regístrate
+                                </a>
                             </p>
                         </motion.div>
                     </form> {/* Cierra form */}

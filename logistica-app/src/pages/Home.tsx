@@ -1,17 +1,17 @@
-import { 
-    IonButton, 
-    IonButtons, 
-    IonContent, 
-    IonHeader, 
-    IonPage, 
-    IonTitle, 
-    IonToolbar, 
-    IonCard, 
-    IonCardContent, 
-    IonCardHeader, 
-    IonCardTitle, 
-    IonGrid, 
-    IonRow, 
+import {
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonPage,
+    IonTitle,
+    IonToolbar,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonGrid,
+    IonRow,
     IonCol,
     IonSpinner,
     IonRefresher,
@@ -30,6 +30,7 @@ import { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import '../styles/Home.scss';
 import '../styles/Toolbar.scss';
+import { useData } from '../context/DataContext'; // Agrega import
 
 interface Estadisticas {
     totalRegistros: number;
@@ -52,13 +53,14 @@ interface Registro {
 const Home: React.FC = () => {
     const history = useHistory();
     const { logout, user } = useAuth();
+    const { refreshKey } = useData(); // Agrega hook
     const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null);
     const [registrosRecientes, setRegistrosRecientes] = useState<Registro[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         cargarDatos();
-    }, []);
+    }, [refreshKey]); // Cambia [] por [refreshKey] para refrescar automáticamente
 
     const cargarDatos = async () => {
         setLoading(true);
@@ -76,7 +78,7 @@ const Home: React.FC = () => {
             const registrosResponse = await conteoService.obtener();
             const registrosOrdenados = registrosResponse.data
                 .sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-            
+
             setRegistrosRecientes(registrosOrdenados);
         } catch (error) {
             console.error('Error al cargar datos:', error);
@@ -123,10 +125,10 @@ const Home: React.FC = () => {
                 const fecha = new Date(info.getValue() as string);
                 return (
                     <span className="fecha-cell">
-                        {fecha.toLocaleDateString('es-ES', { 
-                            day: '2-digit', 
-                            month: 'short', 
-                            year: 'numeric' 
+                        {fecha.toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
                         })}
                     </span>
                 );
@@ -155,26 +157,26 @@ const Home: React.FC = () => {
 
     // Generar statsData solo si estadisticas no es null
     const statsData = estadisticas ? [
-        { 
-            id: 1, 
-            title: 'Total Personas', 
-            value: estadisticas.totalPersonas || 0, 
-            icon: faUsers, 
-            color: 'primary' 
+        {
+            id: 1,
+            title: 'Total Personas',
+            value: estadisticas.totalPersonas || 0,
+            icon: faUsers,
+            color: 'primary'
         },
-        { 
-            id: 2, 
-            title: 'Promedio', 
-            value: Math.round(estadisticas.promedioPersonas || 0), 
-            icon: faChartLine, 
-            color: 'secondary' 
+        {
+            id: 2,
+            title: 'Promedio',
+            value: Math.round(estadisticas.promedioPersonas || 0),
+            icon: faChartLine,
+            color: 'secondary'
         },
-        { 
-            id: 3, 
-            title: 'Registros', 
-            value: estadisticas.totalRegistros || 0, 
-            icon: faCalendarAlt, 
-            color: 'tertiary' 
+        {
+            id: 3,
+            title: 'Registros',
+            value: estadisticas.totalRegistros || 0,
+            icon: faCalendarAlt,
+            color: 'tertiary'
         },
     ] : [];
 
@@ -182,7 +184,9 @@ const Home: React.FC = () => {
         <IonPage>
             <IonHeader>
                 <IonToolbar>
-                    <IonTitle slot="start">MPOLOG</IonTitle>
+                    <IonTitle>
+                        {user ? `Bienvenido, ${user.nombre}` : 'Logística App'} {/* Cambia título por usuario */}
+                    </IonTitle>
                     <IonButtons slot="end">
                         <div className="user-greeting">
                             Hola, {user?.nombre || 'Usuario'}
@@ -249,8 +253,8 @@ const Home: React.FC = () => {
                                     <IonCardContent>
                                         <div className="area-grid">
                                             {estadisticas.registrosPorArea.map((area, index) => (
-                                                <motion.div 
-                                                    key={index} 
+                                                <motion.div
+                                                    key={index}
                                                     className="area-item"
                                                     initial={{ opacity: 0, scale: 0.9 }}
                                                     animate={{ opacity: 1, scale: 1 }}
@@ -293,8 +297,8 @@ const Home: React.FC = () => {
 
                         {/* Estado vacío */}
                         {!loading && (!estadisticas || estadisticas.totalRegistros === 0) && (
-                            <motion.div 
-                                variants={itemVariants} 
+                            <motion.div
+                                variants={itemVariants}
                                 className="empty-state"
                             >
                                 <FontAwesomeIcon icon={faUsers} size="3x" />

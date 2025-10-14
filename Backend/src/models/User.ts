@@ -2,15 +2,16 @@ import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
-    username: string;
+    email: string; // Mantén email
     password: string;
     nombre: string;
-    rol: 'admin' | 'usuario';
+    rol: string;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const UserSchema: Schema = new Schema({
-    username: {
+    // Quita username
+    email: {
         type: String,
         required: true,
         unique: true,

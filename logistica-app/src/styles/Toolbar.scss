@@ -7,6 +7,10 @@ ion-toolbar {
     --padding-bottom: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: relative;
+    --min-height: 44px;
+    /* Altura reducida (default es ~56px) */
+    --padding-start: 12px;
+    --padding-end: 12px;
 
     &::after {
         content: '';
@@ -96,12 +100,12 @@ ion-toolbar {
 @media (max-width: 768px) {
     ion-toolbar {
         ion-title {
-            font-size: 1.2rem;
+            font-size: 1rem;
             padding-left: 8px;
 
             &::before {
                 font-size: 1rem;
-                margin-right: 6px;
+                margin-right: 2px;
             }
         }
 
@@ -132,7 +136,7 @@ ion-toolbar {
 @media (max-width: 576px) {
     ion-toolbar {
         ion-title {
-            font-size: 1.1rem;
+            font-size: 0.8rem;
             padding-left: 4px;
 
             &::before {
