@@ -49,6 +49,8 @@ const AddRecord: React.FC = () => {
     const [fecha, setFecha] = useState<string>(new Date().toISOString());
     const [cantidad, setCantidad] = useState<number | undefined>(undefined);
     const [area, setArea] = useState<string>('');
+    const [tipo, setTipo] = useState<'personas' | 'materiales'>('personas'); // Agrega tipo
+    const [subArea, setSubArea] = useState<string>(''); // Agrega subArea
     const [areas, setAreas] = useState<string[]>([]);
     const [registros, setRegistros] = useState<PersonaRegistro[]>([]);
     const [showToast, setShowToast] = useState(false);
@@ -57,16 +59,17 @@ const AddRecord: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [loadingAreas, setLoadingAreas] = useState(true);
     const { refreshData } = useData(); // Agrega hook
+    const [tipoVista, setTipoVista] = useState<'personas' | 'materiales'>('personas'); // Estado para el tipo de vista
 
     // Cargar áreas al montar el componente
     useEffect(() => {
         cargarAreas();
     }, []);
 
-    // Cargar registros cuando cambia la fecha
+    // Cargar registros cuando cambia la fecha o el tipo de vista
     useEffect(() => {
         cargarRegistros();
-    }, [fecha]);
+    }, [fecha, tipoVista]); // Agrega tipoVista
 
     const cargarAreas = async () => {
         setLoadingAreas(true);
@@ -88,9 +91,9 @@ const AddRecord: React.FC = () => {
     const cargarRegistros = async () => {
         try {
             const fechaFormateada = new Date(fecha).toISOString().split('T')[0];
-            console.log('🔍 Cargando registros para fecha:', fechaFormateada);
+            console.log('🔍 Cargando registros para fecha:', fechaFormateada, 'tipo:', tipoVista);
 
-            const response = await conteoService.obtener(fechaFormateada);
+            const response = await conteoService.obtener(fechaFormateada, undefined, tipoVista); // Filtra por tipoVista
             console.log('📦 Respuesta del servidor:', response);
 
             const registrosFormateados = response.data.map((item: any, index: number) => ({
@@ -98,7 +101,7 @@ const AddRecord: React.FC = () => {
                 id: index + 1,
                 fecha: new Date(item.fecha).toLocaleDateString('es-ES'),
                 cantidad: item.cantidad,
-                area: item.area,
+                area: tipoVista === 'materiales' ? item.subArea : item.area, // Usa subArea para materiales
             }));
 
             console.log('✅ Registros formateados:', registrosFormateados);
@@ -126,24 +129,36 @@ const AddRecord: React.FC = () => {
             return;
         }
 
+        if (tipo === 'materiales' && !subArea) {
+            setToastMessage('Por favor selecciona una sub-área para materiales');
+            setToastColor('danger');
+            setShowToast(true);
+            return;
+        }
+
         setLoading(true);
         try {
             console.log('🚀 Enviando registro:', {
                 fecha: fecha,
                 area: area,
                 cantidad: cantidad,
+                tipo: tipo,
+                subArea: subArea,
             });
 
             await conteoService.crear({
                 fecha: fecha,
                 area: area,
                 cantidad: cantidad,
+                tipo: tipo,
+                subArea: subArea,
             });
 
             await cargarRegistros();
 
             setCantidad(undefined);
             setArea('');
+            setSubArea('');
 
             setToastMessage('Registro agregado correctamente');
             setToastColor('success');
@@ -190,7 +205,7 @@ const AddRecord: React.FC = () => {
         },
     };
 
-    const totalPersonas = registros.reduce((sum, reg) => sum + reg.cantidad, 0);
+    const totalCantidad = registros.reduce((sum, reg) => sum + reg.cantidad, 0); // Cambia a totalCantidad
 
     return (
         <IonPage>
@@ -208,118 +223,261 @@ const AddRecord: React.FC = () => {
                 </IonRefresher>
 
                 <div className="add-record-container">
-                    {/* Formulario */}
+                    {/* Selector Principal de Tipo */}
                     <motion.div
                         variants={fadeInVariant}
                         initial="hidden"
                         animate="visible"
                     >
-                        <IonCard className="form-card">
+                        <IonCard className="tipo-selector-card">
                             <IonCardHeader>
-                                <IonCardTitle>
-                                    <FontAwesomeIcon icon={faUserPlus} /> Conteo de Personas
-                                </IonCardTitle>
+                                <IonCardTitle>Selecciona Tipo de Conteo</IonCardTitle>
                             </IonCardHeader>
                             <IonCardContent>
-                                <IonGrid>
-                                    <IonRow>
-                                        <IonCol size="12" sizeMd="4">
-                                            <IonItem lines="none" className="form-item">
-                                                <IonLabel position="stacked">Fecha</IonLabel>
-                                                <IonDatetimeButton datetime="datetime"></IonDatetimeButton>
-                                                <IonModal keepContentsMounted={true}>
-                                                    <IonDatetime
-                                                        id="datetime"
-                                                        presentation="date"
-                                                        value={fecha}
-                                                        onIonChange={(e) => {
-                                                            const newFecha = e.detail.value as string;
-                                                            console.log('📅 Nueva fecha:', newFecha);
-                                                            setFecha(newFecha);
-                                                        }}
-                                                    ></IonDatetime>
-                                                </IonModal>
-                                            </IonItem>
-                                        </IonCol>
-
-                                        <IonCol size="12" sizeMd="4">
-                                            <IonItem lines="none" className="form-item">
-                                                <IonLabel position="stacked">Área</IonLabel>
-                                                <IonSelect
-                                                    value={area}
-                                                    placeholder="Selecciona un área"
-                                                    onIonChange={(e) => {
-                                                        const newArea = e.detail.value;
-                                                        console.log('📍 Nueva área:', newArea);
-                                                        setArea(newArea);
-                                                    }}
-                                                    disabled={loading || loadingAreas}
-                                                >
-                                                    {loadingAreas ? (
-                                                        <IonSelectOption value="">Cargando...</IonSelectOption>
-                                                    ) : (
-                                                        areas.map((areaOption) => (
-                                                            <IonSelectOption key={areaOption} value={areaOption}>
-                                                                {areaOption}
-                                                            </IonSelectOption>
-                                                        ))
-                                                    )}
-                                                </IonSelect>
-                                            </IonItem>
-                                        </IonCol>
-
-                                        <IonCol size="12" sizeMd="4">
-                                            <IonItem lines="none" className="form-item">
-                                                <IonLabel position="stacked">Cantidad de Personas</IonLabel>
-                                                <IonInput
-                                                    type="number"
-                                                    value={cantidad}
-                                                    placeholder="0"
-                                                    onIonInput={(e) => {
-                                                        const value = e.detail.value;
-                                                        const numValue = value ? parseInt(value) : undefined;
-                                                        console.log('🔢 Nueva cantidad:', numValue);
-                                                        setCantidad(numValue);
-                                                    }}
-                                                    disabled={loading}
-                                                ></IonInput>
-                                            </IonItem>
-                                        </IonCol>
-                                    </IonRow>
-
-                                    <IonRow>
-                                        <IonCol>
-                                            <motion.div
-                                                whileHover={{ scale: loading ? 1 : 1.02 }}
-                                                whileTap={{ scale: loading ? 1 : 0.98 }}
-                                            >
-                                                <IonButton
-                                                    expand="block"
-                                                    onClick={handleAddRecord}
-                                                    className="add-button"
-                                                    disabled={loading || loadingAreas}
-                                                >
-                                                    {loading ? (
-                                                        <>
-                                                            <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
-                                                            Agregando...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '8px' }} />
-                                                            Agregar Registro
-                                                        </>
-                                                    )}
-                                                </IonButton>
-                                            </motion.div>
-                                        </IonCol>
-                                    </IonRow>
-                                </IonGrid>
+                                <IonItem lines="none">
+                                    <IonLabel position="stacked">Tipo</IonLabel>
+                                    <IonSelect
+                                        value={tipoVista}
+                                        onIonChange={(e) => {
+                                            const newTipo = e.detail.value as 'personas' | 'materiales';
+                                            console.log('📝 Nuevo tipo de vista:', newTipo);
+                                            setTipoVista(newTipo);
+                                            setTipo(newTipo); // Sincroniza con el formulario
+                                            setArea('');
+                                            setSubArea('');
+                                        }}
+                                    >
+                                        <IonSelectOption value="personas">Conteo de Personas</IonSelectOption>
+                                        <IonSelectOption value="materiales">Conteo de Materiales</IonSelectOption>
+                                    </IonSelect>
+                                </IonItem>
                             </IonCardContent>
                         </IonCard>
                     </motion.div>
 
-                    {/* Estadísticas */}
+                    {/* Formulario Condicional */}
+                    {tipoVista === 'personas' ? (
+                        // Formulario para Personas
+                        <motion.div
+                            variants={fadeInVariant}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            <IonCard className="form-card">
+                                <IonCardHeader>
+                                    <IonCardTitle>
+                                        <FontAwesomeIcon icon={faUserPlus} /> Conteo de Personas
+                                    </IonCardTitle>
+                                </IonCardHeader>
+                                <IonCardContent>
+                                    <IonGrid>
+                                        <IonRow>
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Fecha</IonLabel>
+                                                    <IonDatetimeButton datetime="datetime"></IonDatetimeButton>
+                                                    <IonModal keepContentsMounted={true}>
+                                                        <IonDatetime
+                                                            id="datetime"
+                                                            presentation="date"
+                                                            value={fecha}
+                                                            onIonChange={(e) => {
+                                                                const newFecha = e.detail.value as string;
+                                                                console.log('📅 Nueva fecha:', newFecha);
+                                                                setFecha(newFecha);
+                                                            }}
+                                                        ></IonDatetime>
+                                                    </IonModal>
+                                                </IonItem>
+                                            </IonCol>
+
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Área</IonLabel>
+                                                    <IonSelect
+                                                        value={area}
+                                                        placeholder="Selecciona un área"
+                                                        onIonChange={(e) => {
+                                                            const newArea = e.detail.value;
+                                                            console.log('📍 Nueva área:', newArea);
+                                                            setArea(newArea);
+                                                        }}
+                                                        disabled={loading || loadingAreas}
+                                                    >
+                                                        {loadingAreas ? (
+                                                            <IonSelectOption value="">Cargando...</IonSelectOption>
+                                                        ) : (
+                                                            areas.map((areaOption) => (
+                                                                <IonSelectOption key={areaOption} value={areaOption}>
+                                                                    {areaOption}
+                                                                </IonSelectOption>
+                                                            ))
+                                                        )}
+                                                    </IonSelect>
+                                                </IonItem>
+                                            </IonCol>
+
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Cantidad de Personas</IonLabel>
+                                                    <IonInput
+                                                        type="number"
+                                                        value={cantidad}
+                                                        placeholder="0"
+                                                        onIonInput={(e) => {
+                                                            const value = e.detail.value;
+                                                            const numValue = value ? parseInt(value) : undefined;
+                                                            console.log('🔢 Nueva cantidad:', numValue);
+                                                            setCantidad(numValue);
+                                                        }}
+                                                        disabled={loading}
+                                                    ></IonInput>
+                                                </IonItem>
+                                            </IonCol>
+                                        </IonRow>
+
+                                        <IonRow>
+                                            <IonCol>
+                                                <motion.div
+                                                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                                                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                                                >
+                                                    <IonButton
+                                                        expand="block"
+                                                        onClick={handleAddRecord}
+                                                        className="add-button"
+                                                        disabled={loading || loadingAreas}
+                                                    >
+                                                        {loading ? (
+                                                            <>
+                                                                <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
+                                                                Agregando...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '8px' }} />
+                                                                Agregar Registro
+                                                            </>
+                                                        )}
+                                                    </IonButton>
+                                                </motion.div>
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonCardContent>
+                            </IonCard>
+                        </motion.div>
+                    ) : (
+                        // Formulario para Materiales
+                        <motion.div
+                            variants={fadeInVariant}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            <IonCard className="form-card">
+                                <IonCardHeader>
+                                    <IonCardTitle>
+                                        <FontAwesomeIcon icon={faUserPlus} /> Conteo de Materiales
+                                    </IonCardTitle>
+                                </IonCardHeader>
+                                <IonCardContent>
+                                    <IonGrid>
+                                        <IonRow>
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Fecha</IonLabel>
+                                                    <IonDatetimeButton datetime="datetime"></IonDatetimeButton>
+                                                    <IonModal keepContentsMounted={true}>
+                                                        <IonDatetime
+                                                            id="datetime"
+                                                            presentation="date"
+                                                            value={fecha}
+                                                            onIonChange={(e) => {
+                                                                const newFecha = e.detail.value as string;
+                                                                console.log('📅 Nueva fecha:', newFecha);
+                                                                setFecha(newFecha);
+                                                            }}
+                                                        ></IonDatetime>
+                                                    </IonModal>
+                                                </IonItem>
+                                            </IonCol>
+
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Sub-Área</IonLabel>
+                                                    <IonSelect
+                                                        value={subArea}
+                                                        placeholder="Selecciona una sub-área"
+                                                        onIonChange={(e) => {
+                                                            const newSubArea = e.detail.value;
+                                                            console.log('📍 Nueva sub-área:', newSubArea);
+                                                            setSubArea(newSubArea);
+                                                            setArea('Materiales');
+                                                        }}
+                                                        disabled={loading}
+                                                    >
+                                                        <IonSelectOption value="media">Media</IonSelectOption>
+                                                        <IonSelectOption value="musica">Música (Instrumentos)</IonSelectOption>
+                                                        <IonSelectOption value="biblias">Biblias</IonSelectOption>
+                                                        <IonSelectOption value="sillas">Sillas</IonSelectOption>
+                                                        <IonSelectOption value="utensilios de limpieza">Utensilios de Limpieza</IonSelectOption>
+                                                    </IonSelect>
+                                                </IonItem>
+                                            </IonCol>
+
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Cantidad</IonLabel>
+                                                    <IonInput
+                                                        type="number"
+                                                        value={cantidad}
+                                                        placeholder="0"
+                                                        onIonInput={(e) => {
+                                                            const value = e.detail.value;
+                                                            const numValue = value ? parseInt(value) : undefined;
+                                                            console.log('🔢 Nueva cantidad:', numValue);
+                                                            setCantidad(numValue);
+                                                        }}
+                                                        disabled={loading}
+                                                    ></IonInput>
+                                                </IonItem>
+                                            </IonCol>
+                                        </IonRow>
+
+                                        <IonRow>
+                                            <IonCol>
+                                                <motion.div
+                                                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                                                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                                                >
+                                                    <IonButton
+                                                        expand="block"
+                                                        onClick={handleAddRecord}
+                                                        className="add-button"
+                                                        disabled={loading}
+                                                    >
+                                                        {loading ? (
+                                                            <>
+                                                                <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
+                                                                Agregando...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '8px' }} />
+                                                                Agregar Registro
+                                                            </>
+                                                        )}
+                                                    </IonButton>
+                                                </motion.div>
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonCardContent>
+                            </IonCard>
+                        </motion.div>
+                    )}
+
+                    {/* Estadísticas Condicionales */}
                     {registros.length > 0 && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -334,8 +492,8 @@ const AddRecord: React.FC = () => {
                                             <p>Registros</p>
                                         </div>
                                         <div className="stat-item">
-                                            <h3>{totalPersonas}</h3>
-                                            <p>Total Personas</p>
+                                            <h3>{totalCantidad}</h3>
+                                            <p>Total {tipoVista === 'personas' ? 'Personas' : 'Materiales'}</p>
                                         </div>
                                         <div className="stat-item">
                                             <h3>{new Date(fecha).toLocaleDateString('es-ES')}</h3>
@@ -347,7 +505,7 @@ const AddRecord: React.FC = () => {
                         </motion.div>
                     )}
 
-                    {/* Lista de Registros con Tarjetas */}
+                    {/* Lista de Registros Condicionales */}
                     {registros.length > 0 && (
                         <motion.div
                             className="registros-list"
@@ -356,7 +514,7 @@ const AddRecord: React.FC = () => {
                             transition={{ duration: 0.4, delay: 0.2 }}
                         >
                             <div className="list-header">
-                                <h2>Registros del Día</h2>
+                                <h2>Registros del Día ({tipoVista === 'personas' ? 'Personas' : 'Materiales'})</h2>
                             </div>
                             {registros.map((registro, index) => (
                                 <RegistroCard
@@ -371,7 +529,7 @@ const AddRecord: React.FC = () => {
                         </motion.div>
                     )}
 
-                    {/* Mensaje vacío */}
+                    {/* Mensaje vacío Condicional */}
                     {registros.length === 0 && (
                         <motion.div
                             className="empty-state"
@@ -381,7 +539,7 @@ const AddRecord: React.FC = () => {
                         >
                             <FontAwesomeIcon icon={faUserPlus} size="3x" />
                             <h3>No hay registros</h3>
-                            <p>Agrega el primer registro de conteo de personas</p>
+                            <p>Agrega el primer registro de conteo de {tipoVista === 'personas' ? 'personas' : 'materiales'}</p>
                         </motion.div>
                     )}
                 </div>

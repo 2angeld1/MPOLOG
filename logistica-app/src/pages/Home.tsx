@@ -65,17 +65,17 @@ const Home: React.FC = () => {
     const cargarDatos = async () => {
         setLoading(true);
         try {
-            // Obtener estadísticas
+            // Obtener estadísticas solo para personas
             const fechaHoy = new Date().toISOString().split('T')[0];
             const fechaInicio = new Date();
             fechaInicio.setDate(fechaInicio.getDate() - 30);
             const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
 
-            const statsResponse = await conteoService.obtenerEstadisticas(fechaInicioStr, fechaHoy);
+            const statsResponse = await conteoService.obtenerEstadisticas(fechaInicioStr, fechaHoy, 'personas'); // Filtra por personas
             setEstadisticas(statsResponse.data);
 
-            // Obtener todos los registros para la tabla
-            const registrosResponse = await conteoService.obtener();
+            // Obtener registros solo para personas
+            const registrosResponse = await conteoService.obtener(undefined, undefined, 'personas'); // Filtra por personas
             const registrosOrdenados = registrosResponse.data
                 .sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
@@ -145,7 +145,7 @@ const Home: React.FC = () => {
         },
         {
             accessorKey: 'cantidad',
-            header: 'Cantidad Personas',
+            header: 'Cantidad',
             cell: (info) => (
                 <span className="cantidad-cell">
                     <FontAwesomeIcon icon={faUsers} style={{ marginRight: '8px', color: 'var(--ion-color-primary)' }} />
@@ -285,7 +285,7 @@ const Home: React.FC = () => {
                                     <IonCardHeader>
                                         <IonCardTitle>
                                             <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
-                                            Historial de Registros
+                                            Historial de Registros de Personas
                                         </IonCardTitle>
                                     </IonCardHeader>
                                     <IonCardContent>

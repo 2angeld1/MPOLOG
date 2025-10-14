@@ -61,15 +61,23 @@ export const authService = {
 
 // Servicios de conteo
 export const conteoService = {
-    crear: async (data: { fecha: string; area: string; cantidad: number; observaciones?: string }) => {
+    crear: async (data: {
+        fecha: string;
+        area: string;
+        cantidad: number;
+        tipo?: 'personas' | 'materiales'; // Agrega tipo opcional
+        subArea?: string; // Agrega subArea opcional
+        observaciones?: string;
+    }) => {
         const response = await api.post('/conteo', data);
         return response.data;
     },
 
-    obtener: async (fecha?: string, area?: string) => {
+    obtener: async (fecha?: string, area?: string, tipo?: 'personas' | 'materiales') => { // Agrega tipo opcional
         const params = new URLSearchParams();
         if (fecha) params.append('fecha', fecha);
         if (area) params.append('area', area);
+        if (tipo) params.append('tipo', tipo); // Agrega filtro por tipo
 
         const response = await api.get(`/conteo?${params.toString()}`);
         return response.data;
@@ -80,10 +88,11 @@ export const conteoService = {
         return response.data;
     },
 
-    obtenerEstadisticas: async (fechaInicio?: string, fechaFin?: string) => {
+    obtenerEstadisticas: async (fechaInicio?: string, fechaFin?: string, tipo?: 'personas' | 'materiales') => { // Agrega tipo opcional
         const params = new URLSearchParams();
         if (fechaInicio) params.append('fechaInicio', fechaInicio);
         if (fechaFin) params.append('fechaFin', fechaFin);
+        if (tipo) params.append('tipo', tipo); // Agrega filtro por tipo
 
         const response = await api.get(`/conteo/estadisticas?${params.toString()}`);
         return response.data;

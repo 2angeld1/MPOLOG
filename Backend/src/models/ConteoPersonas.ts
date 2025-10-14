@@ -6,6 +6,8 @@ export interface IConteoPersonas extends Document {
     cantidad: number;
     usuario: mongoose.Types.ObjectId;
     observaciones?: string;
+    tipo: 'personas' | 'materiales'; // Agrega tipo
+    subArea?: string; // Agrega subArea opcional
 }
 
 const ConteoPersonasSchema: Schema = new Schema({
@@ -38,6 +40,15 @@ const ConteoPersonasSchema: Schema = new Schema({
     },
     observaciones: {
         type: String
+    },
+    tipo: { // Agrega tipo
+        type: String,
+        enum: ['personas', 'materiales'],
+        default: 'personas'
+    },
+    subArea: { // Agrega subArea
+        type: String,
+        required: false
     }
 }, {
     timestamps: true

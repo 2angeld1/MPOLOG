@@ -4,11 +4,15 @@ import { AuthRequest } from '../middleware/auth';
 
 export const crearConteo = async (req: AuthRequest, res: Response) => {
     try {
-        const { fecha, area, cantidad, observaciones } = req.body;
+        const { fecha, area, cantidad, observaciones, tipo, subArea } = req.body; // Agrega tipo y subArea
 
         // Validar datos
         if (!fecha || !area || cantidad === undefined) {
             return res.status(400).json({ message: 'Por favor completa todos los campos requeridos' });
+        }
+
+        if (tipo === 'materiales' && !subArea) {
+            return res.status(400).json({ message: 'Para materiales, selecciona una sub-área' });
         }
 
         const conteo = new ConteoPersonas({
@@ -16,7 +20,9 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
             area,
             cantidad,
             observaciones,
-            usuario: req.userId
+            usuario: req.userId,
+            tipo: tipo || 'personas', // Default a personas
+            subArea
         });
 
         await conteo.save();
@@ -33,7 +39,7 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
 
 export const obtenerConteos = async (req: AuthRequest, res: Response) => {
     try {
-        const { fecha, area } = req.query;
+        const { fecha, area, tipo } = req.query; // Agrega tipo
         const query: any = {};
 
         if (fecha) {
@@ -49,6 +55,10 @@ export const obtenerConteos = async (req: AuthRequest, res: Response) => {
 
         if (area) {
             query.area = area;
+        }
+
+        if (tipo) {
+            query.tipo = tipo; // Filtra por tipo
         }
 
         const conteos = await ConteoPersonas.find(query)
@@ -87,7 +97,7 @@ export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
         console.log('🔍 Query MongoDB:', JSON.stringify(query, null, 2));
 
         const conteos = await ConteoPersonas.find(query);
-        
+
         console.log('📊 Conteos encontrados:', conteos.length);
 
         const totalRegistros = conteos.length;
@@ -95,7 +105,7 @@ export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
         const promedioPersonas = totalRegistros > 0 ? totalPersonas / totalRegistros : 0;
 
         const registrosPorAreaMap: { [key: string]: { cantidad: number; totalPersonas: number } } = {};
-        
+
         conteos.forEach(conteo => {
             if (!registrosPorAreaMap[conteo.area]) {
                 registrosPorAreaMap[conteo.area] = {
@@ -140,7 +150,7 @@ export const obtenerAreas = async (req: AuthRequest, res: Response) => {
     try {
         // Obtener el schema del modelo
         const schema = ConteoPersonas.schema.path('area');
-        
+
         // Obtener los valores del enum
         const areas = (schema as any).enumValues || [];
 
