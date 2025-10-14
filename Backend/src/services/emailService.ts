@@ -1,22 +1,27 @@
 import nodemailer from 'nodemailer';
 
 // Configurar transporte SMTP
-const transporter = nodemailer.createTransport({ // Cambia 'createTransporter' por 'createTransport'
-    host: 'smtp.sendgrid.net',
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // true para 465, false para otros puertos
+    secure: false, // TLS
     auth: {
-        user: 'apikey', // Siempre 'apikey' para SendGrid
-        pass: process.env.SENDGRID_SMTP // Tu API Key de SendGrid
+        user: process.env.EMAIL_USER, // Tu email de Gmail
+        pass: process.env.EMAIL_PASS  // App password
     }
 });
 
 // Función para enviar email de recuperación
 export const enviarEmailRecuperacion = async (email: string, token: string) => {
+    console.log('📧 From email:', 'adfp21900@gmail.com'); // Confirma el remitente
+    console.log('📧 EMAIL_USER:', process.env.EMAIL_USER);
+    console.log('📧 EMAIL_PASS:', process.env.EMAIL_PASS ? 'Loaded' : 'Not loaded');
+    console.log('📧 EMAIL_PASS length:', process.env.EMAIL_PASS?.length); // Debe ser 16
+
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 
     const mailOptions = {
-        from: 'adfp21900@gmail.com', // Cambia por tu email verificado en SendGrid
+        from: process.env.EMAIL_USER, // Usa tu email de Gmail como remitente
         to: email,
         subject: 'Recuperación de Contraseña - Logística App',
         html: `
@@ -31,6 +36,8 @@ export const enviarEmailRecuperacion = async (email: string, token: string) => {
             </div>
         `
     };
+
+    console.log('📧 Mail options:', mailOptions); // Agregado para depuración
 
     try {
         await transporter.sendMail(mailOptions);
