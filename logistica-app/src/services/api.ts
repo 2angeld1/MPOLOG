@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://mpolog.onrender.com/api';
 
 // Crear instancia de axios con configuración base
 const api = axios.create({
