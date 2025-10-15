@@ -4,7 +4,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import Tabs from './pages/Tabs';
 import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -38,6 +38,19 @@ import './theme/variables.css';
 
 setupIonicReact();
 
+// Componente para rutas protegidas
+const PrivateRoute: React.FC<{ component: React.ComponentType<any>; path: string }> = ({ component: Component, ...rest }) => {
+  const { isAuthenticated } = useAuth();
+  return (
+    <Route
+      {...rest}
+      render={(props) =>
+        isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />
+      }
+    />
+  );
+};
+
 const App: React.FC = () => (
   <IonApp>
     <AuthProvider>
@@ -47,9 +60,7 @@ const App: React.FC = () => (
             <Route exact path="/login">
               <LoginPage />
             </Route>
-            <Route path="/tabs">
-              <Tabs />
-            </Route>
+            <PrivateRoute path="/tabs" component={Tabs} /> {/* Protege /tabs */}
             <Route exact path="/">
               <Redirect to="/login" />
             </Route>
