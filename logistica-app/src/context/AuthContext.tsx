@@ -1,21 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'; // Cambia useNavigate por useHistory (v5)
 import { authService } from '../services/api';
-
-interface User {
-    id: string;
-    email: string; // Cambia username por email
-    nombre: string;
-    rol: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    token: string | null;
-    login: (email: string, password: string) => Promise<void>; // Cambia username por email
-    logout: () => void;
-    isAuthenticated: boolean;
-}
+import { User, AuthContextType } from '../../types/types'; // Cambia la ruta al archivo central
 
 const AuthContext = createContext<AuthContextType>({
     user: null,

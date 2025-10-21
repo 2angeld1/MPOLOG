@@ -1,87 +1,26 @@
-import {
-    IonPage,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonButton,
-    IonInput,
-    IonItem,
-    IonToast,
-    IonSpinner,
-    IonText,
-    IonIcon,
-    IonButtons, // Agrega IonButtons aquí
-} from '@ionic/react';
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonToast, IonSpinner, IonText, IonIcon, IonButtons } from '@ionic/react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { arrowBack } from 'ionicons/icons'; // Agrega arrowBack de Ionicons
+import { arrowBack } from 'ionicons/icons';
 import ThemeToggle from '../components/ThemeToggle';
-import api from '../services/api';
+import { useForgotPassword } from '../hooks/useForgotPassword';
+import { containerVariants, itemVariants } from '../animations';
 import '../styles/ForgotPasswordPage.scss';
 
 const ForgotPasswordPage: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const history = useHistory();
-
-    const handleForgotPassword = async (e?: React.FormEvent) => {
-        e?.preventDefault();
-
-        if (!email || email.trim() === '') {
-            setToastMessage('Por favor ingresa tu email');
-            setShowToast(true);
-            return;
-        }
-
-        setLoading(true);
-        try {
-            await api.post('/auth/forgot-password', { email });
-            setToastMessage('Se ha enviado un enlace de recuperación a tu email');
-            setShowToast(true);
-            setTimeout(() => history.push('/login'), 3000); // Redirigir después de 3 segundos
-        } catch (error: any) {
-            setToastMessage(error.message || 'Error al enviar el enlace de recuperación');
-            setShowToast(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5 }
-        }
-    };
+    const { email, setEmail, showToast, setShowToast, toastMessage, loading, history, handleForgotPassword } = useForgotPassword();
 
     return (
         <IonPage>
             <IonHeader>
                 <IonToolbar>
                     <IonButton fill="clear" slot="start" onClick={() => history.goBack()}>
-                        <IonIcon icon={arrowBack} /> {/* Cambia faArrowLeft por arrowBack */}
+                        <IonIcon icon={arrowBack} />
                     </IonButton>
                     <IonTitle>Recuperar Pwd</IonTitle>
-                    <IonButtons slot="end"> {/* Ahora IonButtons está importado */}
+                    <IonButtons slot="end">
                         <ThemeToggle />
                     </IonButtons>
                 </IonToolbar>

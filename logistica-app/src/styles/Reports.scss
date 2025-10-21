@@ -1,6 +1,7 @@
 .reports-content {
     --background: var(--ion-background-color);
-    padding: 20px;
+    --padding-top: 50px; // Agrega para compensar el Toolbar
+    padding: 20px; // Mantén padding horizontal si es necesario
 }
 
 .reports-container {

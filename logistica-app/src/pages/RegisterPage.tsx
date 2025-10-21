@@ -1,101 +1,16 @@
-import {
-    IonPage,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonButton,
-    IonInput,
-    IonItem,
-    IonToast,
-    IonSpinner,
-    IonText,
-    IonIcon,
-    IonButtons,
-} from '@ionic/react';
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonToast, IonSpinner, IonText, IonIcon, IonButtons } from '@ionic/react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { arrowBack } from 'ionicons/icons';
 import ThemeToggle from '../components/ThemeToggle';
-import api from '../services/api';
+import { useRegister } from '../hooks/useRegister';
+import { containerVariants, itemVariants } from '../animations';
 import '../styles/RegisterPage.scss';
 
 const RegisterPage: React.FC = () => {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-        confirmPassword: '',
-        nombre: ''
-        // Quita username y rol
-    });
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const history = useHistory();
-
-    const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleRegister = async (e?: React.FormEvent) => {
-        e?.preventDefault();
-
-        const { email, password, confirmPassword, nombre } = formData;
-
-        if (!email || !password || !confirmPassword || !nombre) { // Quita username
-            setToastMessage('Por favor completa todos los campos');
-            setShowToast(true);
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setToastMessage('Las contraseñas no coinciden');
-            setShowToast(true);
-            return;
-        }
-
-        if (password.length < 6) {
-            setToastMessage('La contraseña debe tener al menos 6 caracteres');
-            setShowToast(true);
-            return;
-        }
-
-        setLoading(true);
-        try {
-            await api.post('/auth/register', formData); // Envía solo los campos restantes
-            setToastMessage('Usuario registrado correctamente. Ahora puedes iniciar sesión.');
-            setShowToast(true);
-            setTimeout(() => history.push('/login'), 3000);
-        } catch (error: any) {
-            setToastMessage(error.message || 'Error al registrar usuario');
-            setShowToast(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5 }
-        }
-    };
+    const { formData, showToast, setShowToast, toastMessage, loading, history, handleInputChange, handleRegister } = useRegister();
 
     return (
         <IonPage>
@@ -142,8 +57,6 @@ const RegisterPage: React.FC = () => {
                             </IonItem>
                         </motion.div>
 
-                        {/* Quita el IonInput para username */}
-
                         <motion.div variants={itemVariants}>
                             <IonItem lines="none" className="form-item">
                                 <IonInput
@@ -185,8 +98,6 @@ const RegisterPage: React.FC = () => {
                                 ></IonInput>
                             </IonItem>
                         </motion.div>
-
-                        {/* Quita el IonSelect para rol */}
 
                         <motion.div
                             variants={itemVariants}

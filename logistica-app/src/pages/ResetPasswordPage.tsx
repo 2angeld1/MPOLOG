@@ -1,114 +1,26 @@
-import {
-    IonPage,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonButton,
-    IonInput,
-    IonItem,
-    IonToast,
-    IonSpinner,
-    IonText,
-    IonIcon,
-    IonButtons, // Agrega IonButtons aquí
-} from '@ionic/react';
-import React, { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonInput, IonItem, IonToast, IonSpinner, IonText, IonIcon, IonButtons } from '@ionic/react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock } from '@fortawesome/free-solid-svg-icons'; // Remueve faArrowLeft
-import { arrowBack } from 'ionicons/icons'; // Agrega arrowBack de Ionicons
+import { faLock } from '@fortawesome/free-solid-svg-icons';
+import { arrowBack } from 'ionicons/icons';
 import ThemeToggle from '../components/ThemeToggle';
-import api from '../services/api';
+import { useResetPassword } from '../hooks/useResetPassword';
+import { containerVariants, itemVariants } from '../animations';
 import '../styles/ResetPasswordPage.scss';
 
 const ResetPasswordPage: React.FC = () => {
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [token, setToken] = useState('');
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const history = useHistory();
-    const location = useLocation();
-
-    useEffect(() => {
-        // Obtener token de la URL (ej. /reset-password?token=abc123)
-        const urlParams = new URLSearchParams(location.search);
-        const tokenFromUrl = urlParams.get('token');
-        if (tokenFromUrl) {
-            setToken(tokenFromUrl);
-        } else {
-            setToastMessage('Token inválido o expirado');
-            setShowToast(true);
-        }
-    }, [location]);
-
-    const handleResetPassword = async (e?: React.FormEvent) => {
-        e?.preventDefault();
-
-        if (!password || password.trim() === '') {
-            setToastMessage('Por favor ingresa una nueva contraseña');
-            setShowToast(true);
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setToastMessage('Las contraseñas no coinciden');
-            setShowToast(true);
-            return;
-        }
-
-        if (password.length < 6) {
-            setToastMessage('La contraseña debe tener al menos 6 caracteres');
-            setShowToast(true);
-            return;
-        }
-
-        setLoading(true);
-        try {
-            await api.post('/auth/reset-password', { token, password });
-            setToastMessage('Contraseña restablecida correctamente');
-            setShowToast(true);
-            setTimeout(() => history.push('/login'), 3000);
-        } catch (error: any) {
-            setToastMessage(error.message || 'Error al restablecer la contraseña');
-            setShowToast(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5 }
-        }
-    };
+    const { password, setPassword, confirmPassword, setConfirmPassword, token, showToast, setShowToast, toastMessage, loading, history, handleResetPassword } = useResetPassword();
 
     return (
         <IonPage>
             <IonHeader>
                 <IonToolbar>
                     <IonButton fill="clear" slot="start" onClick={() => history.goBack()}>
-                        <IonIcon icon={arrowBack} /> {/* Cambia faArrowLeft por arrowBack */}
+                        <IonIcon icon={arrowBack} />
                     </IonButton>
                     <IonTitle>Restablecer Contraseña</IonTitle>
-                    <IonButtons slot="end"> {/* Ahora IonButtons está importado */}
+                    <IonButtons slot="end">
                         <ThemeToggle />
                     </IonButtons>
                 </IonToolbar>

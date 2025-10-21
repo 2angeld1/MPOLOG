@@ -3,18 +3,8 @@ import { IonCard, IonCardContent, IonBadge, IonButton } from '@ionic/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar, faLocationDot, faUsers, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
+import type { RegistroCardProps } from '../../types/types';
 import '../styles/RegistroCard.scss';
-
-interface RegistroCardProps {
-    fecha: string;
-    iglesia: string;
-    area: string;
-    subArea?: string; // Nuevo prop opcional
-    tipo?: 'personas' | 'materiales'; // Nuevo prop para saber el tipo
-    cantidad: number;
-    onDelete?: () => void;
-    index?: number;
-}
 
 const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, iglesia, area, subArea, tipo, cantidad, onDelete, index = 0 }) => {
     return (

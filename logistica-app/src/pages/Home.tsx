@@ -1,150 +1,17 @@
-import {
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonSpinner,
-    IonRefresher,
-    IonRefresherContent,
-    IonBadge,
-    IonAccordion,
-    IonAccordionGroup,
-    IonItem,
-    IonLabel
-} from '@ionic/react';
+import { IonButton, IonButtons, IonContent, IonPage, IonTitle, IonToolbar, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonGrid, IonRow, IonCol, IonSpinner, IonRefresher, IonRefresherContent, IonBadge, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/react';
 import ThemeToggle from '../components/ThemeToggle';
 import DataTable from '../components/DataTable';
 import { motion } from 'framer-motion';
-import { useHistory } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faCalendarAlt, faChartLine, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../context/AuthContext';
-import { conteoService } from '../services/api';
-import { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import '../styles/Home.scss';
-import '../styles/Toolbar.scss';
-import { useData } from '../context/DataContext'; // Agrega import
-
-interface Estadisticas {
-    totalRegistros: number;
-    totalPersonas: number;
-    promedioPersonas: number;
-    registrosPorArea: {
-        area: string;
-        cantidad: number;
-        totalPersonas: number;
-    }[];
-}
-
-interface Registro {
-    _id: string;
-    fecha: string;
-    iglesia: string; // Nuevo campo
-    area: string;
-    subArea?: string; // Agrega subArea para materiales
-    cantidad: number;
-}
+import { useHome } from '../hooks/useHome';
+import { Registro } from '../../types/types';
+import { containerVariants, itemVariants } from '../animations';
 
 const Home: React.FC = () => {
-    const history = useHistory();
-    const { logout, user } = useAuth();
-    const { refreshKey } = useData(); // Agrega hook
-    const [estadisticasPersonas, setEstadisticasPersonas] = useState<Estadisticas | null>(null);
-    const [estadisticasMateriales, setEstadisticasMateriales] = useState<Estadisticas | null>(null);
-    const [registrosPersonas, setRegistrosPersonas] = useState<Registro[]>([]);
-    const [registrosMateriales, setRegistrosMateriales] = useState<Registro[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        cargarDatos();
-    }, [refreshKey]); // Cambia [] por [refreshKey] para refrescar automáticamente
-
-    const cargarDatos = async () => {
-        setLoading(true);
-        try {
-            const fechaHoy = new Date().toISOString().split('T')[0];
-            const fechaInicio = new Date();
-            fechaInicio.setDate(fechaInicio.getDate() - 30);
-            const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
-
-            // Estadísticas y registros para personas
-            const statsPersonasResponse = await conteoService.obtenerEstadisticas(fechaInicioStr, fechaHoy, 'personas');
-            setEstadisticasPersonas(statsPersonasResponse.data);
-
-            const registrosPersonasResponse = await conteoService.obtener(undefined, undefined, 'personas');
-            const registrosPersonasOrdenados = registrosPersonasResponse.data
-                .sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
-                .map((reg: any) => ({
-                    _id: reg._id,
-                    fecha: reg.fecha,
-                    iglesia: reg.iglesia,
-                    area: reg.area,
-                    subArea: reg.subArea,
-                    cantidad: reg.cantidad,
-                }));
-            setRegistrosPersonas(registrosPersonasOrdenados);
-
-            // Estadísticas y registros para materiales
-            const statsMaterialesResponse = await conteoService.obtenerEstadisticas(fechaInicioStr, fechaHoy, 'materiales');
-            setEstadisticasMateriales(statsMaterialesResponse.data);
-
-            const registrosMaterialesResponse = await conteoService.obtener(undefined, undefined, 'materiales');
-            const registrosMaterialesOrdenados = registrosMaterialesResponse.data
-                .sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
-                .map((reg: any) => ({
-                    _id: reg._id,
-                    fecha: reg.fecha,
-                    iglesia: reg.iglesia,
-                    area: reg.area,
-                    subArea: reg.subArea,
-                    cantidad: reg.cantidad,
-                }));
-            setRegistrosMateriales(registrosMaterialesOrdenados);
-        } catch (error) {
-            console.error('Error al cargar datos:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleRefresh = async (event: CustomEvent) => {
-        await cargarDatos();
-        event.detail.complete();
-    };
-
-    const handleLogout = () => {
-        logout(); // Ya redirige a /login
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.4 }
-        }
-    };
+    const { estadisticasPersonas, estadisticasMateriales, registrosPersonas, registrosMateriales, loading, history, handleRefresh, handleLogout } = useHome();
 
     // Columnas para personas
     const columnsPersonas: ColumnDef<Registro>[] = [
@@ -281,7 +148,7 @@ const Home: React.FC = () => {
         {
             id: 1,
             title: 'Total Materiales',
-            value: estadisticasMateriales.totalPersonas || 0, // Reutiliza totalPersonas para cantidad total
+            value: estadisticasMateriales.totalPersonas || 0,
             icon: faUsers,
             color: 'primary'
         },
@@ -303,23 +170,6 @@ const Home: React.FC = () => {
 
     return (
         <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonTitle>
-                        {user ? `Bienvenido, ${user.nombre}` : 'Logística App'} {/* Cambia título por usuario */}
-                    </IonTitle>
-                    <IonButtons slot="end">
-                        <div className="user-greeting">
-                            Hola, {user?.nombre || 'Usuario'}
-                        </div>
-                        <ThemeToggle />
-                        <IonButton onClick={handleLogout} className="logout-button">
-                            <FontAwesomeIcon icon={faSignOutAlt} />
-                            <span className="button-text">Salir</span>
-                        </IonButton>
-                    </IonButtons>
-                </IonToolbar>
-            </IonHeader>
             <IonContent fullscreen className="dashboard-content">
                 <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
                     <IonRefresherContent></IonRefresherContent>
@@ -338,7 +188,7 @@ const Home: React.FC = () => {
                         animate="visible"
                     >
                         {/* Accordiones para Personas y Materiales */}
-                        <IonAccordionGroup value="personas"> {/* Abre "personas" por defecto y permite solo uno abierto */}
+                        <IonAccordionGroup value="personas">
                             {/* Sección Personas */}
                             <IonAccordion value="personas">
                                 <IonItem slot="header" color="light">

@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-    useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    flexRender,
-    SortingState,
-    ColumnDef,
-} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getPaginationRowModel, flexRender, SortingState, ColumnDef } from '@tanstack/react-table';
 import { IonButton, IonSearchbar } from '@ionic/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSort, faSortUp, faSortDown, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';

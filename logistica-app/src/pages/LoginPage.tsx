@@ -1,84 +1,15 @@
-import {
-    IonButton,
-    IonContent,
-    IonInput,
-    IonPage,
-    IonItem,
-    IonToast,
-    IonSpinner,
-} from '@ionic/react';
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom'; // Cambia useNavigate por useHistory
+import { IonButton, IonContent, IonInput, IonPage, IonItem, IonToast, IonSpinner } from '@ionic/react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChurch } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../context/AuthContext';
+import { useLogin } from '../hooks/useLogin';
 import '../styles/LoginPage.scss';
-import { authService } from '../services/api';
+import { containerVariants, itemVariants, logoVariants } from '../animations';
 
 const LoginPage: React.FC = () => {
-    const [email, setEmail] = useState(''); // Cambia username por email
-    const [password, setPassword] = useState('');
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const history = useHistory(); // Cambia navigate por history
-    const { login } = useAuth();
-
-    const handleLogin = async (e?: React.FormEvent) => {
-        e?.preventDefault();
-
-        if (!email || !password) {
-            setToastMessage('Por favor ingresa email y contraseña');
-            setShowToast(true);
-            return;
-        }
-
-        setLoading(true);
-        try {
-            await login(email, password); // Cambia authService.login por login del contexto
-            // El contexto maneja el toast de éxito y la redirección
-        } catch (error: any) {
-            setToastMessage(error.message || 'Error al iniciar sesión');
-            setShowToast(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 0.5
-            }
-        }
-    };
-
-    const logoVariants = {
-        hidden: { opacity: 0, scale: 0.8 },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            transition: {
-                duration: 0.6
-            }
-        }
-    };
+    const { email, setEmail, password, setPassword, showToast, setShowToast, toastMessage, loading, history, handleLogin } = useLogin();
 
     return (
         <IonPage>
@@ -103,15 +34,15 @@ const LoginPage: React.FC = () => {
                         <p>Inicia sesión para continuar</p>
                     </motion.div>
 
-                    <form onSubmit={handleLogin} className="login-form"> {/* Agrega form */}
+                    <form onSubmit={handleLogin} className="login-form">
                         <motion.div variants={itemVariants}>
                             <IonItem lines="none" className="form-item">
                                 <IonInput
-                                    label="Email" // Cambia "Usuario" por "Email"
+                                    label="Email"
                                     labelPlacement="floating"
-                                    type="email" // Agrega type="email"
-                                    value={email} // Cambia username por email
-                                    onIonInput={(e) => setEmail(e.detail.value || '')} // Cambia setUsername por setEmail
+                                    type="email"
+                                    value={email}
+                                    onIonInput={(e) => setEmail(e.detail.value || '')}
                                     disabled={loading}
                                     required
                                 ></IonInput>
@@ -125,7 +56,7 @@ const LoginPage: React.FC = () => {
                                     labelPlacement="floating"
                                     type="password"
                                     value={password}
-                                    onIonInput={(e) => { // Quita el console.log
+                                    onIonInput={(e) => {
                                         const value = e.detail.value || '';
                                         setPassword(value);
                                     }}
@@ -141,7 +72,7 @@ const LoginPage: React.FC = () => {
                         >
                             <IonButton
                                 expand="block"
-                                type="submit" // Cambia a type="submit"
+                                type="submit"
                                 className="login-button"
                                 shape="round"
                                 disabled={loading}
@@ -167,7 +98,7 @@ const LoginPage: React.FC = () => {
                                     href="#"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        history.push('/forgot-password'); // Cambia navigate por history.push
+                                        history.push('/forgot-password');
                                     }}
                                     className="forgot-password-link"
                                 >
@@ -180,7 +111,7 @@ const LoginPage: React.FC = () => {
                                     href="#"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        history.push('/register'); // Cambia navigate por history.push
+                                        history.push('/register');
                                     }}
                                     className="register-link"
                                 >
@@ -188,7 +119,7 @@ const LoginPage: React.FC = () => {
                                 </a>
                             </p>
                         </motion.div>
-                    </form> {/* Cierra form */}
+                    </form>
                 </motion.div>
 
                 <IonToast
