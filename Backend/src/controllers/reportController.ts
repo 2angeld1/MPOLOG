@@ -40,25 +40,37 @@ const obtenerRangoFechas = (periodo: string): { inicio: Date; fin: Date } => {
 // Generar PDF
 export const generarReportePDF = async (req: AuthRequest, res: Response) => {
     try {
-        const { periodo } = req.query;
+        const { periodo, iglesia, tipo } = req.query; // Agrega iglesia y tipo
         const { inicio, fin } = obtenerRangoFechas(periodo as string || 'mes');
 
-        const conteos = await ConteoPersonas.find({
-            fecha: { $gte: inicio, $lte: fin }
-        }).populate('usuario', 'nombre');
+        const query: any = { fecha: { $gte: inicio, $lte: fin } };
+        if (iglesia) query.iglesia = iglesia;
+        if (tipo) query.tipo = tipo;
 
-        // Calcular estadísticas
+        const conteos = await ConteoPersonas.find(query)
+            .populate('usuario', 'nombre');
+
+        // Calcular estadísticas por iglesia y tipo
         const totalRegistros = conteos.length;
         const totalPersonas = conteos.reduce((sum, c) => sum + c.cantidad, 0);
         const promedioPersonas = totalRegistros > 0 ? (totalPersonas / totalRegistros).toFixed(2) : 0;
 
         const registrosPorArea: { [key: string]: { cantidad: number; totalPersonas: number } } = {};
+        const registrosPorIglesia: { [key: string]: { cantidad: number; totalPersonas: number } } = {};
         conteos.forEach(conteo => {
+            // Por área
             if (!registrosPorArea[conteo.area]) {
                 registrosPorArea[conteo.area] = { cantidad: 0, totalPersonas: 0 };
             }
             registrosPorArea[conteo.area].cantidad++;
             registrosPorArea[conteo.area].totalPersonas += conteo.cantidad;
+
+            // Por iglesia
+            if (!registrosPorIglesia[conteo.iglesia]) {
+                registrosPorIglesia[conteo.iglesia] = { cantidad: 0, totalPersonas: 0 };
+            }
+            registrosPorIglesia[conteo.iglesia].cantidad++;
+            registrosPorIglesia[conteo.iglesia].totalPersonas += conteo.cantidad;
         });
 
         // Crear PDF
@@ -73,6 +85,8 @@ export const generarReportePDF = async (req: AuthRequest, res: Response) => {
         doc.fontSize(24).fillColor('#3880ff').text('Reporte de Logística', { align: 'center' });
         doc.moveDown();
         doc.fontSize(12).fillColor('#666').text(`Período: ${inicio.toLocaleDateString()} - ${fin.toLocaleDateString()}`, { align: 'center' });
+        if (iglesia) doc.text(`Iglesia: ${iglesia}`, { align: 'center' });
+        if (tipo) doc.text(`Tipo: ${tipo}`, { align: 'center' });
         doc.moveDown(2);
 
         // Estadísticas generales
@@ -80,22 +94,32 @@ export const generarReportePDF = async (req: AuthRequest, res: Response) => {
         doc.moveDown();
         doc.fontSize(12).fillColor('#333');
         doc.text(`Total de Registros: ${totalRegistros}`);
-        doc.text(`Total de Personas: ${totalPersonas}`);
+        doc.text(`Total de Personas/Materiales: ${totalPersonas}`);
         doc.text(`Promedio por Registro: ${promedioPersonas}`);
         doc.moveDown(2);
 
-        // Registros por área
+        // Registros por Iglesia
+        doc.fontSize(16).fillColor('#000').text('Registros por Iglesia', { underline: true });
+        doc.moveDown();
+        doc.fontSize(12).fillColor('#333');
+        Object.entries(registrosPorIglesia).forEach(([iglesiaKey, data]) => {
+            doc.text(`${iglesiaKey}:`);
+            doc.text(`  - Registros: ${data.cantidad}`, { indent: 20 });
+            doc.text(`  - Total: ${data.totalPersonas}`, { indent: 20 });
+            doc.moveDown(0.5);
+        });
+        doc.moveDown(2);
+
+        // Registros por Área
         doc.fontSize(16).fillColor('#000').text('Registros por Área', { underline: true });
         doc.moveDown();
         doc.fontSize(12).fillColor('#333');
-
         Object.entries(registrosPorArea).forEach(([area, data]) => {
             doc.text(`${area}:`);
             doc.text(`  - Registros: ${data.cantidad}`, { indent: 20 });
-            doc.text(`  - Total Personas: ${data.totalPersonas}`, { indent: 20 });
+            doc.text(`  - Total: ${data.totalPersonas}`, { indent: 20 });
             doc.moveDown(0.5);
         });
-
         doc.moveDown(2);
 
         // Tabla de registros detallados
@@ -106,10 +130,12 @@ export const generarReportePDF = async (req: AuthRequest, res: Response) => {
         const startY = doc.y;
         doc.fontSize(10).fillColor('#fff');
         doc.rect(50, startY, 500, 20).fill('#3880ff');
-        doc.text('Fecha', 60, startY + 5, { width: 100 });
-        doc.text('Área', 160, startY + 5, { width: 150 });
-        doc.text('Cantidad', 310, startY + 5, { width: 80 });
-        doc.text('Usuario', 390, startY + 5, { width: 150 });
+        doc.text('Fecha', 60, startY + 5, { width: 60 });
+        doc.text('Iglesia', 120, startY + 5, { width: 80 }); // Nueva columna
+        doc.text('Tipo', 200, startY + 5, { width: 50 }); // Nueva columna
+        doc.text('Área', 250, startY + 5, { width: 100 });
+        doc.text('Sub-Área', 350, startY + 5, { width: 100 }); // Nueva columna
+        doc.text('Cantidad', 450, startY + 5, { width: 60 });
 
         // Filas de datos
         let y = startY + 25;
@@ -125,10 +151,12 @@ export const generarReportePDF = async (req: AuthRequest, res: Response) => {
             doc.rect(50, y - 5, 500, 20).fill(bgColor);
             doc.fillColor('#333');
             doc.fontSize(9);
-            doc.text(new Date(conteo.fecha).toLocaleDateString(), 60, y, { width: 100 });
-            doc.text(conteo.area, 160, y, { width: 150 });
-            doc.text(conteo.cantidad.toString(), 310, y, { width: 80 });
-            doc.text((conteo.usuario as any)?.nombre || 'N/A', 390, y, { width: 150 });
+            doc.text(new Date(conteo.fecha).toLocaleDateString(), 60, y, { width: 60 });
+            doc.text(conteo.iglesia, 120, y, { width: 80 });
+            doc.text(conteo.tipo, 200, y, { width: 50 });
+            doc.text(conteo.area, 250, y, { width: 100 });
+            doc.text(conteo.subArea || '', 350, y, { width: 100 });
+            doc.text(conteo.cantidad.toString(), 450, y, { width: 60 });
 
             y += 20;
         });
@@ -155,12 +183,15 @@ export const generarReportePDF = async (req: AuthRequest, res: Response) => {
 // Generar Excel
 export const generarReporteExcel = async (req: AuthRequest, res: Response) => {
     try {
-        const { periodo } = req.query;
+        const { periodo, iglesia, tipo } = req.query; // Agrega iglesia y tipo
         const { inicio, fin } = obtenerRangoFechas(periodo as string || 'mes');
 
-        const conteos = await ConteoPersonas.find({
-            fecha: { $gte: inicio, $lte: fin }
-        }).populate('usuario', 'nombre');
+        const query: any = { fecha: { $gte: inicio, $lte: fin } };
+        if (iglesia) query.iglesia = iglesia;
+        if (tipo) query.tipo = tipo;
+
+        const conteos = await ConteoPersonas.find(query)
+            .populate('usuario', 'nombre');
 
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Reporte de Logística');
@@ -173,13 +204,13 @@ export const generarReporteExcel = async (req: AuthRequest, res: Response) => {
         };
 
         // Título
-        worksheet.mergeCells('A1:E1');
+        worksheet.mergeCells('A1:G1'); // Ajusta para más columnas
         worksheet.getCell('A1').value = 'Reporte de Logística';
         worksheet.getCell('A1').font = { size: 18, bold: true };
         worksheet.getCell('A1').alignment = { horizontal: 'center' };
 
         // Período
-        worksheet.mergeCells('A2:E2');
+        worksheet.mergeCells('A2:G2');
         worksheet.getCell('A2').value = `Período: ${inicio.toLocaleDateString()} - ${fin.toLocaleDateString()}`;
         worksheet.getCell('A2').alignment = { horizontal: 'center' };
 
@@ -189,12 +220,12 @@ export const generarReporteExcel = async (req: AuthRequest, res: Response) => {
 
         worksheet.addRow([]);
         worksheet.addRow(['Total de Registros:', totalRegistros]);
-        worksheet.addRow(['Total de Personas:', totalPersonas]);
+        worksheet.addRow(['Total de Personas/Materiales:', totalPersonas]);
         worksheet.addRow(['Promedio por Registro:', (totalPersonas / totalRegistros).toFixed(2)]);
 
         // Encabezados de tabla
         worksheet.addRow([]);
-        const headerRow = worksheet.addRow(['Fecha', 'Área', 'Cantidad', 'Usuario', 'Observaciones']);
+        const headerRow = worksheet.addRow(['Fecha', 'Iglesia', 'Tipo', 'Área', 'Sub-Área', 'Cantidad', 'Usuario']); // Agrega iglesia, tipo, subArea
         headerRow.eachCell((cell) => {
             cell.style = headerStyle;
         });
@@ -203,20 +234,24 @@ export const generarReporteExcel = async (req: AuthRequest, res: Response) => {
         conteos.forEach(conteo => {
             worksheet.addRow([
                 new Date(conteo.fecha).toLocaleDateString(),
+                conteo.iglesia, // Nueva columna
+                conteo.tipo, // Nueva columna
                 conteo.area,
+                conteo.subArea || '', // Nueva columna
                 conteo.cantidad,
-                (conteo.usuario as any)?.nombre || 'N/A',
-                conteo.observaciones || ''
+                (conteo.usuario as any)?.nombre || 'N/A'
             ]);
         });
 
         // Ajustar anchos de columna
         worksheet.columns = [
-            { width: 15 },
-            { width: 20 },
-            { width: 12 },
-            { width: 20 },
-            { width: 30 }
+            { width: 15 }, // Fecha
+            { width: 15 }, // Iglesia
+            { width: 10 }, // Tipo
+            { width: 20 }, // Área
+            { width: 20 }, // Sub-Área
+            { width: 12 }, // Cantidad
+            { width: 20 }  // Usuario
         ];
 
         // Enviar archivo
@@ -234,21 +269,24 @@ export const generarReporteExcel = async (req: AuthRequest, res: Response) => {
 // Generar PNG (gráfico)
 export const generarReportePNG = async (req: AuthRequest, res: Response) => {
     try {
-        const { periodo } = req.query;
+        const { periodo, iglesia, tipo } = req.query; // Agrega iglesia y tipo
         const { inicio, fin } = obtenerRangoFechas(periodo as string || 'mes');
 
-        const conteos = await ConteoPersonas.find({
-            fecha: { $gte: inicio, $lte: fin }
-        });
+        const query: any = { fecha: { $gte: inicio, $lte: fin } };
+        if (iglesia) query.iglesia = iglesia;
+        if (tipo) query.tipo = tipo;
 
-        // Agrupar por área
-        const registrosPorArea: { [key: string]: number } = {};
+        const conteos = await ConteoPersonas.find(query);
+
+        // Agrupar por iglesia y área
+        const registrosPorIglesiaArea: { [key: string]: number } = {};
         conteos.forEach(conteo => {
-            registrosPorArea[conteo.area] = (registrosPorArea[conteo.area] || 0) + conteo.cantidad;
+            const key = `${conteo.iglesia} - ${conteo.area}`;
+            registrosPorIglesiaArea[key] = (registrosPorIglesiaArea[key] || 0) + conteo.cantidad;
         });
 
-        const areas = Object.keys(registrosPorArea);
-        const cantidades = Object.values(registrosPorArea);
+        const labels = Object.keys(registrosPorIglesiaArea);
+        const cantidades = Object.values(registrosPorIglesiaArea);
 
         // Crear gráfico
         const width = 800;
@@ -258,9 +296,9 @@ export const generarReportePNG = async (req: AuthRequest, res: Response) => {
         const configuration = {
             type: 'bar' as const,
             data: {
-                labels: areas,
+                labels: labels,
                 datasets: [{
-                    label: 'Total de Personas por Área',
+                    label: 'Total por Iglesia y Área',
                     data: cantidades,
                     backgroundColor: [
                         'rgba(56, 128, 255, 0.8)',
@@ -300,13 +338,13 @@ export const generarReportePNG = async (req: AuthRequest, res: Response) => {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Cantidad de Personas'
+                            text: 'Cantidad'
                         }
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'Áreas'
+                            text: 'Iglesia - Área'
                         }
                     }
                 }

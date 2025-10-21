@@ -63,21 +63,23 @@ export const authService = {
 export const conteoService = {
     crear: async (data: {
         fecha: string;
+        iglesia: string; // Nuevo campo
+        tipo: 'personas' | 'materiales';
         area: string;
         cantidad: number;
-        tipo?: 'personas' | 'materiales'; // Agrega tipo opcional
-        subArea?: string; // Agrega subArea opcional
+        subArea?: string;
         observaciones?: string;
     }) => {
         const response = await api.post('/conteo', data);
         return response.data;
     },
 
-    obtener: async (fecha?: string, area?: string, tipo?: 'personas' | 'materiales') => { // Agrega tipo opcional
+    obtener: async (fecha?: string, iglesia?: string, tipo?: 'personas' | 'materiales', area?: string) => { // Agrega iglesia
         const params = new URLSearchParams();
         if (fecha) params.append('fecha', fecha);
+        if (iglesia) params.append('iglesia', iglesia);
+        if (tipo) params.append('tipo', tipo);
         if (area) params.append('area', area);
-        if (tipo) params.append('tipo', tipo); // Agrega filtro por tipo
 
         const response = await api.get(`/conteo?${params.toString()}`);
         return response.data;
@@ -98,8 +100,14 @@ export const conteoService = {
         return response.data;
     },
 
-    obtenerAreas: async () => {
-        const response = await api.get('/conteo/areas');
+    obtenerAreas: async (tipo?: 'personas' | 'materiales') => {
+        const params = tipo ? { tipo } : {};
+        const response = await api.get('/conteo/areas', { params });
+        return response.data;
+    },
+
+    obtenerIglesias: async () => {
+        const response = await api.get('/conteo/iglesias');
         return response.data;
     },
 };

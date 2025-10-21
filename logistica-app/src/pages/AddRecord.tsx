@@ -41,8 +41,10 @@ interface PersonaRegistro {
     _id?: string;
     id: number;
     fecha: string;
+    iglesia: string; // Nuevo campo
     cantidad: number;
     area: string;
+    subArea?: string; // Agrega subArea como opcional
 }
 
 const AddRecord: React.FC = () => {
@@ -51,6 +53,7 @@ const AddRecord: React.FC = () => {
     const [area, setArea] = useState<string>('');
     const [tipo, setTipo] = useState<'personas' | 'materiales'>('personas'); // Agrega tipo
     const [subArea, setSubArea] = useState<string>(''); // Agrega subArea
+    const [iglesia, setIglesia] = useState<string>(''); // Nuevo estado para iglesia
     const [areas, setAreas] = useState<string[]>([]);
     const [registros, setRegistros] = useState<PersonaRegistro[]>([]);
     const [showToast, setShowToast] = useState(false);
@@ -61,47 +64,93 @@ const AddRecord: React.FC = () => {
     const { refreshData } = useData(); // Agrega hook
     const [tipoVista, setTipoVista] = useState<'personas' | 'materiales'>('personas'); // Estado para el tipo de vista
 
-    // Cargar áreas al montar el componente
+    const [iglesias, setIglesias] = useState<string[]>([]); // Cambia a estado
+    const [loadingIglesias, setLoadingIglesias] = useState(true); // Nuevo estado para loading
+
+    const [areasPersonas, setAreasPersonas] = useState<string[]>([]);
+    const [areasMateriales, setAreasMateriales] = useState<string[]>([]);
+    const [loadingAreasPersonas, setLoadingAreasPersonas] = useState(true);
+    const [loadingAreasMateriales, setLoadingAreasMateriales] = useState(true);
+
+    // Cargar iglesias y áreas al montar el componente
     useEffect(() => {
-        cargarAreas();
+        cargarIglesias();
+        cargarAreasPersonas();
+        cargarAreasMateriales();
     }, []);
 
-    // Cargar registros cuando cambia la fecha o el tipo de vista
+    // Cargar registros cuando cambia la fecha, iglesia o el tipo de vista
     useEffect(() => {
         cargarRegistros();
-    }, [fecha, tipoVista]); // Agrega tipoVista
+    }, [fecha, iglesia, tipoVista]); // Agrega iglesia
 
-    const cargarAreas = async () => {
-        setLoadingAreas(true);
+    const cargarIglesias = async () => {
+        setLoadingIglesias(true);
         try {
-            console.log('📍 Cargando áreas desde el backend...');
-            const response = await conteoService.obtenerAreas();
-            console.log('✅ Áreas cargadas:', response.data);
-            setAreas(response.data);
+            console.log('🏛️ Cargando iglesias desde el backend...');
+            const response = await conteoService.obtenerIglesias();
+            console.log('✅ Iglesias cargadas:', response.data);
+            setIglesias(response.data);
         } catch (error: any) {
-            console.error('❌ Error al cargar áreas:', error);
-            setToastMessage('Error al cargar las áreas');
+            console.error('❌ Error al cargar iglesias:', error);
+            setToastMessage('Error al cargar las iglesias');
             setToastColor('danger');
             setShowToast(true);
         } finally {
-            setLoadingAreas(false);
+            setLoadingIglesias(false);
+        }
+    };
+
+    const cargarAreasPersonas = async () => {
+        setLoadingAreasPersonas(true);
+        try {
+            console.log('📍 Cargando áreas de personas desde el backend...');
+            const response = await conteoService.obtenerAreas('personas');
+            console.log('✅ Áreas de personas cargadas:', response.data);
+            setAreasPersonas(response.data);
+        } catch (error: any) {
+            console.error('❌ Error al cargar áreas de personas:', error);
+            setToastMessage('Error al cargar las áreas de personas');
+            setToastColor('danger');
+            setShowToast(true);
+        } finally {
+            setLoadingAreasPersonas(false);
+        }
+    };
+
+    const cargarAreasMateriales = async () => {
+        setLoadingAreasMateriales(true);
+        try {
+            console.log('📍 Cargando áreas de materiales desde el backend...');
+            const response = await conteoService.obtenerAreas('materiales');
+            console.log('✅ Áreas de materiales cargadas:', response.data);
+            setAreasMateriales(response.data);
+        } catch (error: any) {
+            console.error('❌ Error al cargar áreas de materiales:', error);
+            setToastMessage('Error al cargar las áreas de materiales');
+            setToastColor('danger');
+            setShowToast(true);
+        } finally {
+            setLoadingAreasMateriales(false);
         }
     };
 
     const cargarRegistros = async () => {
         try {
             const fechaFormateada = new Date(fecha).toISOString().split('T')[0];
-            console.log('🔍 Cargando registros para fecha:', fechaFormateada, 'tipo:', tipoVista);
+            console.log('🔍 Cargando registros para fecha:', fechaFormateada, 'iglesia:', iglesia, 'tipo:', tipoVista);
 
-            const response = await conteoService.obtener(fechaFormateada, undefined, tipoVista); // Filtra por tipoVista
+            const response = await conteoService.obtener(fechaFormateada, iglesia, tipoVista); // Filtra por iglesia
             console.log('📦 Respuesta del servidor:', response);
 
             const registrosFormateados = response.data.map((item: any, index: number) => ({
                 _id: item._id,
                 id: index + 1,
                 fecha: new Date(item.fecha).toLocaleDateString('es-ES'),
+                iglesia: item.iglesia, // Nuevo campo
                 cantidad: item.cantidad,
-                area: tipoVista === 'materiales' ? item.subArea : item.area, // Usa subArea para materiales
+                area: item.area, // Siempre item.area (área fija para materiales, subárea para personas)
+                subArea: item.subArea, // Siempre item.subArea (objeto para materiales, opcional para personas)
             }));
 
             console.log('✅ Registros formateados:', registrosFormateados);
@@ -113,7 +162,14 @@ const AddRecord: React.FC = () => {
     };
 
     const handleAddRecord = async () => {
-        console.log('📝 Valores actuales:', { cantidad, area });
+        console.log('📝 Valores actuales:', { cantidad, area, iglesia });
+
+        if (!iglesia || iglesia.trim() === '') {
+            setToastMessage('Por favor selecciona una iglesia');
+            setToastColor('danger');
+            setShowToast(true);
+            return;
+        }
 
         if (!cantidad || cantidad <= 0) {
             setToastMessage('Por favor ingresa una cantidad válida');
@@ -140,6 +196,7 @@ const AddRecord: React.FC = () => {
         try {
             console.log('🚀 Enviando registro:', {
                 fecha: fecha,
+                iglesia: iglesia, // Nuevo campo
                 area: area,
                 cantidad: cantidad,
                 tipo: tipo,
@@ -148,6 +205,7 @@ const AddRecord: React.FC = () => {
 
             await conteoService.crear({
                 fecha: fecha,
+                iglesia: iglesia, // Nuevo campo
                 area: area,
                 cantidad: cantidad,
                 tipo: tipo,
@@ -159,6 +217,7 @@ const AddRecord: React.FC = () => {
             setCantidad(undefined);
             setArea('');
             setSubArea('');
+            // No resetear iglesia, para mantener selección
 
             setToastMessage('Registro agregado correctamente');
             setToastColor('success');
@@ -192,7 +251,7 @@ const AddRecord: React.FC = () => {
     };
 
     const handleRefresh = async (event: CustomEvent) => {
-        await Promise.all([cargarAreas(), cargarRegistros()]);
+        await cargarRegistros(); // Solo recarga registros, ya que áreas no cambian
         event.detail.complete();
     };
 
@@ -223,6 +282,46 @@ const AddRecord: React.FC = () => {
                 </IonRefresher>
 
                 <div className="add-record-container">
+                    {/* Selector de Iglesia */}
+                    <motion.div
+                        variants={fadeInVariant}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        <IonCard className="iglesia-selector-card">
+                            <IonCardHeader>
+                                <IonCardTitle>Selecciona Iglesia</IonCardTitle>
+                            </IonCardHeader>
+                            <IonCardContent>
+                                <IonItem lines="none">
+                                    <IonLabel position="stacked">Iglesia</IonLabel>
+                                    <IonSelect
+                                        value={iglesia}
+                                        placeholder={loadingIglesias ? "Cargando..." : "Selecciona una iglesia"}
+                                        onIonChange={(e) => {
+                                            const newIglesia = e.detail.value;
+                                            console.log('🏛️ Nueva iglesia:', newIglesia);
+                                            setIglesia(newIglesia);
+                                            setArea('');
+                                            setSubArea('');
+                                        }}
+                                        disabled={loadingIglesias} // Deshabilita mientras carga
+                                    >
+                                        {loadingIglesias ? (
+                                            <IonSelectOption value="">Cargando...</IonSelectOption>
+                                        ) : (
+                                            iglesias.map((iglesiaOption) => (
+                                                <IonSelectOption key={iglesiaOption} value={iglesiaOption}>
+                                                    {iglesiaOption}
+                                                </IonSelectOption>
+                                            ))
+                                        )}
+                                    </IonSelect>
+                                </IonItem>
+                            </IonCardContent>
+                        </IonCard>
+                    </motion.div>
+
                     {/* Selector Principal de Tipo */}
                     <motion.div
                         variants={fadeInVariant}
@@ -246,6 +345,7 @@ const AddRecord: React.FC = () => {
                                             setArea('');
                                             setSubArea('');
                                         }}
+                                        disabled={!iglesia} // Deshabilita si no hay iglesia seleccionada
                                     >
                                         <IonSelectOption value="personas">Conteo de Personas</IonSelectOption>
                                         <IonSelectOption value="materiales">Conteo de Materiales</IonSelectOption>
@@ -255,8 +355,8 @@ const AddRecord: React.FC = () => {
                         </IonCard>
                     </motion.div>
 
-                    {/* Formulario Condicional */}
-                    {tipoVista === 'personas' ? (
+                    {/* Formulario Condicional - Solo mostrar si iglesia y tipoVista están seleccionados */}
+                    {iglesia && tipoVista === 'personas' ? (
                         // Formulario para Personas
                         <motion.div
                             variants={fadeInVariant}
@@ -302,12 +402,12 @@ const AddRecord: React.FC = () => {
                                                             console.log('📍 Nueva área:', newArea);
                                                             setArea(newArea);
                                                         }}
-                                                        disabled={loading || loadingAreas}
+                                                        disabled={loading || loadingAreasPersonas}
                                                     >
-                                                        {loadingAreas ? (
+                                                        {loadingAreasPersonas ? (
                                                             <IonSelectOption value="">Cargando...</IonSelectOption>
                                                         ) : (
-                                                            areas.map((areaOption) => (
+                                                            areasPersonas.map((areaOption) => (
                                                                 <IonSelectOption key={areaOption} value={areaOption}>
                                                                     {areaOption}
                                                                 </IonSelectOption>
@@ -367,7 +467,7 @@ const AddRecord: React.FC = () => {
                                 </IonCardContent>
                             </IonCard>
                         </motion.div>
-                    ) : (
+                    ) : iglesia && tipoVista === 'materiales' ? (
                         // Formulario para Materiales
                         <motion.div
                             variants={fadeInVariant}
@@ -377,7 +477,7 @@ const AddRecord: React.FC = () => {
                             <IonCard className="form-card">
                                 <IonCardHeader>
                                     <IonCardTitle>
-                                        <FontAwesomeIcon icon={faUserPlus} /> Conteo de Materiales
+                                        <FontAwesomeIcon icon={faUserPlus} /> Conteo de Materiales (Utensilios)
                                     </IonCardTitle>
                                 </IonCardHeader>
                                 <IonCardContent>
@@ -404,27 +504,49 @@ const AddRecord: React.FC = () => {
 
                                             <IonCol size="12" sizeMd="4">
                                                 <IonItem lines="none" className="form-item">
-                                                    <IonLabel position="stacked">Sub-Área</IonLabel>
+                                                    <IonLabel position="stacked">Área</IonLabel>
                                                     <IonSelect
-                                                        value={subArea}
-                                                        placeholder="Selecciona una sub-área"
+                                                        value={area}
+                                                        placeholder="Selecciona un área"
                                                         onIonChange={(e) => {
-                                                            const newSubArea = e.detail.value;
-                                                            console.log('📍 Nueva sub-área:', newSubArea);
-                                                            setSubArea(newSubArea);
-                                                            setArea('Materiales');
+                                                            const newArea = e.detail.value;
+                                                            console.log('📍 Nueva área:', newArea);
+                                                            setArea(newArea);
                                                         }}
-                                                        disabled={loading}
+                                                        disabled={loading || loadingAreasMateriales}
                                                     >
-                                                        <IonSelectOption value="media">Media</IonSelectOption>
-                                                        <IonSelectOption value="musica">Música (Instrumentos)</IonSelectOption>
-                                                        <IonSelectOption value="biblias">Biblias</IonSelectOption>
-                                                        <IonSelectOption value="sillas">Sillas</IonSelectOption>
-                                                        <IonSelectOption value="utensilios de limpieza">Utensilios de Limpieza</IonSelectOption>
+                                                        {loadingAreasMateriales ? (
+                                                            <IonSelectOption value="">Cargando...</IonSelectOption>
+                                                        ) : (
+                                                            areasMateriales.map((areaOption) => (
+                                                                <IonSelectOption key={areaOption} value={areaOption}>
+                                                                    {areaOption}
+                                                                </IonSelectOption>
+                                                            ))
+                                                        )}
                                                     </IonSelect>
                                                 </IonItem>
                                             </IonCol>
 
+                                            <IonCol size="12" sizeMd="4">
+                                                <IonItem lines="none" className="form-item">
+                                                    <IonLabel position="stacked">Sub-Área (Objeto)</IonLabel>
+                                                    <IonInput
+                                                        type="text"
+                                                        value={subArea}
+                                                        placeholder="Ej. juguetes, biblias, etc."
+                                                        onIonInput={(e) => {
+                                                            const value = e.detail.value;
+                                                            console.log('📍 Nueva sub-área:', value);
+                                                            setSubArea(value || '');
+                                                        }}
+                                                        disabled={loading}
+                                                    ></IonInput>
+                                                </IonItem>
+                                            </IonCol>
+                                        </IonRow>
+
+                                        <IonRow>
                                             <IonCol size="12" sizeMd="4">
                                                 <IonItem lines="none" className="form-item">
                                                     <IonLabel position="stacked">Cantidad</IonLabel>
@@ -475,7 +597,7 @@ const AddRecord: React.FC = () => {
                                 </IonCardContent>
                             </IonCard>
                         </motion.div>
-                    )}
+                    ) : null}
 
                     {/* Estadísticas Condicionales */}
                     {registros.length > 0 && (
@@ -514,13 +636,16 @@ const AddRecord: React.FC = () => {
                             transition={{ duration: 0.4, delay: 0.2 }}
                         >
                             <div className="list-header">
-                                <h2>Registros del Día ({tipoVista === 'personas' ? 'Personas' : 'Materiales'})</h2>
+                                <h2>Registros del Día ({tipoVista === 'personas' ? 'Personas' : 'Materiales'}) - {iglesia}</h2> {/* Agrega iglesia al título */}
                             </div>
                             {registros.map((registro, index) => (
                                 <RegistroCard
                                     key={registro._id || registro.id}
                                     fecha={registro.fecha}
+                                    iglesia={registro.iglesia}
                                     area={registro.area}
+                                    subArea={registro.subArea} // Nuevo
+                                    tipo={tipoVista} // Nuevo
                                     cantidad={registro.cantidad}
                                     onDelete={() => handleDeleteRecord(registro._id)}
                                     index={index}

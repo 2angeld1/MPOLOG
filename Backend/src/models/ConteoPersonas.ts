@@ -2,12 +2,13 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IConteoPersonas extends Document {
     fecha: Date;
-    area: string;
+    iglesia: string; // Nuevo campo para iglesia
+    tipo: 'personas' | 'materiales';
+    area: string; // Ahora representa subáreas específicas
     cantidad: number;
     usuario: mongoose.Types.ObjectId;
     observaciones?: string;
-    tipo: 'personas' | 'materiales'; // Agrega tipo
-    subArea?: string; // Agrega subArea opcional
+    subArea?: string; // Opcional, si se necesita más granularidad
 }
 
 const ConteoPersonasSchema: Schema = new Schema({
@@ -15,17 +16,54 @@ const ConteoPersonasSchema: Schema = new Schema({
         type: Date,
         required: true
     },
-    area: {
+    iglesia: { // Nuevo campo
         type: String,
         required: true,
         enum: [
+            'Arraijan',
+            'Bique',
+            'Burunga',
+            'Capira',
+            'Central',
+            'Chiriqui',
+            'El potrero',
+            'Este',
+            'Norte',
+            'Oeste',
+            'Penonome',
+            'Santiago',
+            'Veracruz'
+        ]
+    },
+    tipo: {
+        type: String,
+        enum: ['personas', 'materiales'],
+        default: 'personas'
+    },
+    area: { // Enum actualizado para incluir áreas de materiales
+        type: String,
+        required: true,
+        enum: [
+            // Áreas para personas
             'Bloque 1 y 2',
             'Bloque 3 y 4',
             'Altar y Media',
             'JEF Teen',
             'Genesis',
             'Cafetería',
-            'Seguridad'
+            'Seguridad',
+            'En vivo',
+            // Áreas para materiales (utensilios)
+            'cafeteria',
+            'baños',
+            'media',
+            'oficina',
+            'jef teen',
+            'jef',
+            'evangelio cambia',
+            'comedor',
+            'proyecto dar',
+            'navidad alegre'
         ]
     },
     cantidad: {
@@ -41,20 +79,15 @@ const ConteoPersonasSchema: Schema = new Schema({
     observaciones: {
         type: String
     },
-    tipo: { // Agrega tipo
+    subArea: {
         type: String,
-        enum: ['personas', 'materiales'],
-        default: 'personas'
-    },
-    subArea: { // Agrega subArea
-        type: String,
-        required: false
+        required: false // Ya es string libre
     }
 }, {
     timestamps: true
 });
 
-// Índice para búsquedas rápidas por fecha
-ConteoPersonasSchema.index({ fecha: 1, area: 1 });
+// Índice para búsquedas rápidas por fecha e iglesia
+ConteoPersonasSchema.index({ fecha: 1, iglesia: 1 });
 
 export default mongoose.model<IConteoPersonas>('ConteoPersonas', ConteoPersonasSchema);

@@ -7,13 +7,16 @@ import '../styles/RegistroCard.scss';
 
 interface RegistroCardProps {
     fecha: string;
+    iglesia: string;
     area: string;
+    subArea?: string; // Nuevo prop opcional
+    tipo?: 'personas' | 'materiales'; // Nuevo prop para saber el tipo
     cantidad: number;
-    onDelete?: () => void; // Ahora es opcional
+    onDelete?: () => void;
     index?: number;
 }
 
-const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, area, cantidad, onDelete, index = 0 }) => {
+const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, iglesia, area, subArea, tipo, cantidad, onDelete, index = 0 }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -24,7 +27,7 @@ const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, area, cantidad, onDe
                 <IonCardContent>
                     <div className="registro-header">
                         <IonBadge color="primary" className="area-badge">
-                            {area}
+                            {iglesia} - {area} {/* Muestra iglesia y área fija para ambos tipos */}
                         </IonBadge>
                         {onDelete && (
                             <IonButton fill="clear" color="danger" size="small" onClick={onDelete}>
@@ -44,9 +47,16 @@ const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, area, cantidad, onDe
                                 <span className="info-label">Área:</span>
                                 <span className="info-value">{area}</span>
                             </div>
+                            {tipo === 'materiales' && subArea && (
+                                <div className="info-item">
+                                    <FontAwesomeIcon icon={faTrash} className="info-icon" /> {/* Usa un icono apropiado, e.g., faBox para objeto */}
+                                    <span className="info-label">Objeto:</span>
+                                    <span className="info-value">{subArea}</span>
+                                </div>
+                            )}
                             <div className="info-item highlight">
                                 <FontAwesomeIcon icon={faUsers} className="info-icon" />
-                                <span className="info-label">Personas:</span>
+                                <span className="info-label">Cantidad:</span>
                                 <span className="info-value cantidad">{cantidad}</span>
                             </div>
                         </div>

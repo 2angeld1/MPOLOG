@@ -7,8 +7,8 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import RegisterPage from './pages/RegisterPage';
 import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext'; // Agrega import
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -42,10 +42,24 @@ import './theme/variables.css';
 
 setupIonicReact();
 
+// Componente para rutas protegidas (ajustado para Ionic)
+const PrivateRoute: React.FC<{ component: React.ComponentType<any>; path: string; exact?: boolean }> = ({ component: Component, path, exact = false }) => {
+  const { isAuthenticated } = useAuth();
+  return (
+    <Route
+      path={path}
+      exact={exact}
+      render={(props) =>
+        isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />
+      }
+    />
+  );
+};
+
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <DataProvider> {/* Agrega DataProvider */}
+      <DataProvider>
         <AuthProvider>
           <IonRouterOutlet>
             <Route exact path="/login">
@@ -60,15 +74,14 @@ const App: React.FC = () => (
             <Route exact path="/reset-password">
               <ResetPasswordPage />
             </Route>
-            <Route path="/tabs">
-              <Tabs />
-            </Route>
+            {/* Elimina la ruta duplicada y usa solo PrivateRoute */}
+            <PrivateRoute path="/tabs" component={Tabs} />
             <Route exact path="/">
               <Redirect to="/login" />
             </Route>
           </IonRouterOutlet>
         </AuthProvider>
-      </DataProvider> {/* Cierra DataProvider */}
+      </DataProvider>
     </IonReactRouter>
   </IonApp>
 );

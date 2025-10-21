@@ -4,33 +4,64 @@ import { AuthRequest } from '../middleware/auth';
 
 export const crearConteo = async (req: AuthRequest, res: Response) => {
     try {
-        const { fecha, area, cantidad, observaciones, tipo, subArea } = req.body; // Agrega tipo y subArea
+        const { fecha, iglesia, tipo, area, cantidad, observaciones, subArea } = req.body;
 
         // Validar datos
-        if (!fecha || !area || cantidad === undefined) {
-            return res.status(400).json({ message: 'Por favor completa todos los campos requeridos' });
+        if (!fecha || !iglesia || !tipo || !area || cantidad === undefined) {
+            return res.status(400).json({ message: 'Por favor completa todos los campos requeridos: fecha, iglesia, tipo, area y cantidad' });
         }
 
         if (tipo === 'materiales' && !subArea) {
-            return res.status(400).json({ message: 'Para materiales, selecciona una sub-área' });
+            return res.status(400).json({ message: 'Para materiales, ingresa una sub-área (ej. juguetes)' });
         }
 
-        const conteo = new ConteoPersonas({
-            fecha: new Date(fecha),
-            area,
-            cantidad,
-            observaciones,
-            usuario: req.userId,
-            tipo: tipo || 'personas', // Default a personas
-            subArea
-        });
+        // Lógica de upsert para materiales
+        if (tipo === 'materiales') {
+            const existingConteo = await ConteoPersonas.findOneAndUpdate(
+                {
+                    fecha: new Date(fecha),
+                    iglesia,
+                    tipo,
+                    area,
+                    subArea
+                },
+                {
+                    $inc: { cantidad: cantidad }, // Suma la cantidad
+                    observaciones,
+                    usuario: req.userId
+                },
+                {
+                    new: true, // Devuelve el documento actualizado
+                    upsert: true, // Crea si no existe
+                    setDefaultsOnInsert: true // Aplica defaults en inserción
+                }
+            );
 
-        await conteo.save();
+            return res.status(201).json({
+                success: true,
+                data: existingConteo,
+                message: 'Registro actualizado o creado correctamente'
+            });
+        } else {
+            // Para personas, crear siempre nuevo (lógica original)
+            const conteo = new ConteoPersonas({
+                fecha: new Date(fecha),
+                iglesia,
+                tipo,
+                area,
+                cantidad,
+                observaciones,
+                usuario: req.userId,
+                subArea
+            });
 
-        res.status(201).json({
-            success: true,
-            data: conteo
-        });
+            await conteo.save();
+
+            return res.status(201).json({
+                success: true,
+                data: conteo
+            });
+        }
     } catch (error) {
         console.error('Error al crear conteo:', error);
         res.status(500).json({ message: 'Error del servidor' });
@@ -39,7 +70,7 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
 
 export const obtenerConteos = async (req: AuthRequest, res: Response) => {
     try {
-        const { fecha, area, tipo } = req.query; // Agrega tipo
+        const { fecha, iglesia, tipo, area } = req.query; // Agrega iglesia
         const query: any = {};
 
         if (fecha) {
@@ -53,12 +84,16 @@ export const obtenerConteos = async (req: AuthRequest, res: Response) => {
             };
         }
 
-        if (area) {
-            query.area = area;
+        if (iglesia) {
+            query.iglesia = iglesia;
         }
 
         if (tipo) {
-            query.tipo = tipo; // Filtra por tipo
+            query.tipo = tipo;
+        }
+
+        if (area) {
+            query.area = area;
         }
 
         const conteos = await ConteoPersonas.find(query)
@@ -77,9 +112,9 @@ export const obtenerConteos = async (req: AuthRequest, res: Response) => {
 
 export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
     try {
-        const { fechaInicio, fechaFin } = req.query;
+        const { fechaInicio, fechaFin, tipo } = req.query; // Agrega tipo
 
-        console.log('📅 Parámetros recibidos:', { fechaInicio, fechaFin });
+        console.log('📅 Parámetros recibidos:', { fechaInicio, fechaFin, tipo });
 
         let query: any = {};
 
@@ -92,6 +127,10 @@ export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
                 $gte: inicio,
                 $lt: fin
             };
+        }
+
+        if (tipo) {
+            query.tipo = tipo; // Filtra por tipo si se proporciona
         }
 
         console.log('🔍 Query MongoDB:', JSON.stringify(query, null, 2));
@@ -148,25 +187,39 @@ export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
 
 export const obtenerAreas = async (req: AuthRequest, res: Response) => {
     try {
-        // Obtener el schema del modelo
-        const schema = ConteoPersonas.schema.path('area');
+        const { tipo } = req.query; // Nuevo parámetro opcional: 'personas' o 'materiales'
 
-        // Obtener los valores del enum
-        const areas = (schema as any).enumValues || [];
+        // Lista completa de áreas del enum
+        const todasLasAreas = [
+            // Personas
+            'Bloque 1 y 2', 'Bloque 3 y 4', 'Altar y Media', 'JEF Teen', 'Genesis', 'Cafetería', 'Seguridad', 'En vivo',
+            // Materiales
+            'cafeteria', 'baños', 'media', 'oficina', 'jef teen', 'jef', 'evangelio cambia', 'comedor', 'proyecto dar', 'navidad alegre'
+        ];
 
-        console.log('📍 Áreas disponibles:', areas);
+        // Áreas de personas
+        const areasPersonas = [
+            'Bloque 1 y 2', 'Bloque 3 y 4', 'Altar y Media', 'JEF Teen', 'Genesis', 'Cafetería', 'Seguridad', 'En vivo'
+        ];
 
-        res.json({
-            success: true,
-            data: areas
-        });
-    } catch (error: any) {
-        console.error('❌ Error al obtener áreas:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener áreas',
-            error: error.message
-        });
+        // Áreas de materiales
+        const areasMateriales = [
+            'cafeteria', 'baños', 'media', 'oficina', 'jef teen', 'jef', 'evangelio cambia', 'comedor', 'proyecto dar', 'navidad alegre'
+        ];
+
+        let areasFiltradas;
+        if (tipo === 'personas') {
+            areasFiltradas = areasPersonas;
+        } else if (tipo === 'materiales') {
+            areasFiltradas = areasMateriales;
+        } else {
+            areasFiltradas = todasLasAreas; // Si no se especifica tipo, devolver todas
+        }
+
+        res.json({ success: true, data: areasFiltradas });
+    } catch (error) {
+        console.error('Error al obtener áreas:', error);
+        res.status(500).json({ message: 'Error del servidor' });
     }
 };
 
@@ -186,6 +239,19 @@ export const eliminarConteo = async (req: AuthRequest, res: Response) => {
         });
     } catch (error) {
         console.error('Error al eliminar conteo:', error);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+};
+
+export const obtenerIglesias = async (req: AuthRequest, res: Response) => {
+    try {
+        // Lista de iglesias del enum (puedes extraerla del modelo si es necesario)
+        const iglesias = [
+            'Arraijan', 'Bique', 'Burunga', 'Capira', 'Central', 'Chiriqui', 'El potrero', 'Este', 'Norte', 'Oeste', 'Penonome', 'Santiago', 'Veracruz'
+        ];
+        res.json({ success: true, data: iglesias });
+    } catch (error) {
+        console.error('Error al obtener iglesias:', error);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
