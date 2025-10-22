@@ -169,211 +169,209 @@ const Home: React.FC = () => {
     ] : [];
 
     return (
-        <IonPage>
-            <IonContent fullscreen className="dashboard-content">
-                <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-                    <IonRefresherContent></IonRefresherContent>
-                </IonRefresher>
+        <IonContent fullscreen className="dashboard-content">
+            <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+                <IonRefresherContent></IonRefresherContent>
+            </IonRefresher>
 
-                {loading ? (
-                    <div className="loading-container">
-                        <IonSpinner name="crescent" />
-                        <p>Cargando datos...</p>
-                    </div>
-                ) : (
-                    <motion.div
-                        className="dashboard-container"
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                    >
-                        {/* Accordiones para Personas y Materiales */}
-                        <IonAccordionGroup value="personas">
-                            {/* Sección Personas */}
-                            <IonAccordion value="personas">
-                                <IonItem slot="header" color="light">
-                                    <IonLabel>Conteo de Personas</IonLabel>
-                                </IonItem>
-                                <div slot="content">
-                                    {/* Stats Cards para Personas */}
-                                    {estadisticasPersonas && (
-                                        <IonGrid>
-                                            <IonRow>
-                                                {statsDataPersonas.map((stat) => (
-                                                    <IonCol size="12" sizeMd="4" key={stat.id}>
-                                                        <IonCard className={`stat-card stat-card-${stat.color}`}>
-                                                            <IonCardContent>
-                                                                <div className="stat-content">
-                                                                    <div className="stat-icon">
-                                                                        <FontAwesomeIcon icon={stat.icon} />
-                                                                    </div>
-                                                                    <div className="stat-info">
-                                                                        <h3>{stat.value.toLocaleString()}</h3>
-                                                                        <p>{stat.title}</p>
-                                                                    </div>
+            {loading ? (
+                <div className="loading-container">
+                    <IonSpinner name="crescent" />
+                    <p>Cargando datos...</p>
+                </div>
+            ) : (
+                <motion.div
+                    className="dashboard-container"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {/* Accordiones para Personas y Materiales */}
+                    <IonAccordionGroup value="personas">
+                        {/* Sección Personas */}
+                        <IonAccordion value="personas">
+                            <IonItem slot="header" color="light">
+                                <IonLabel>Conteo de Personas</IonLabel>
+                            </IonItem>
+                            <div slot="content">
+                                {/* Stats Cards para Personas */}
+                                {estadisticasPersonas && (
+                                    <IonGrid>
+                                        <IonRow>
+                                            {statsDataPersonas.map((stat) => (
+                                                <IonCol size="12" sizeMd="4" key={stat.id}>
+                                                    <IonCard className={`stat-card stat-card-${stat.color}`}>
+                                                        <IonCardContent>
+                                                            <div className="stat-content">
+                                                                <div className="stat-icon">
+                                                                    <FontAwesomeIcon icon={stat.icon} />
                                                                 </div>
-                                                            </IonCardContent>
-                                                        </IonCard>
-                                                    </IonCol>
-                                                ))}
-                                            </IonRow>
-                                        </IonGrid>
-                                    )}
-
-                                    {/* Registros por Área para Personas */}
-                                    {estadisticasPersonas && estadisticasPersonas.registrosPorArea && estadisticasPersonas.registrosPorArea.length > 0 && (
-                                        <div className="area-section">
-                                            <IonCard className="area-card">
-                                                <IonCardHeader>
-                                                    <IonCardTitle>Personas por Área (Últimos 30 días)</IonCardTitle>
-                                                </IonCardHeader>
-                                                <div className="area-grid">
-                                                    {estadisticasPersonas.registrosPorArea.map((area, index) => (
-                                                        <motion.div
-                                                            key={index}
-                                                            className="area-item"
-                                                            initial={{ opacity: 0, scale: 0.9 }}
-                                                            animate={{ opacity: 1, scale: 1 }}
-                                                            transition={{ delay: index * 0.1 }}
-                                                        >
-                                                            <div className="area-name">{area.area}</div>
-                                                            <div className="area-stats">
-                                                                <div className="area-count">
-                                                                    <FontAwesomeIcon icon={faUsers} />
-                                                                    <span>{area.totalPersonas}</span>
-                                                                </div>
-                                                                <div className="area-registros">
-                                                                    {area.cantidad} registros
+                                                                <div className="stat-info">
+                                                                    <h3>{stat.value.toLocaleString()}</h3>
+                                                                    <p>{stat.title}</p>
                                                                 </div>
                                                             </div>
-                                                        </motion.div>
-                                                    ))}
-                                                </div>
-                                            </IonCard>
-                                        </div>
-                                    )}
+                                                        </IonCardContent>
+                                                    </IonCard>
+                                                </IonCol>
+                                            ))}
+                                        </IonRow>
+                                    </IonGrid>
+                                )}
 
-                                    {/* Tabla de Registros para Personas */}
-                                    {registrosPersonas.length > 0 && (
-                                        <div className="table-section">
-                                            <IonCard className="data-table-card">
-                                                <IonCardHeader>
-                                                    <IonCardTitle>
-                                                        <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
-                                                        Historial de Registros de Personas
-                                                    </IonCardTitle>
-                                                </IonCardHeader>
-                                                <IonCardContent>
-                                                    <DataTable data={registrosPersonas} columns={columnsPersonas} />
-                                                </IonCardContent>
-                                            </IonCard>
-                                        </div>
-                                    )}
-                                </div>
-                            </IonAccordion>
-
-                            {/* Sección Materiales */}
-                            <IonAccordion value="materiales">
-                                <IonItem slot="header" color="light">
-                                    <IonLabel>Conteo de Materiales (Utensilios)</IonLabel>
-                                </IonItem>
-                                <div slot="content">
-                                    {/* Stats Cards para Materiales */}
-                                    {estadisticasMateriales && (
-                                        <IonGrid>
-                                            <IonRow>
-                                                {statsDataMateriales.map((stat) => (
-                                                    <IonCol size="12" sizeMd="4" key={stat.id}>
-                                                        <IonCard className={`stat-card stat-card-${stat.color}`}>
-                                                            <IonCardContent>
-                                                                <div className="stat-content">
-                                                                    <div className="stat-icon">
-                                                                        <FontAwesomeIcon icon={stat.icon} />
-                                                                    </div>
-                                                                    <div className="stat-info">
-                                                                        <h3>{stat.value.toLocaleString()}</h3>
-                                                                        <p>{stat.title}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </IonCardContent>
-                                                        </IonCard>
-                                                    </IonCol>
+                                {/* Registros por Área para Personas */}
+                                {estadisticasPersonas && estadisticasPersonas.registrosPorArea && estadisticasPersonas.registrosPorArea.length > 0 && (
+                                    <div className="area-section">
+                                        <IonCard className="area-card">
+                                            <IonCardHeader>
+                                                <IonCardTitle>Personas por Área (Últimos 30 días)</IonCardTitle>
+                                            </IonCardHeader>
+                                            <div className="area-grid">
+                                                {estadisticasPersonas.registrosPorArea.map((area, index) => (
+                                                    <motion.div
+                                                        key={index}
+                                                        className="area-item"
+                                                        initial={{ opacity: 0, scale: 0.9 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ delay: index * 0.1 }}
+                                                    >
+                                                        <div className="area-name">{area.area}</div>
+                                                        <div className="area-stats">
+                                                            <div className="area-count">
+                                                                <FontAwesomeIcon icon={faUsers} />
+                                                                <span>{area.totalPersonas}</span>
+                                                            </div>
+                                                            <div className="area-registros">
+                                                                {area.cantidad} registros
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
                                                 ))}
-                                            </IonRow>
-                                        </IonGrid>
-                                    )}
+                                            </div>
+                                        </IonCard>
+                                    </div>
+                                )}
 
-                                    {/* Registros por Área para Materiales */}
-                                    {estadisticasMateriales && estadisticasMateriales.registrosPorArea && estadisticasMateriales.registrosPorArea.length > 0 && (
-                                        <div className="area-section">
-                                            <IonCard className="area-card">
-                                                <IonCardHeader>
-                                                    <IonCardTitle>Materiales por Área (Últimos 30 días)</IonCardTitle>
-                                                </IonCardHeader>
-                                                <div className="area-grid">
-                                                    {estadisticasMateriales.registrosPorArea.map((area, index) => (
-                                                        <motion.div
-                                                            key={index}
-                                                            className="area-item"
-                                                            initial={{ opacity: 0, scale: 0.9 }}
-                                                            animate={{ opacity: 1, scale: 1 }}
-                                                            transition={{ delay: index * 0.1 }}
-                                                        >
-                                                            <div className="area-name">{area.area}</div>
-                                                            <div className="area-stats">
-                                                                <div className="area-count">
-                                                                    <FontAwesomeIcon icon={faUsers} />
-                                                                    <span>{area.totalPersonas}</span>
+                                {/* Tabla de Registros para Personas */}
+                                {registrosPersonas.length > 0 && (
+                                    <div className="table-section">
+                                        <IonCard className="data-table-card">
+                                            <IonCardHeader>
+                                                <IonCardTitle>
+                                                    <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
+                                                    Historial de Registros de Personas
+                                                </IonCardTitle>
+                                            </IonCardHeader>
+                                            <IonCardContent>
+                                                <DataTable data={registrosPersonas} columns={columnsPersonas} />
+                                            </IonCardContent>
+                                        </IonCard>
+                                    </div>
+                                )}
+                            </div>
+                        </IonAccordion>
+
+                        {/* Sección Materiales */}
+                        <IonAccordion value="materiales">
+                            <IonItem slot="header" color="light">
+                                <IonLabel>Conteo de Materiales (Utensilios)</IonLabel>
+                            </IonItem>
+                            <div slot="content">
+                                {/* Stats Cards para Materiales */}
+                                {estadisticasMateriales && (
+                                    <IonGrid>
+                                        <IonRow>
+                                            {statsDataMateriales.map((stat) => (
+                                                <IonCol size="12" sizeMd="4" key={stat.id}>
+                                                    <IonCard className={`stat-card stat-card-${stat.color}`}>
+                                                        <IonCardContent>
+                                                            <div className="stat-content">
+                                                                <div className="stat-icon">
+                                                                    <FontAwesomeIcon icon={stat.icon} />
                                                                 </div>
-                                                                <div className="area-registros">
-                                                                    {area.cantidad} registros
+                                                                <div className="stat-info">
+                                                                    <h3>{stat.value.toLocaleString()}</h3>
+                                                                    <p>{stat.title}</p>
                                                                 </div>
                                                             </div>
-                                                        </motion.div>
-                                                    ))}
-                                                </div>
-                                            </IonCard>
-                                        </div>
-                                    )}
+                                                        </IonCardContent>
+                                                    </IonCard>
+                                                </IonCol>
+                                            ))}
+                                        </IonRow>
+                                    </IonGrid>
+                                )}
 
-                                    {/* Tabla de Registros para Materiales */}
-                                    {registrosMateriales.length > 0 && (
-                                        <div className="table-section">
-                                            <IonCard className="data-table-card">
-                                                <IonCardHeader>
-                                                    <IonCardTitle>
-                                                        <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
-                                                        Historial de Registros de Materiales
-                                                    </IonCardTitle>
-                                                </IonCardHeader>
-                                                <IonCardContent>
-                                                    <DataTable data={registrosMateriales} columns={columnsMateriales} />
-                                                </IonCardContent>
-                                            </IonCard>
-                                        </div>
-                                    )}
-                                </div>
-                            </IonAccordion>
-                        </IonAccordionGroup>
+                                {/* Registros por Área para Materiales */}
+                                {estadisticasMateriales && estadisticasMateriales.registrosPorArea && estadisticasMateriales.registrosPorArea.length > 0 && (
+                                    <div className="area-section">
+                                        <IonCard className="area-card">
+                                            <IonCardHeader>
+                                                <IonCardTitle>Materiales por Área (Últimos 30 días)</IonCardTitle>
+                                            </IonCardHeader>
+                                            <div className="area-grid">
+                                                {estadisticasMateriales.registrosPorArea.map((area, index) => (
+                                                    <motion.div
+                                                        key={index}
+                                                        className="area-item"
+                                                        initial={{ opacity: 0, scale: 0.9 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ delay: index * 0.1 }}
+                                                    >
+                                                        <div className="area-name">{area.area}</div>
+                                                        <div className="area-stats">
+                                                            <div className="area-count">
+                                                                <FontAwesomeIcon icon={faUsers} />
+                                                                <span>{area.totalPersonas}</span>
+                                                            </div>
+                                                            <div className="area-registros">
+                                                                {area.cantidad} registros
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        </IonCard>
+                                    </div>
+                                )}
 
-                        {/* Estado vacío si no hay datos en ninguna sección */}
-                        {!loading && (!estadisticasPersonas || estadisticasPersonas.totalRegistros === 0) && (!estadisticasMateriales || estadisticasMateriales.totalRegistros === 0) && (
-                            <motion.div
-                                variants={itemVariants}
-                                className="empty-state"
-                            >
-                                <FontAwesomeIcon icon={faUsers} size="3x" />
-                                <h3>No hay datos disponibles</h3>
-                                <p>Comienza agregando registros de conteo de personas o materiales</p>
-                                <IonButton onClick={() => history.push('/tabs/add')}>
-                                    Agregar Registro
-                                </IonButton>
-                            </motion.div>
-                        )}
-                    </motion.div>
-                )}
-            </IonContent>
-        </IonPage>
+                                {/* Tabla de Registros para Materiales */}
+                                {registrosMateriales.length > 0 && (
+                                    <div className="table-section">
+                                        <IonCard className="data-table-card">
+                                            <IonCardHeader>
+                                                <IonCardTitle>
+                                                    <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
+                                                    Historial de Registros de Materiales
+                                                </IonCardTitle>
+                                            </IonCardHeader>
+                                            <IonCardContent>
+                                                <DataTable data={registrosMateriales} columns={columnsMateriales} />
+                                            </IonCardContent>
+                                        </IonCard>
+                                    </div>
+                                )}
+                            </div>
+                        </IonAccordion>
+                    </IonAccordionGroup>
+
+                    {/* Estado vacío si no hay datos en ninguna sección */}
+                    {!loading && (!estadisticasPersonas || estadisticasPersonas.totalRegistros === 0) && (!estadisticasMateriales || estadisticasMateriales.totalRegistros === 0) && (
+                        <motion.div
+                            variants={itemVariants}
+                            className="empty-state"
+                        >
+                            <FontAwesomeIcon icon={faUsers} size="3x" />
+                            <h3>No hay datos disponibles</h3>
+                            <p>Comienza agregando registros de conteo de personas o materiales</p>
+                            <IonButton onClick={() => history.push('/tabs/add')}>
+                                Agregar Registro
+                            </IonButton>
+                        </motion.div>
+                    )}
+                </motion.div>
+            )}
+        </IonContent>
     );
 };
 
