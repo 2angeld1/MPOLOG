@@ -110,7 +110,8 @@ export const obtenerConteos = async (req: AuthRequest, res: Response) => {
     }
 };
 
-export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
+export const obtenerEstadisticas = async (req: any, res: any) => {
+    console.log('[CONTROLLER] obtenerEstadisticas called by user=', req.user?.id);
     try {
         const { fechaInicio, fechaFin, tipo } = req.query; // Agrega tipo
 
@@ -176,12 +177,8 @@ export const obtenerEstadisticas = async (req: AuthRequest, res: Response) => {
             data: estadisticas
         });
     } catch (error: any) {
-        console.error('❌ Error en obtenerEstadisticas:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener estadísticas',
-            error: error.message
-        });
+        console.error('[CONTROLLER] obtenerEstadisticas error:', error.message);
+        return res.status(500).json({ message: 'Error interno' });
     }
 };
 

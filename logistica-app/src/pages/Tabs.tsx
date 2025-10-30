@@ -13,6 +13,7 @@ import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import '../styles/Tabs.scss';
 
 const Tabs: React.FC = () => {
+    console.log('[Tabs] mount, location=', window.location.pathname);
     const location = useLocation();
     const { toolbarTitle } = useData();
     const { logout, user } = useAuth();

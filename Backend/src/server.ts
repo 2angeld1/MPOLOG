@@ -11,17 +11,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+console.log('[SERVER] starting, PORT=', process.env.PORT, 'MONGODB_URI=', !!process.env.MONGODB_URI);
+
 // Middleware
 app.use(cors({
     origin: [
         'http://localhost:3000',
         'http://localhost:8100',
-        'https://tu-app.vercel.app', // Reemplaza con tu URL de Vercel
         'https://mpolog.vercel.app'
     ],
     credentials: true
 }));
 app.use(express.json());
+
+// simple request logger (antes de las rutas)
+app.use((req, res, next) => {
+    console.log(`[HTTP] ${req.method} ${req.originalUrl} - from ${req.ip}`);
+    next();
+});
 
 // Conectar a MongoDB
 connectDB();

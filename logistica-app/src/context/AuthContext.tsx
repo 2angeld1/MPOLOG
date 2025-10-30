@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
         const savedUser = authService.getCurrentUser();
-
+        console.log('[Auth] init, savedToken?', !!savedToken, 'savedUser?', !!savedUser);
         if (savedToken && savedUser) {
             setToken(savedToken);
             setUser(savedUser);

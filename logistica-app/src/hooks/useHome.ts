@@ -16,6 +16,7 @@ export const useHome = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log('[useHome] cargarDatos - start, refreshKey=', refreshKey);
         cargarDatos();
     }, [refreshKey]);
 
@@ -64,8 +65,8 @@ export const useHome = () => {
                     cantidad: reg.cantidad,
                 }));
             setRegistrosMateriales(registrosMaterialesOrdenados);
-        } catch (error) {
-            console.error('Error al cargar datos:', error);
+        } catch (error: any) {
+            console.error('[useHome] cargarDatos error:', error.response?.status, error.response?.data || error.message);
         } finally {
             setLoading(false);
         }
