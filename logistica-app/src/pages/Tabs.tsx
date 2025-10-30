@@ -35,7 +35,7 @@ const Tabs: React.FC = () => {
     ) : null;
 
     return (
-        <IonPage> {/* Agrega IonPage para contener el header */}
+        <>
             <Toolbar title={toolbarTitle} children={toolbarChildren} />
             <IonTabs>
                 <IonRouterOutlet>
@@ -69,7 +69,7 @@ const Tabs: React.FC = () => {
                     </IonTabButton>
                 </IonTabBar>
             </IonTabs>
-        </IonPage>
+        </>
     );
 };
 
