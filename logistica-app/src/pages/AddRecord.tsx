@@ -9,11 +9,16 @@ import '../styles/AddRecord.scss';
 import Toolbar from '../components/Toolbar';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
+import { useIonViewWillEnter } from '@ionic/react';
 
 const AddRecord: React.FC = () => {
     const { fecha, setFecha, cantidad, setCantidad, area, setArea, tipo, setTipo, subArea, setSubArea, iglesia, setIglesia, registros, showToast, setShowToast, toastMessage, toastColor, loading, loadingAreas, tipoVista, setTipoVista, iglesias, loadingIglesias, areasPersonas, areasMateriales, loadingAreasPersonas, loadingAreasMateriales, totalCantidad, handleAddRecord, handleDeleteRecord, handleRefresh } = useAddRecord();
-    const { toolbarTitle } = useData();
+    const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
+
+    useIonViewWillEnter(() => {
+        setToolbarTitle && setToolbarTitle('Agregar');
+    });
 
     const toolbarChildren = (
         <>

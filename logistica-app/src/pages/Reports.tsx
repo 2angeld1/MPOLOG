@@ -10,11 +10,16 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { useIonViewWillEnter } from '@ionic/react';
 
 const Reports: React.FC = () => {
     const { periodo, setPeriodo, loading, showToast, setShowToast, toastMessage, descargarReporte } = useReports();
-    const { toolbarTitle } = useData();
+    const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
+
+    useIonViewWillEnter(() => {
+        setToolbarTitle && setToolbarTitle('Reportes');
+    });
 
     const toolbarChildren = (
         <>
