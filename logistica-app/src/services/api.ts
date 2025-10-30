@@ -4,9 +4,6 @@ import axios from 'axios';
 const API_MODE = import.meta.env.VITE_API_MODE || 'local';
 const API_URL = import.meta.env.VITE_API_URL || (API_MODE === 'remote' ? 'https://mpolog.onrender.com/api' : 'http://localhost:5000/api');
 
-// Log inicial para saber qué baseURL se está usando
-console.log('[API] init - MODE:', API_MODE, 'BASE_URL:', API_URL);
-
 // Crear instancia de axios con configuración base
 const api = axios.create({
     baseURL: API_URL,
@@ -20,7 +17,6 @@ api.interceptors.request.use(
     (config) => {
         try {
             const token = localStorage.getItem('token');
-            console.log('[API] request ->', config.method?.toUpperCase(), config.url, 'tokenPresent=', !!token);
             if (token) {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
@@ -40,13 +36,11 @@ api.interceptors.request.use(
 // Interceptor para loguear responses y errores
 api.interceptors.response.use(
     (response) => {
-        console.log('[API] response <-', response.config.url, response.status);
         return response;
     },
     (error) => {
         const status = error?.response?.status;
         const url = error?.config?.url;
-        console.error('[API] response error <-', url, 'status=', status, 'message=', error.message, 'data=', error?.response?.data);
         return Promise.reject(error);
     }
 );
@@ -107,7 +101,6 @@ export const conteoService = {
         if (area) params.append('area', area);
 
         const url = `/conteo?${params.toString()}`;
-        console.log('[API] obtener conteo ->', url);
         const response = await api.get(url);
         return response.data;
     },
@@ -124,20 +117,17 @@ export const conteoService = {
         if (tipo) params.append('tipo', tipo); // Agrega filtro por tipo
 
         const url = `/conteo/estadisticas?${params.toString()}`;
-        console.log('[API] obtenerEstadisticas ->', url);
         const response = await api.get(url);
         return response.data;
     },
 
     obtenerAreas: async (tipo?: 'personas' | 'materiales') => {
         const params = tipo ? { tipo } : {};
-        console.log('[API] obtenerAreas ->', params);
         const response = await api.get('/conteo/areas', { params });
         return response.data;
     },
 
     obtenerIglesias: async () => {
-        console.log('[API] obtenerIglesias');
         const response = await api.get('/conteo/iglesias');
         return response.data;
     },

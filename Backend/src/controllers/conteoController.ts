@@ -111,11 +111,8 @@ export const obtenerConteos = async (req: AuthRequest, res: Response) => {
 };
 
 export const obtenerEstadisticas = async (req: any, res: any) => {
-    console.log('[CONTROLLER] obtenerEstadisticas called by user=', req.user?.id);
     try {
         const { fechaInicio, fechaFin, tipo } = req.query; // Agrega tipo
-
-        console.log('📅 Parámetros recibidos:', { fechaInicio, fechaFin, tipo });
 
         let query: any = {};
 
@@ -134,11 +131,7 @@ export const obtenerEstadisticas = async (req: any, res: any) => {
             query.tipo = tipo; // Filtra por tipo si se proporciona
         }
 
-        console.log('🔍 Query MongoDB:', JSON.stringify(query, null, 2));
-
         const conteos = await ConteoPersonas.find(query);
-
-        console.log('📊 Conteos encontrados:', conteos.length);
 
         const totalRegistros = conteos.length;
         const totalPersonas = conteos.reduce((sum, conteo) => sum + conteo.cantidad, 0);

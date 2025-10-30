@@ -21,7 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
         const savedUser = authService.getCurrentUser();
-        console.log('[Auth] init, savedToken?', !!savedToken, 'savedUser?', !!savedUser);
         if (savedToken && savedUser) {
             setToken(savedToken);
             setUser(savedUser);
@@ -30,9 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (email: string, password: string) => {
         try {
-            console.log('🔐 Intentando login con:', email);
             const response = await authService.login(email, password);
-            console.log('✅ Login exitoso, response:', response);
 
             if (!response.token || !response.user) {
                 throw new Error('Respuesta del servidor incompleta');
@@ -42,7 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(response.user);
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
-            console.log('🚀 Redirigiendo a /tabs');
             history.push('/tabs');
         } catch (error: any) {
             console.log('❌ Error en login:', error);

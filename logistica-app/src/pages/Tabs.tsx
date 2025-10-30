@@ -13,7 +13,6 @@ import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import '../styles/Tabs.scss';
 
 const Tabs: React.FC = () => {
-    console.log('[Tabs] mount, location=', window.location.pathname);
     const location = useLocation();
     const { toolbarTitle } = useData();
     const { logout, user } = useAuth();
@@ -35,7 +34,7 @@ const Tabs: React.FC = () => {
     ) : null;
 
     return (
-        <>
+        <IonPage>
             <Toolbar title={toolbarTitle} children={toolbarChildren} />
             <IonTabs>
                 <IonRouterOutlet>
@@ -69,7 +68,7 @@ const Tabs: React.FC = () => {
                     </IonTabButton>
                 </IonTabBar>
             </IonTabs>
-        </>
+        </IonPage>
     );
 };
 

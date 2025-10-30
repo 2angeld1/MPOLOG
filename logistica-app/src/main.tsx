@@ -16,5 +16,3 @@ root.render(
     <App />
   </React.StrictMode>
 );
-
-console.log('[APP] main.tsx boot - VITE_API_MODE:', process.env.VITE_API_MODE, 'VITE_API_URL:', process.env.VITE_API_URL);

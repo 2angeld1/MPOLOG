@@ -16,7 +16,6 @@ export const useHome = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('[useHome] cargarDatos - start, refreshKey=', refreshKey);
         cargarDatos();
     }, [refreshKey]);
 

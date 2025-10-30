@@ -13,10 +13,6 @@ const transporter = nodemailer.createTransport({
 
 // Función para enviar email de recuperación
 export const enviarEmailRecuperacion = async (email: string, token: string) => {
-    console.log('📧 From email:', 'adfp21900@gmail.com'); // Confirma el remitente
-    console.log('📧 EMAIL_USER:', process.env.EMAIL_USER);
-    console.log('📧 EMAIL_PASS:', process.env.EMAIL_PASS ? 'Loaded' : 'Not loaded');
-    console.log('📧 EMAIL_PASS length:', process.env.EMAIL_PASS?.length); // Debe ser 16
 
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 

@@ -11,8 +11,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-console.log('[SERVER] starting, PORT=', process.env.PORT, 'MONGODB_URI=', !!process.env.MONGODB_URI);
-
 // Middleware
 app.use(cors({
     origin: [
@@ -26,7 +24,6 @@ app.use(express.json());
 
 // simple request logger (antes de las rutas)
 app.use((req, res, next) => {
-    console.log(`[HTTP] ${req.method} ${req.originalUrl} - from ${req.ip}`);
     next();
 });
 
@@ -44,5 +41,4 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
