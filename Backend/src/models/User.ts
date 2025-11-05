@@ -1,27 +1,25 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
-    email: string; // Mantén email
+    email: string; // Cambia username por email
     password: string;
     nombre: string;
-    rol: string;
+    rol: 'admin' | 'usuario';
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema: Schema = new Schema({
-    // Quita username
-    email: {
+const userSchema = new mongoose.Schema({
+    email: { // Cambia username por email
         type: String,
         required: true,
         unique: true,
-        trim: true,
-        lowercase: true
+        lowercase: true,
+        trim: true
     },
     password: {
         type: String,
-        required: true,
-        minlength: 6
+        required: true
     },
     nombre: {
         type: String,
@@ -37,17 +35,17 @@ const UserSchema: Schema = new Schema({
 });
 
 // Hash password antes de guardar
-UserSchema.pre('save', async function (next) {
+userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
-
+    
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password as string, salt);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
 });
 
 // Método para comparar contraseñas
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-    return await bcrypt.compare(candidatePassword, this.password as string);
+userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password);
 };
 
-export default mongoose.model<IUser>('User', UserSchema);
+export default mongoose.model<IUser>('User', userSchema);
