@@ -16,7 +16,25 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null); // Agrega para temporizador
     const history = useHistory(); // Cambia navigate por history
+
+    // Función para iniciar temporizador de inactividad
+    const startInactivityTimer = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        const id = setTimeout(() => {
+            console.log('[AUTH] Sesión expirada por inactividad');
+            logout(); // Logout automático
+        }, 600000); // 10 minutos
+        setTimeoutId(id);
+    };
+
+    // Función para resetear temporizador
+    const resetInactivityTimer = () => {
+        if (!!token) { // Solo si autenticado
+            startInactivityTimer();
+        }
+    };
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
@@ -24,8 +42,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (savedToken && savedUser) {
             setToken(savedToken);
             setUser(savedUser);
+            startInactivityTimer(); // Inicia temporizador si restaura sesión
         }
     }, []);
+
+    // useEffect para eventos de actividad (solo si autenticado)
+    useEffect(() => {
+        if (!token) return; // Solo si hay token
+
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        const handleActivity = () => resetInactivityTimer();
+
+        events.forEach(event => window.addEventListener(event, handleActivity));
+
+        return () => {
+            events.forEach(event => window.removeEventListener(event, handleActivity));
+        };
+    }, [token]); // Dependencia en token
 
     const login = async (email: string, password: string) => {
         try {
@@ -39,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(response.user);
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
+            startInactivityTimer(); // Inicia temporizador al loguear
             history.push('/tabs');
         } catch (error: any) {
             console.log('❌ Error en login:', error);
@@ -47,6 +81,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = () => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            setTimeoutId(null);
+        }
         authService.logout();
         setToken(null);
         setUser(null);

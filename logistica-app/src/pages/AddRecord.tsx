@@ -10,20 +10,27 @@ import Toolbar from '../components/Toolbar';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useIonViewWillEnter } from '@ionic/react';
+import { useHistory } from 'react-router-dom'; // Agrega si no está
 
 const AddRecord: React.FC = () => {
     const { fecha, setFecha, cantidad, setCantidad, area, setArea, tipo, setTipo, subArea, setSubArea, iglesia, setIglesia, registros, showToast, setShowToast, toastMessage, toastColor, loading, loadingAreas, tipoVista, setTipoVista, iglesias, loadingIglesias, areasPersonas, areasMateriales, loadingAreasPersonas, loadingAreasMateriales, totalCantidad, handleAddRecord, handleDeleteRecord, handleRefresh } = useAddRecord();
     const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
+    const history = useHistory(); // Agrega
 
     useIonViewWillEnter(() => {
         setToolbarTitle && setToolbarTitle('Agregar');
     });
 
+    const handleLogout = () => {
+        logout();
+        history.push('/login'); // Agrega redirección
+    };
+
     const toolbarChildren = (
         <>
             <div className="user-greeting">Hola, {user?.nombre || 'Usuario'}</div>
-            <IonButton onClick={() => logout()} className="logout-button">
+            <IonButton onClick={handleLogout} className="logout-button">
                 <FontAwesomeIcon icon={faSignOutAlt} />
                 <span className="button-text">Salir</span>
             </IonButton>

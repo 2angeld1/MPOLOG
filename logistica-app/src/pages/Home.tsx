@@ -12,16 +12,23 @@ import { containerVariants, itemVariants } from '../animations';
 import Toolbar from '../components/Toolbar';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
+import { useHistory } from 'react-router-dom'; // Agrega si no está
 
 const Home: React.FC = () => {
-    const { estadisticasPersonas, estadisticasMateriales, registrosPersonas, registrosMateriales, loading, history, handleRefresh, handleLogout } = useHome();
+    const { estadisticasPersonas, estadisticasMateriales, registrosPersonas, registrosMateriales, loading, history: historyProp, handleRefresh } = useHome();
     const { toolbarTitle } = useData();
     const { logout, user } = useAuth();
+    const history = useHistory(); // Agrega
+
+    const handleLogout = () => {
+        logout();
+        history.push('/login'); // Agrega redirección
+    };
 
     const toolbarChildren = (
         <>
             <div className="user-greeting">Hola, {user?.nombre || 'Usuario'}</div>
-            <IonButton onClick={() => logout()} className="logout-button">
+            <IonButton onClick={handleLogout} className="logout-button">
                 <FontAwesomeIcon icon={faSignOutAlt} />
                 <span className="button-text">Salir</span>
             </IonButton>
@@ -381,7 +388,7 @@ const Home: React.FC = () => {
                                 <FontAwesomeIcon icon={faUsers} size="3x" />
                                 <h3>No hay datos disponibles</h3>
                                 <p>Comienza agregando registros de conteo de personas o materiales</p>
-                                <IonButton onClick={() => history.push('/tabs/add')}>
+                                <IonButton onClick={() => historyProp.push('/tabs/add')}>
                                     Agregar Registro
                                 </IonButton>
                             </motion.div>

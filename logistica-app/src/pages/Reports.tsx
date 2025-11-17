@@ -11,20 +11,27 @@ import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { useIonViewWillEnter } from '@ionic/react';
+import { useHistory } from 'react-router-dom'; // Agrega si no está
 
 const Reports: React.FC = () => {
     const { periodo, setPeriodo, loading, showToast, setShowToast, toastMessage, descargarReporte } = useReports();
     const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
+    const history = useHistory(); // Agrega
 
     useIonViewWillEnter(() => {
         setToolbarTitle && setToolbarTitle('Reportes');
     });
 
+    const handleLogout = () => {
+        logout();
+        history.push('/login'); // Agrega redirección
+    };
+
     const toolbarChildren = (
         <>
             <div className="user-greeting">Hola, {user?.nombre || 'Usuario'}</div>
-            <IonButton onClick={() => logout()} className="logout-button">
+            <IonButton onClick={handleLogout} className="logout-button">
                 <FontAwesomeIcon icon={faSignOutAlt} />
                 <span className="button-text">Salir</span>
             </IonButton>
