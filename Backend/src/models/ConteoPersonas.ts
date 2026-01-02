@@ -9,6 +9,8 @@ export interface IConteoPersonas extends Document {
     usuario: mongoose.Types.ObjectId;
     observaciones?: string;
     subArea?: string; // Opcional, si se necesita más granularidad
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const ConteoPersonasSchema: Schema = new Schema({

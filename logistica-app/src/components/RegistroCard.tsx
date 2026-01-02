@@ -1,12 +1,12 @@
 import React from 'react';
 import { IonCard, IonCardContent, IonBadge, IonButton } from '@ionic/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar, faLocationDot, faUsers, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faLocationDot, faUsers, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import type { RegistroCardProps } from '../../types/types';
 import '../styles/RegistroCard.scss';
 
-const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, iglesia, area, subArea, tipo, cantidad, onDelete, index = 0 }) => {
+const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, iglesia, area, subArea, tipo, cantidad, onDelete, onEdit, registroId, index = 0 }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -19,11 +19,18 @@ const RegistroCard: React.FC<RegistroCardProps> = ({ fecha, iglesia, area, subAr
                         <IonBadge color="primary" className="area-badge">
                             {iglesia} - {area} {/* Muestra iglesia y área fija para ambos tipos */}
                         </IonBadge>
-                        {onDelete && (
-                            <IonButton fill="clear" color="danger" size="small" onClick={onDelete}>
-                                <FontAwesomeIcon icon={faTrash} />
-                            </IonButton>
-                        )}
+                        <div className="action-buttons">
+                            {onEdit && registroId && (
+                                <IonButton fill="clear" color="secondary" size="small" onClick={() => onEdit(registroId)}>
+                                    <FontAwesomeIcon icon={faEdit} />
+                                </IonButton>
+                            )}
+                            {onDelete && (
+                                <IonButton fill="clear" color="danger" size="small" onClick={onDelete}>
+                                    <FontAwesomeIcon icon={faTrash} />
+                                </IonButton>
+                            )}
+                        </div>
                     </div>
                     <div className="registro-body">
                         <div className="registro-info">

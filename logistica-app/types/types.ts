@@ -6,6 +6,8 @@ export interface RegistroCardProps {
     tipo?: 'personas' | 'materiales'; // Nuevo prop para saber el tipo
     cantidad: number;
     onDelete?: () => void;
+    onEdit?: (registroId: string) => void;
+    registroId?: string;
     index?: number;
 }
 

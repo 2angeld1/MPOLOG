@@ -1,7 +1,7 @@
-import { IonPage, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonDatetime, IonDatetimeButton, IonModal, IonGrid, IonRow, IonCol, IonToast, IonSpinner, IonRefresher, IonRefresherContent } from '@ionic/react';
+import { IonPage, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonDatetime, IonDatetimeButton, IonModal, IonGrid, IonRow, IonCol, IonToast, IonSpinner, IonRefresher, IonRefresherContent, IonChip, IonBadge, IonIcon, IonSearchbar } from '@ionic/react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus, faSignOutAlt, faLayerGroup, faList, faCalendarAlt, faSearch } from '@fortawesome/free-solid-svg-icons';
 import RegistroCard from '../components/RegistroCard';
 import { useAddRecord } from '../hooks/useAddRecord';
 import { fadeInVariant } from '../animations';
@@ -11,9 +11,10 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useIonViewWillEnter } from '@ionic/react';
 import { useHistory } from 'react-router-dom'; // Agrega si no está
+import { PersonaRegistro } from '../../types/types';
 
 const AddRecord: React.FC = () => {
-    const { fecha, setFecha, cantidad, setCantidad, area, setArea, tipo, setTipo, subArea, setSubArea, iglesia, setIglesia, registros, showToast, setShowToast, toastMessage, toastColor, loading, loadingAreas, tipoVista, setTipoVista, iglesias, loadingIglesias, areasPersonas, areasMateriales, loadingAreasPersonas, loadingAreasMateriales, totalCantidad, handleAddRecord, handleDeleteRecord, handleRefresh } = useAddRecord();
+    const { fecha, setFecha, cantidad, setCantidad, area, setArea, tipo, setTipo, subArea, setSubArea, iglesia, setIglesia, registros, showToast, setShowToast, toastMessage, toastColor, loading, loadingAreas, tipoVista, setTipoVista, iglesias, loadingIglesias, areasPersonas, areasMateriales, loadingAreasPersonas, loadingAreasMateriales, totalCantidad, isEditing, editingRegistroId, viewGrouped, setViewGrouped, registrosAgrupados, searchTerm, setSearchTerm, filteredRegistros, filteredRegistrosAgrupados, handleAddRecord, handleDeleteRecord, handleEditRecord, handleCancelEdit, handleRefresh } = useAddRecord();
     const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
     const history = useHistory(); // Agrega
@@ -196,7 +197,7 @@ const AddRecord: React.FC = () => {
                                         </IonRow>
 
                                         <IonRow>
-                                            <IonCol>
+                                            <IonCol size="12" sizeMd={isEditing ? "6" : "12"}>
                                                 <motion.div
                                                     whileHover={{ scale: loading ? 1 : 1.02 }}
                                                     whileTap={{ scale: loading ? 1 : 0.98 }}
@@ -210,17 +211,29 @@ const AddRecord: React.FC = () => {
                                                         {loading ? (
                                                             <>
                                                                 <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
-                                                                Agregando...
+                                                                {isEditing ? 'Actualizando...' : 'Agregando...'}
                                                             </>
                                                         ) : (
                                                             <>
                                                                 <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '8px' }} />
-                                                                Agregar Registro
+                                                                {isEditing ? 'Actualizar Registro' : 'Agregar Registro'}
                                                             </>
                                                         )}
                                                     </IonButton>
                                                 </motion.div>
                                             </IonCol>
+                                            {isEditing && (
+                                                <IonCol size="12" sizeMd="6">
+                                                    <IonButton
+                                                        expand="block"
+                                                        onClick={handleCancelEdit}
+                                                        color="medium"
+                                                        fill="outline"
+                                                    >
+                                                        Cancelar Edición
+                                                    </IonButton>
+                                                </IonCol>
+                                            )}
                                         </IonRow>
                                     </IonGrid>
                                 </IonCardContent>
@@ -322,7 +335,7 @@ const AddRecord: React.FC = () => {
                                         </IonRow>
 
                                         <IonRow>
-                                            <IonCol>
+                                            <IonCol size="12" sizeMd={isEditing ? "6" : "12"}>
                                                 <motion.div
                                                     whileHover={{ scale: loading ? 1 : 1.02 }}
                                                     whileTap={{ scale: loading ? 1 : 0.98 }}
@@ -336,17 +349,29 @@ const AddRecord: React.FC = () => {
                                                         {loading ? (
                                                             <>
                                                                 <IonSpinner name="crescent" style={{ marginRight: '8px' }} />
-                                                                Agregando...
+                                                                {isEditing ? 'Actualizando...' : 'Agregando...'}
                                                             </>
                                                         ) : (
                                                             <>
                                                                 <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '8px' }} />
-                                                                Agregar Registro
+                                                                {isEditing ? 'Actualizar Registro' : 'Agregar Registro'}
                                                             </>
                                                         )}
                                                     </IonButton>
                                                 </motion.div>
                                             </IonCol>
+                                            {isEditing && (
+                                                <IonCol size="12" sizeMd="6">
+                                                    <IonButton
+                                                        expand="block"
+                                                        onClick={handleCancelEdit}
+                                                        color="medium"
+                                                        fill="outline"
+                                                    >
+                                                        Cancelar Edición
+                                                    </IonButton>
+                                                </IonCol>
+                                            )}
                                         </IonRow>
                                     </IonGrid>
                                 </IonCardContent>
@@ -365,11 +390,11 @@ const AddRecord: React.FC = () => {
                                 <IonCardContent>
                                     <div className="stats-summary">
                                         <div className="stat-item">
-                                            <h3>{registros.length}</h3>
-                                            <p>Registros</p>
+                                            <h3>{viewGrouped ? registrosAgrupados.length : registros.length}</h3>
+                                            <p>{viewGrouped ? 'Grupos' : 'Registros'}</p>
                                         </div>
                                         <div className="stat-item">
-                                            <h3>{totalCantidad}</h3>
+                                            <h3>{viewGrouped ? registrosAgrupados.reduce((sum, group) => sum + group.totalCantidad, 0) : totalCantidad}</h3>
                                             <p>Total {tipoVista === 'personas' ? 'Personas' : 'Materiales'}</p>
                                         </div>
                                         <div className="stat-item">
@@ -382,8 +407,125 @@ const AddRecord: React.FC = () => {
                         </motion.div>
                     )}
 
-                    {/* Lista de Registros Condicionales */}
-                    {registros.length > 0 && (
+                    {/* Toggle de Vista Agrupada y Buscador */}
+                    {tipoVista && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: 0.1 }}
+                        >
+                            <IonCard className="view-toggle-card">
+                                <IonCardContent>
+                                    <div className="view-toggle-container" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <div className="view-toggle">
+                                            <span>Vista:</span>
+                                            <IonButton
+                                                fill={!viewGrouped ? "solid" : "outline"}
+                                                size="small"
+                                                onClick={() => setViewGrouped(false)}
+                                                className="view-button"
+                                            >
+                                                <FontAwesomeIcon icon={faList} style={{ marginRight: '4px' }} />
+                                                Lista
+                                            </IonButton>
+                                            <IonButton
+                                                fill={viewGrouped ? "solid" : "outline"}
+                                                size="small"
+                                                onClick={() => setViewGrouped(true)}
+                                                className="view-button"
+                                            >
+                                                <FontAwesomeIcon icon={faLayerGroup} style={{ marginRight: '4px' }} />
+                                                Agrupada
+                                            </IonButton>
+                                        </div>
+                                        <IonSearchbar
+                                            value={searchTerm}
+                                            onIonInput={(e) => setSearchTerm(e.detail.value!)}
+                                            placeholder="Buscar por día, área o iglesia..."
+                                            animated={true}
+                                            className="custom-searchbar"
+                                        />
+                                    </div>
+                                </IonCardContent>
+                            </IonCard>
+                        </motion.div>
+                    )}
+
+                    {/* Vista Agrupada */}
+                    {viewGrouped && (
+                        <motion.div
+                            className="registros-agrupados"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: 0.2 }}
+                        >
+                            <div className="list-header">
+                                <h2>Registros Agrupados por Área ({tipoVista === 'personas' ? 'Personas' : 'Materiales'}){iglesia ? ` - ${iglesia}` : ''}</h2>
+                            </div>
+                            {filteredRegistrosAgrupados.length > 0 ? (
+                                filteredRegistrosAgrupados.map((group: any, index: number) => (
+                                    <IonCard key={index} className="group-card">
+                                        <IonCardHeader>
+                                            <IonCardTitle className="group-title">
+                                                {group.area}
+                                                <IonBadge color="primary" className="total-badge">
+                                                    Total: {group.totalCantidad}
+                                                </IonBadge>
+                                            </IonCardTitle>
+                                            <IonCardSubtitle className="group-date">
+                                                <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '5px' }} />
+                                                {group.fecha}
+                                            </IonCardSubtitle>
+                                        </IonCardHeader>
+                                        <IonCardContent>
+                                            <div className="group-details">
+                                                {group.registros?.map((registro: any, regIndex: number) => (
+                                                    <IonChip key={regIndex} color="secondary" className="registro-chip">
+                                                        <span>
+                                                            {registro.subArea ? `${registro.subArea}: ` : ''}
+                                                            {registro.cantidad}
+                                                            {tipoVista === 'personas' ? ' personas' : ' unidades'}
+                                                        </span>
+                                                    </IonChip>
+                                                )) || []}
+                                            </div>
+                                        </IonCardContent>
+                                    </IonCard>
+                                ))
+                            ) : (
+                                <IonCard>
+                                    <IonCardContent>
+                                        <div style={{ textAlign: 'center', padding: '20px' }}>
+                                            <FontAwesomeIcon icon={registros.length > 0 ? faSearch : faList} size="3x" color="var(--ion-color-medium)" style={{ marginBottom: '10px' }} />
+                                            <h3 style={{ color: 'var(--ion-color-medium)', margin: '10px 0' }}>
+                                                {registros.length > 0 ? "No se encontraron resultados" : "No hay registros para agrupar"}
+                                            </h3>
+                                            <p style={{ color: 'var(--ion-color-medium)', margin: 0 }}>
+                                                {registros.length > 0 ? "Intenta con otra búsqueda" : "Agrega algunos registros primero para ver la vista agrupada"}
+                                            </p>
+                                        </div>
+                                    </IonCardContent>
+                                </IonCard>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {/* No Search Results for List View */}
+                    {!viewGrouped && registros.length > 0 && filteredRegistros.length === 0 && (
+                         <motion.div
+                            className="empty-state"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: 0.1 }}
+                        >
+                            <FontAwesomeIcon icon={faSearch} size="3x" />
+                            <h3>No se encontraron resultados</h3>
+                            <p>Intenta con otra búsqueda</p>
+                        </motion.div>
+                    )}
+
+                    {/* Lista de Registros Normal */}
+                    {!viewGrouped && filteredRegistros.length > 0 && (
                         <motion.div
                             className="registros-list"
                             initial={{ opacity: 0, y: 20 }}
@@ -391,9 +533,9 @@ const AddRecord: React.FC = () => {
                             transition={{ duration: 0.4, delay: 0.2 }}
                         >
                             <div className="list-header">
-                                <h2>Registros del Día ({tipoVista === 'personas' ? 'Personas' : 'Materiales'}) - {iglesia}</h2>
+                                <h2>Registros del Día ({tipoVista === 'personas' ? 'Personas' : 'Materiales'}){iglesia ? ` - ${iglesia}` : ''}</h2>
                             </div>
-                            {registros.map((registro, index) => (
+                            {filteredRegistros.map((registro: PersonaRegistro, index: number) => (
                                 <RegistroCard
                                     key={registro._id || registro.id}
                                     fecha={registro.fecha}
@@ -403,6 +545,8 @@ const AddRecord: React.FC = () => {
                                     tipo={tipoVista}
                                     cantidad={registro.cantidad}
                                     onDelete={() => handleDeleteRecord(registro._id)}
+                                    onEdit={handleEditRecord}
+                                    registroId={registro._id}
                                     index={index}
                                 />
                             ))}

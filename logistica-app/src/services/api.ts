@@ -41,6 +41,16 @@ api.interceptors.response.use(
     (error) => {
         const status = error?.response?.status;
         const url = error?.config?.url;
+
+        // Si hay error 401 (no autorizado), hacer logout automático
+        if (status === 401) {
+            console.log('[API] Token inválido o expirado, haciendo logout automático');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Recargar la página para resetear el estado de la aplicación
+            window.location.href = '/login';
+        }
+
         return Promise.reject(error);
     }
 );
@@ -93,15 +103,29 @@ export const conteoService = {
         return response.data;
     },
 
-    obtener: async (fecha?: string, iglesia?: string, tipo?: 'personas' | 'materiales', area?: string) => { // Agrega iglesia
+    obtener: async (fecha?: string, iglesia?: string, tipo?: 'personas' | 'materiales', area?: string, groupByArea?: string) => { // Agrega iglesia y groupByArea
         const params = new URLSearchParams();
         if (fecha) params.append('fecha', fecha);
         if (iglesia) params.append('iglesia', iglesia);
         if (tipo) params.append('tipo', tipo);
         if (area) params.append('area', area);
+        if (groupByArea) params.append('groupByArea', groupByArea);
 
         const url = `/conteo?${params.toString()}`;
         const response = await api.get(url);
+        return response.data;
+    },
+
+    actualizar: async (id: string, data: {
+        fecha: string;
+        iglesia: string;
+        tipo: 'personas' | 'materiales';
+        area: string;
+        cantidad: number;
+        subArea?: string;
+        observaciones?: string;
+    }) => {
+        const response = await api.put(`/conteo/${id}`, data);
         return response.data;
     },
 

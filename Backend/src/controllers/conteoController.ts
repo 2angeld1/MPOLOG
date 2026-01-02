@@ -70,7 +70,8 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
 
 export const obtenerConteos = async (req: AuthRequest, res: Response) => {
     try {
-        const { fecha, iglesia, tipo, area } = req.query; // Agrega iglesia
+        const { fecha, iglesia, tipo, area, groupByArea = 'false' } = req.query;
+        console.log('🔍 obtenerConteos - Parámetros:', { fecha, iglesia, tipo, area, groupByArea });
         const query: any = {};
 
         if (fecha) {
@@ -97,13 +98,52 @@ export const obtenerConteos = async (req: AuthRequest, res: Response) => {
         }
 
         const conteos = await ConteoPersonas.find(query)
-            .populate('usuario', 'nombre username')
+            .populate('usuario', 'nombre email')
             .sort({ fecha: -1 });
 
-        res.json({
-            success: true,
-            data: conteos
-        });
+        // Si se solicita agrupar por área, crear estructura agrupada
+        if (groupByArea === 'true') {
+            const groupedData: { [key: string]: any } = {};
+
+            conteos.forEach(conteo => {
+                const key = `${conteo.fecha.toISOString().split('T')[0]}_${conteo.iglesia}_${conteo.tipo}_${conteo.area}`;
+
+                if (!groupedData[key]) {
+                    groupedData[key] = {
+                        fecha: conteo.fecha,
+                        iglesia: conteo.iglesia,
+                        tipo: conteo.tipo,
+                        area: conteo.area,
+                        totalCantidad: 0,
+                        registros: []
+                    };
+                }
+
+                groupedData[key].totalCantidad += conteo.cantidad;
+                groupedData[key].registros.push({
+                    id: conteo._id,
+                    cantidad: conteo.cantidad,
+                    subArea: conteo.subArea,
+                    observaciones: conteo.observaciones,
+                    usuario: conteo.usuario,
+                    createdAt: conteo.createdAt
+                });
+            });
+
+            const groupedArray = Object.values(groupedData);
+
+            res.json({
+                success: true,
+                data: groupedArray,
+                grouped: true
+            });
+        } else {
+            res.json({
+                success: true,
+                data: conteos,
+                grouped: false
+            });
+        }
     } catch (error) {
         console.error('Error al obtener conteos:', error);
         res.status(500).json({ message: 'Error del servidor' });
@@ -209,6 +249,50 @@ export const obtenerAreas = async (req: AuthRequest, res: Response) => {
         res.json({ success: true, data: areasFiltradas });
     } catch (error) {
         console.error('Error al obtener áreas:', error);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+};
+
+export const actualizarConteo = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { fecha, iglesia, tipo, area, cantidad, observaciones, subArea } = req.body;
+
+        // Validar datos
+        if (!fecha || !iglesia || !tipo || !area || cantidad === undefined) {
+            return res.status(400).json({ message: 'Por favor completa todos los campos requeridos: fecha, iglesia, tipo, area y cantidad' });
+        }
+
+        if (tipo === 'materiales' && !subArea) {
+            return res.status(400).json({ message: 'Para materiales, ingresa una sub-área (ej. juguetes)' });
+        }
+
+        const conteo = await ConteoPersonas.findByIdAndUpdate(
+            id,
+            {
+                fecha: new Date(fecha),
+                iglesia,
+                tipo,
+                area,
+                cantidad,
+                observaciones,
+                subArea,
+                usuario: req.userId
+            },
+            { new: true }
+        ).populate('usuario', 'nombre email');
+
+        if (!conteo) {
+            return res.status(404).json({ message: 'Conteo no encontrado' });
+        }
+
+        res.json({
+            success: true,
+            data: conteo,
+            message: 'Conteo actualizado correctamente'
+        });
+    } catch (error) {
+        console.error('Error al actualizar conteo:', error);
         res.status(500).json({ message: 'Error del servidor' });
     }
 };

@@ -1,4 +1,4 @@
-import { IonPage, IonContent, IonButton, IonTitle, IonToolbar, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonGrid, IonRow, IonCol, IonSpinner, IonRefresher, IonRefresherContent, IonBadge, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/react';
+import { IonPage, IonContent, IonButton, IonTitle, IonToolbar, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonGrid, IonRow, IonCol, IonSpinner, IonRefresher, IonRefresherContent, IonBadge, IonAccordion, IonAccordionGroup, IonItem, IonLabel, useIonViewWillEnter } from '@ionic/react';
 import ThemeToggle from '../components/ThemeToggle';
 import DataTable from '../components/DataTable';
 import { motion } from 'framer-motion';
@@ -16,9 +16,13 @@ import { useHistory } from 'react-router-dom'; // Agrega si no está
 
 const Home: React.FC = () => {
     const { estadisticasPersonas, estadisticasMateriales, registrosPersonas, registrosMateriales, loading, history: historyProp, handleRefresh } = useHome();
-    const { toolbarTitle } = useData();
+    const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
     const history = useHistory(); // Agrega
+
+    useIonViewWillEnter(() => {
+        setToolbarTitle && setToolbarTitle(`Bienvenido(a), ${user?.nombre || ''}`);
+    });
 
     const handleLogout = () => {
         logout();
@@ -27,7 +31,6 @@ const Home: React.FC = () => {
 
     const toolbarChildren = (
         <>
-            <div className="user-greeting">Hola, {user?.nombre || 'Usuario'}</div>
             <IonButton onClick={handleLogout} className="logout-button">
                 <FontAwesomeIcon icon={faSignOutAlt} />
                 <span className="button-text">Salir</span>

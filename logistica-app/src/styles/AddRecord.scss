@@ -197,6 +197,61 @@
     }
 }
 
+// Vista agrupada
+.view-toggle-card {
+    margin-bottom: 20px;
+
+    .view-toggle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: center;
+
+        span {
+            font-weight: 500;
+            color: var(--ion-color-dark);
+        }
+
+        .view-button {
+            --border-radius: 8px;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+.registros-agrupados {
+    .group-card {
+        margin-bottom: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+
+            .total-badge {
+                font-size: 0.9rem;
+                --padding-start: 8px;
+                --padding-end: 8px;
+            }
+        }
+
+        .group-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+
+            .registro-chip {
+                --background: var(--ion-color-light);
+                --color: var(--ion-color-dark);
+                font-size: 0.85rem;
+            }
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .add-record-container {
         padding: 12px;

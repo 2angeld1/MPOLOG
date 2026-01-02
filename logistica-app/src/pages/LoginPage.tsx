@@ -3,7 +3,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChurch } from '@fortawesome/free-solid-svg-icons';
 import { useLogin } from '../hooks/useLogin';
 import '../styles/LoginPage.scss';
 import { containerVariants, itemVariants, logoVariants } from '../animations';
@@ -28,7 +27,7 @@ const LoginPage: React.FC = () => {
                         variants={logoVariants}
                     >
                         <div className="logo-icon">
-                            <FontAwesomeIcon icon={faChurch} />
+                            <img src="/favicon.png" alt="Logo" style={{ width: '80px', height: '80px' }} />
                         </div>
                         <h1>Logística App</h1>
                         <p>Inicia sesión para continuar</p>

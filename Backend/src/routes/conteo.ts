@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { crearConteo, obtenerConteos, eliminarConteo, obtenerEstadisticas, obtenerAreas, obtenerIglesias } from '../controllers/conteoController';
+import { crearConteo, obtenerConteos, actualizarConteo, eliminarConteo, obtenerEstadisticas, obtenerAreas, obtenerIglesias } from '../controllers/conteoController';
 import { auth } from '../middleware/auth';
 
 const router = Router();
@@ -10,6 +10,7 @@ router.get('/areas', auth, obtenerAreas);
 router.get('/iglesias', auth, obtenerIglesias); // Nueva ruta
 router.post('/', auth, crearConteo);
 router.get('/', auth, obtenerConteos);
+router.put('/:id', auth, actualizarConteo);
 router.delete('/:id', auth, eliminarConteo);
 
 export default router;
