@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const id = setTimeout(() => {
             console.log('[AUTH] Sesión expirada por inactividad');
             logout(); // Logout automático
-        }, 600000); // 10 minutos
+        }, 28800000); // 8 horas
         setTimeoutId(id);
     };
 

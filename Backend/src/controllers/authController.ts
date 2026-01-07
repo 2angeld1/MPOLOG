@@ -30,7 +30,7 @@ export const login = async (req: Request, res: Response) => {
         const token = jwt.sign(
             { userId: user._id },
             jwtSecret,
-            { expiresIn: '7d' } as SignOptions
+            { expiresIn: '30d' } as SignOptions
         );
 
         res.json({
@@ -80,7 +80,7 @@ export const register = async (req: Request, res: Response) => {
         const token = jwt.sign(
             { userId: user._id },
             jwtSecret,
-            { expiresIn: '7d' } as SignOptions
+            { expiresIn: '30d' } as SignOptions
         );
 
         res.status(201).json({
