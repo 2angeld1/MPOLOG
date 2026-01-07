@@ -5,6 +5,7 @@ import { connectDB } from './config/database';
 import authRoutes from './routes/auth';
 import conteoRoutes from './routes/conteo';
 import reportesRoutes from './routes/reportes'; // NUEVO
+import eventoRoutes from './routes/evento'; // EVENTOS
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api/conteo', conteoRoutes);
 app.use('/api/reportes', reportesRoutes); // NUEVO
+app.use('/api/eventos', eventoRoutes); // EVENTOS
 
 // Ruta de prueba
 app.get('/', (req, res) => {

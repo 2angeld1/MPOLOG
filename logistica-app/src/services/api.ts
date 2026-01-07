@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Ubicacion } from '../../types/types';
 
 // Obtener la URL de la API desde variables de entorno
 const API_MODE = import.meta.env.VITE_API_MODE || 'local';
@@ -153,6 +154,102 @@ export const conteoService = {
 
     obtenerIglesias: async () => {
         const response = await api.get('/conteo/iglesias');
+        return response.data;
+    },
+};
+
+// Servicios de eventos
+export const eventoService = {
+    // Eventos
+    crearEvento: async (data: {
+        nombre: string;
+        tipo?: 'campamento' | 'retiro' | 'conferencia' | 'otro';
+        fechaInicio: string;
+        fechaFin: string;
+        precioTotal: number;
+        descripcion?: string;
+        ubicacion?: {
+            lat: number;
+            lng: number;
+            nombreLugar: string;
+        };
+    }) => {
+        const response = await api.post('/eventos', data);
+        return response.data;
+    },
+
+    actualizarEvento: async (id: string, data: Partial<{
+        nombre: string;
+        tipo: 'campamento' | 'retiro' | 'conferencia' | 'otro';
+        fechaInicio: string;
+        fechaFin: string;
+        precioTotal: number;
+        descripcion: string;
+        ubicacion: Ubicacion;
+        activo: boolean;
+    }>) => {
+        const response = await api.put(`/eventos/${id}`, data);
+        return response.data;
+    },
+
+    obtenerEventos: async (activo?: boolean, tipo?: string) => {
+        const params = new URLSearchParams();
+        if (activo !== undefined) params.append('activo', String(activo));
+        if (tipo) params.append('tipo', tipo);
+        const response = await api.get(`/eventos?${params.toString()}`);
+        return response.data;
+    },
+
+    obtenerEventoPorId: async (id: string) => {
+        const response = await api.get(`/eventos/${id}`);
+        return response.data;
+    },
+
+    eliminarEvento: async (id: string) => {
+        const response = await api.delete(`/eventos/${id}`);
+        return response.data;
+    },
+
+    // Personas en eventos
+    registrarPersona: async (eventoId: string, data: {
+        nombre: string;
+        apellido: string;
+        edad: number;
+        abono: boolean;
+        montoAbono?: number;
+        equipo?: string;
+    }) => {
+        const response = await api.post(`/eventos/${eventoId}/personas`, data);
+        return response.data;
+    },
+
+    obtenerPersonas: async (eventoId: string, busqueda?: string, equipo?: string) => {
+        const params = new URLSearchParams();
+        if (busqueda) params.append('busqueda', busqueda);
+        if (equipo) params.append('equipo', equipo);
+        const response = await api.get(`/eventos/${eventoId}/personas?${params.toString()}`);
+        return response.data;
+    },
+
+    actualizarPersona: async (eventoId: string, personaId: string, data: {
+        nombre: string;
+        apellido: string;
+        edad: number;
+        abono: boolean;
+        montoAbono?: number;
+        equipo?: string;
+    }) => {
+        const response = await api.put(`/eventos/${eventoId}/personas/${personaId}`, data);
+        return response.data;
+    },
+
+    eliminarPersona: async (eventoId: string, personaId: string) => {
+        const response = await api.delete(`/eventos/${eventoId}/personas/${personaId}`);
+        return response.data;
+    },
+
+    obtenerEstadisticas: async (eventoId: string) => {
+        const response = await api.get(`/eventos/${eventoId}/estadisticas`);
         return response.data;
     },
 };

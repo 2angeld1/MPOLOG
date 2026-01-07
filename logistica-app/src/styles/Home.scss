@@ -48,17 +48,17 @@
 
     &.stat-card-primary {
         border-left-color: var(--ion-color-primary);
-        background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.05), transparent);
+        background: rgba(var(--ion-color-primary-rgb), 0.05);
     }
 
     &.stat-card-secondary {
         border-left-color: var(--ion-color-secondary);
-        background: linear-gradient(135deg, rgba(var(--ion-color-secondary-rgb), 0.05), transparent);
+        background: rgba(var(--ion-color-secondary-rgb), 0.05);
     }
 
     &.stat-card-tertiary {
         border-left-color: var(--ion-color-tertiary);
-        background: linear-gradient(135deg, rgba(var(--ion-color-tertiary-rgb), 0.05), transparent);
+        background: rgba(var(--ion-color-tertiary-rgb), 0.05);
     }
 
     ion-card-content {
@@ -78,19 +78,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+        background: var(--ion-color-primary);
         color: white;
         font-size: 1.8rem;
         box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.4);
     }
 
     .stat-card-secondary & .stat-icon {
-        background: linear-gradient(135deg, var(--ion-color-secondary), var(--ion-color-tertiary));
+        background: var(--ion-color-secondary);
         box-shadow: 0 4px 12px rgba(var(--ion-color-secondary-rgb), 0.4);
     }
 
     .stat-card-tertiary & .stat-icon {
-        background: linear-gradient(135deg, var(--ion-color-tertiary), var(--ion-color-primary));
+        background: var(--ion-color-tertiary);
         box-shadow: 0 4px 12px rgba(var(--ion-color-tertiary-rgb), 0.4);
     }
 
@@ -101,10 +101,7 @@
             font-size: 2rem;
             font-weight: 700;
             margin: 0;
-            background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--ion-color-primary);
         }
 
         p {
@@ -126,7 +123,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
     ion-card-header {
-        background: linear-gradient(135deg, var(--ion-color-primary-tint), var(--ion-color-secondary-tint));
+        background: var(--ion-color-primary);
         border-radius: 16px 16px 0 0;
 
         ion-card-title {
@@ -200,7 +197,7 @@
     overflow: hidden;
 
     ion-card-header {
-        background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+        background: var(--ion-color-primary);
         padding: 20px;
 
         ion-card-title {

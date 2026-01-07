@@ -11,7 +11,7 @@
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient(90deg, var(--ion-color-primary), var(--ion-color-secondary), var(--ion-color-tertiary)); // Usa variables de Ionic
+        background: var(--ion-color-primary);
         opacity: 0.8;
     }
 

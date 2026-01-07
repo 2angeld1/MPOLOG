@@ -1,9 +1,10 @@
 import { IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/react';
 import { Route, Redirect, useLocation } from 'react-router-dom';
-import { home, addCircle, statsChart } from 'ionicons/icons';
+import { home, addCircle, statsChart, people } from 'ionicons/icons';
 import Home from './Home';
 import AddRecord from './AddRecord';
 import Reports from './Reports';
+import EventoRegistro from './EventoRegistro';
 import Toolbar from '../components/Toolbar';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +43,9 @@ const Tabs: React.FC = () => {
                 <Route exact path="/tabs/add">
                     <AddRecord />
                 </Route>
+                <Route exact path="/tabs/eventos">
+                    <EventoRegistro />
+                </Route>
                 <Route exact path="/tabs/reports">
                     <Reports />
                 </Route>
@@ -54,11 +58,13 @@ const Tabs: React.FC = () => {
                     <IonIcon icon={home} />
                     <IonLabel>Inicio</IonLabel>
                 </IonTabButton>
-                <IonTabButton tab="add" href="/tabs/add" className="center-tab">
-                    <div className="center-tab-icon">
-                        <IonIcon icon={addCircle} />
-                    </div>
+                <IonTabButton tab="add" href="/tabs/add">
+                    <IonIcon icon={addCircle} />
                     <IonLabel>Agregar</IonLabel>
+                </IonTabButton>
+                <IonTabButton tab="eventos" href="/tabs/eventos">
+                    <IonIcon icon={people} />
+                    <IonLabel>Eventos</IonLabel>
                 </IonTabButton>
                 <IonTabButton tab="reports" href="/tabs/reports">
                     <IonIcon icon={statsChart} />

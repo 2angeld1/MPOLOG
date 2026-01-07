@@ -17,7 +17,7 @@
     margin-bottom: 20px;
 
     ion-card-header {
-        background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+        background: var(--ion-color-primary);
         color: white;
 
         ion-card-title {
@@ -71,8 +71,7 @@
     margin-top: 16px;
     height: 50px;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
-    --border-radius: 12px;
+    background: var(--ion-color-primary);
 }
 
 .stats-card {
@@ -101,10 +100,7 @@
             font-size: 2rem;
             font-weight: 700;
             margin: 0 0 8px 0;
-            background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--ion-color-primary);
         }
 
         p {
@@ -121,7 +117,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
     ion-card-header {
-        background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+        background: var(--ion-color-primary);
         color: white;
 
         ion-card-title {
@@ -188,10 +184,7 @@
         h2 {
             font-size: 1.4rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--ion-color-primary);
             margin: 0;
         }
     }

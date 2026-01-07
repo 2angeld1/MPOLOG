@@ -1,0 +1,682 @@
+// Variables de colores minimalistas y consistentes
+$color-primary: #6366f1;
+$color-primary-light: rgba(99, 102, 241, 0.08);
+$color-primary-lighter: rgba(99, 102, 241, 0.04);
+$color-success: #10b981;
+$color-success-light: rgba(16, 185, 129, 0.08);
+$color-warning: #f59e0b;
+$color-warning-light: rgba(245, 158, 11, 0.08);
+$color-danger: #ef4444;
+$color-danger-light: rgba(239, 68, 68, 0.08);
+$color-info: #3b82f6;
+$color-info-light: rgba(59, 130, 246, 0.08);
+
+$color-border: rgba(99, 102, 241, 0.1);
+$color-bg-subtle: rgba(99, 102, 241, 0.02);
+$color-text-muted: rgba(107, 114, 128, 0.7);
+
+.evento-registro-content {
+  --padding-top: 40px;
+  --padding-bottom: 16px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.evento-registro-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+// Tarjeta de información del evento
+.evento-info-card {
+  margin: 0 0 20px 0;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--ion-card-background, #fff);
+  border: 1px solid $color-border;
+  transition: all 0.3s ease;
+
+  .evento-info-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      &.description {
+        flex-basis: 100%;
+        padding-top: 12px;
+        border-top: 1px solid $color-border;
+        color: $color-text-muted;
+        font-style: italic;
+        font-size: 0.9rem;
+      }
+
+      .icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        background: $color-primary-light;
+        color: $color-primary;
+
+        &.location {
+          background: rgba(236, 72, 153, 0.08);
+          color: #ec4899;
+        }
+      }
+
+      .label {
+        margin: 0 0 2px 0;
+        font-size: 0.75rem;
+        color: $color-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+
+      .value {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--ion-text-color);
+
+        &.highlight {
+          color: $color-primary;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// Estilos para el acordeón de registro
+.form-accordion-group {
+  margin: 24px;
+  background: transparent;
+
+  ion-accordion {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid $color-border;
+    overflow: hidden;
+    margin-top: 0;
+    --background: var(--ion-card-background, #fff);
+    transition: all 0.3s ease;
+
+    &::part(header) {
+      background: var(--ion-card-background, #fff);
+    }
+
+    &.accordion-expanding,
+    &.accordion-expanded {
+      margin-bottom: 0;
+      background: var(--ion-card-background, #fff);
+      --background: var(--ion-card-background, #fff);
+    }
+  }
+
+  .form-header-item {
+    --background: var(--ion-card-background, #fff);
+    --background-focused: $color-bg-subtle;
+    --background-hover: $color-bg-subtle;
+    --color: var(--ion-text-color);
+    --padding-start: 20px;
+    --padding-end: 20px;
+    --min-height: 64px;
+    transition: all 0.2s ease;
+
+    &::part(native) {
+      border: none;
+      background: inherit;
+
+      ion-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+
+    &::part(detail-icon) {
+      color: $color-primary;
+      opacity: 0.7;
+      font-size: 1.2rem;
+    }
+  }
+
+  .form-content-wrapper {
+    padding: 0 8px 16px 8px;
+    background: var(--ion-card-background, #fff);
+  }
+}
+
+// Selector de evento
+.evento-selector-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: var(--ion-card-background, #fff);
+  border: 1px solid $color-border;
+
+  ion-card-header {
+    background: linear-gradient(135deg, $color-primary 0%, #5558e3 100%);
+    color: white;
+    padding: 16px 20px;
+
+    ion-card-title {
+      color: white !important;
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+
+  ion-card-content {
+    padding: 24px;
+
+    .evento-select-row {
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+
+      .evento-select-item {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .action-buttons-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-shrink: 0;
+        width: 100%;
+        max-width: 420px;
+
+        ion-button {
+          flex: 1;
+          --border-radius: 12px;
+          --padding-start: 16px;
+          --padding-end: 16px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+          }
+
+          &.crear-evento-btn {
+            --background: $color-primary;
+            --color: white;
+
+            &[fill="outline"] {
+              --color: $color-primary;
+              --border-color: $color-primary;
+            }
+          }
+
+          &.editar-evento-btn {
+            --background: #3b82f6;
+            --color: white;
+
+            &[fill="outline"] {
+              --color: #3b82f6;
+              --border-color: #3b82f6;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// GRID DE ESTADÍSTICAS
+.stats-grid {
+  display: grid;
+
+  .stat-card {
+    background: var(--ion-card-background, #fff);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid $color-border;
+    transition: all 0.3s ease;
+    min-height: 110px;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: var(--ion-text-color);
+    }
+
+    .stat-content {
+      flex: 1;
+
+      p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: $color-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+    }
+
+    &.total .stat-icon {
+      background: $color-primary-light;
+      color: $color-primary;
+    }
+
+    &.success .stat-icon {
+      background: $color-success-light;
+      color: $color-success;
+    }
+
+    &.warning .stat-icon {
+      background: $color-warning-light;
+      color: $color-warning;
+    }
+
+    &.money .stat-icon {
+      background: $color-info-light;
+      color: $color-info;
+    }
+
+    &.danger .stat-icon {
+      background: $color-danger-light;
+      color: $color-danger;
+    }
+
+    &.full-width {
+      grid-column: span 1;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+  }
+}
+
+// Tabla de personas
+.personas-list-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+  overflow: hidden;
+  background: var(--ion-card-background, #fff);
+  border: 1px solid $color-border;
+
+  ion-card-header {
+    background: linear-gradient(135deg, $color-info 0%, #2563eb 100%);
+    color: white;
+    padding: 16px 20px;
+
+    ion-card-title {
+      color: white !important;
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+}
+
+.personas-table-container {
+  padding: 0;
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      background: $color-bg-subtle;
+      padding: 16px 12px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--ion-text-color);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid $color-border;
+    }
+
+    td {
+      padding: 16px 12px;
+      font-size: 0.95rem;
+      color: var(--ion-text-color);
+      border-bottom: 1px solid $color-border;
+      transition: all 0.2s ease;
+    }
+
+    tr:nth-child(even) {
+      background: $color-bg-subtle;
+    }
+
+    tr:hover td {
+      background: $color-primary-lighter;
+      color: var(--ion-text-color);
+    }
+  }
+}
+
+.nombre-cell {
+  font-weight: 700 !important;
+}
+
+.abono-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  &.abono-si {
+    background: $color-success-light;
+    color: $color-success;
+  }
+
+  &.abono-no {
+    background: $color-danger-light;
+    color: $color-danger;
+  }
+}
+
+.monto-cell {
+  font-weight: 700;
+  color: $color-success;
+  font-family: monospace;
+  font-size: 1rem !important;
+}
+
+.equipo-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: $color-primary-light;
+  color: $color-primary;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+
+  ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+}
+
+// Sección de ubicación del formulario
+.ubicacion-form-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: $color-bg-subtle;
+  border-radius: 12px;
+  border: 1px solid $color-border;
+
+  .ubicacion-preview-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    background: var(--ion-card-background, #fff);
+    border-radius: 12px;
+    border: 2px solid $color-primary-light;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: $color-primary;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+    }
+
+    .ubicacion-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      .map-icon {
+        font-size: 1.5rem;
+        color: $color-primary;
+        flex-shrink: 0;
+      }
+
+      .text-container {
+        flex: 1;
+
+        .lugar-nombre {
+          margin: 0 0 4px 0;
+          font-weight: 600;
+          color: var(--ion-text-color);
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        .lugar-coords {
+          margin: 0;
+          font-size: 0.8rem;
+          color: $color-text-muted;
+          font-family: monospace;
+        }
+      }
+    }
+
+    ion-button {
+      --color: $color-primary;
+      font-weight: 600;
+      flex-shrink: 0;
+
+      &:hover {
+        --color: #5558e3;
+      }
+    }
+  }
+
+  ion-button {
+    --background: $color-primary;
+    --color: white;
+    --border-radius: 12px;
+    width: 100%;
+    font-weight: 600;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      --background: #5558e3;
+    }
+  }
+}
+
+// Contenedor del input de equipo
+.equipo-input-container {
+  position: relative;
+
+  .equipo-sugerencias {
+    background: $color-bg-subtle;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid $color-border;
+
+    .sugerencias-titulo {
+      font-size: 0.75rem;
+      color: $color-text-muted;
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sugerencias-lista {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sugerencia-chip {
+      --background: $color-primary-light;
+      --color: $color-primary;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .evento-registro-container {
+    padding: 12px;
+  }
+
+  .evento-selector-card ion-card-content .evento-select-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+
+    .evento-select-item {
+      width: 100%;
+    }
+
+    .action-buttons-group {
+      width: 100%;
+      max-width: 100%;
+      flex-direction: row;
+
+      ion-button {
+        flex: 1;
+      }
+    }
+  }
+
+  .stats-grid {
+    padding: 15px;
+    
+    .stat-card {
+      &.full-width {
+        grid-column: span 1;
+        max-width: 100%;
+      }
+    }
+  }
+
+  .personas-table-container table {
+    font-size: 0.85rem;
+
+    th,
+    td {
+      padding: 12px 8px;
+    }
+  }
+
+  .ubicacion-form-section {
+    padding: 12px;
+
+    .ubicacion-preview-card {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+
+      .ubicacion-info {
+        width: 100%;
+      }
+
+      ion-button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+
+    .stat-card {
+      &.full-width {
+        grid-column: span 1;
+        max-width: 100%;
+      }
+    }
+  }
+
+  .evento-selector-card ion-card-content .evento-select-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    .action-buttons-group {
+      flex-direction: row;
+      width: 100%;
+      max-width: 100%;
+
+      ion-button {
+        width: 100%;
+      }
+    }
+  }
+
+  .ubicacion-form-section {
+    padding: 12px;
+
+    .ubicacion-preview-card {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .ubicacion-info {
+        width: 100%;
+      }
+
+      ion-button {
+        width: 100%;
+      }
+    }
+
+    ion-button {
+      width: 100%;
+    }
+  }
+}
