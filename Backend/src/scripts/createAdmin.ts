@@ -9,18 +9,18 @@ const createAdmin = async () => {
         await mongoose.connect(process.env.MONGODB_URI!);
 
         // Elimina el admin existente si existe
-        await User.deleteOne({ email: 'admin@mpolog.com' });
+        await User.deleteOne({ email: 'admin@superadmin.com' });
 
         const admin = new User({
-            email: 'admin@mpolog.com', // Cambia username por email
+            email: 'admin@superadmin.com',
             password: 'admin123',
-            nombre: 'Administrador',
-            rol: 'admin'
+            nombre: 'Super Admin',
+            rol: 'superadmin'
         });
 
         await admin.save();
-        console.log('✅ Usuario admin creado correctamente');
-        console.log('📧 Email: admin@mpolog.com');
+        console.log('✅ Usuario superadmin creado correctamente');
+        console.log('📧 Email: admin@superadmin.com');
         console.log('🔑 Password: admin123');
         process.exit(0);
     } catch (error) {

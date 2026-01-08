@@ -5,7 +5,7 @@ export interface IUser extends Document {
     email: string; // Cambia username por email
     password: string;
     nombre: string;
-    rol: 'admin' | 'usuario';
+    rol: 'superadmin' | 'logisticadmin' | 'eventsadmin' | 'sameadmin' | 'admin' | 'usuario';
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
     },
     rol: {
         type: String,
-        enum: ['admin', 'usuario'],
+        enum: ['superadmin', 'logisticadmin', 'eventsadmin', 'sameadmin', 'admin', 'usuario'],
         default: 'usuario'
     }
 }, {

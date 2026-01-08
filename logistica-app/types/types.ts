@@ -13,9 +13,9 @@ export interface RegistroCardProps {
 
 export interface User {
     id: string;
-    email: string; // Cambia username por email
+    email: string;
     nombre: string;
-    rol: string;
+    rol: 'superadmin' | 'logisticadmin' | 'eventsadmin' | 'sameadmin' | 'admin' | 'usuario';
 }
 
 export interface AuthContextType {

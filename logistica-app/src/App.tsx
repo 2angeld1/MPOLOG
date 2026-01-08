@@ -57,33 +57,35 @@ const PrivateRoute: React.FC<{ component: React.ComponentType<any>; path: string
 };
 
 const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <DataProvider>
-        <AuthProvider>
-          <IonRouterOutlet>
-            <Route exact path="/login">
-              <LoginPage />
-            </Route>
-            <Route exact path="/register">
-              <RegisterPage />
-            </Route>
-            <Route exact path="/forgot-password">
-              <ForgotPasswordPage />
-            </Route>
-            <Route exact path="/reset-password">
-              <ResetPasswordPage />
-            </Route>
-            {/* Elimina la ruta duplicada y usa solo PrivateRoute */}
-            <PrivateRoute path="/tabs" component={Tabs} />
-            <Route exact path="/">
-              <Redirect to="/login" />
-            </Route>
-          </IonRouterOutlet>
-        </AuthProvider>
-      </DataProvider>
-    </IonReactRouter>
-  </IonApp>
+  <ThemeProvider>
+    <IonApp>
+      <IonReactRouter>
+        <DataProvider>
+          <AuthProvider>
+            <IonRouterOutlet>
+              <Route exact path="/login">
+                <LoginPage />
+              </Route>
+              <Route exact path="/register">
+                <RegisterPage />
+              </Route>
+              <Route exact path="/forgot-password">
+                <ForgotPasswordPage />
+              </Route>
+              <Route exact path="/reset-password">
+                <ResetPasswordPage />
+              </Route>
+              {/* Elimina la ruta duplicada y usa solo PrivateRoute */}
+              <PrivateRoute path="/tabs" component={Tabs} />
+              <Route exact path="/">
+                <Redirect to="/login" />
+              </Route>
+            </IonRouterOutlet>
+          </AuthProvider>
+        </DataProvider>
+      </IonReactRouter>
+    </IonApp>
+  </ThemeProvider>
 );
 
 export default App;

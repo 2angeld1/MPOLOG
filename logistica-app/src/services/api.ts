@@ -254,4 +254,45 @@ export const eventoService = {
     },
 };
 
+// Servicios de usuarios (Superadmin)
+export const userService = {
+    getUsers: async () => {
+        const response = await api.get('/users');
+        return response.data;
+    },
+
+    updateUserRole: async (id: string, rol: string) => {
+        const response = await api.put(`/users/${id}/role`, { rol });
+        return response.data;
+    },
+
+    deleteUser: async (id: string) => {
+        const response = await api.delete(`/users/${id}`);
+        return response.data;
+    }
+};
+
+// Servicios de roles (Superadmin)
+export const roleService = {
+    getRoles: async () => {
+        const response = await api.get('/roles');
+        return response.data;
+    },
+
+    createRole: async (data: { name: string; description: string; permissions?: string[] }) => {
+        const response = await api.post('/roles', data);
+        return response.data;
+    },
+
+    updateRole: async (id: string, data: { name?: string; description?: string; permissions?: string[] }) => {
+        const response = await api.put(`/roles/${id}`, data);
+        return response.data;
+    },
+
+    deleteRole: async (id: string) => {
+        const response = await api.delete(`/roles/${id}`);
+        return response.data;
+    }
+};
+
 export default api;

@@ -69,7 +69,7 @@ export const register = async (req: Request, res: Response) => {
             email, // Quita username
             password,
             nombre,
-            rol: rol || 'usuario'
+            rol: 'usuario' // Siempre asignar rol 'usuario' por defecto en el registro
         });
 
         await user.save();

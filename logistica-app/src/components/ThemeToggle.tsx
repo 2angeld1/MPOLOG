@@ -1,28 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { IonToggle, IonIcon } from '@ionic/react';
-import { sunny, moon } from 'ionicons/icons'; // Cambia 'sun' por 'sunny'
+import { sunny, moon } from 'ionicons/icons';
 import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 import '../styles/ThemeToggle.css';
 
 const ThemeToggle: React.FC = () => {
-    const [isDark, setIsDark] = useState(false);
-
-    useEffect(() => {
-        // Verificar el tema inicial
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const storedTheme = localStorage.getItem('theme');
-        const initialDark = storedTheme ? storedTheme === 'dark' : prefersDark;
-
-        setIsDark(initialDark);
-        document.documentElement.classList.toggle('ion-palette-dark', initialDark);
-    }, []);
-
-    const toggleTheme = () => {
-        const newDark = !isDark;
-        setIsDark(newDark);
-        document.documentElement.classList.toggle('ion-palette-dark', newDark);
-        localStorage.setItem('theme', newDark ? 'dark' : 'light');
-    };
+    const { isDark, toggleTheme } = useTheme();
 
     return (
         <motion.div
@@ -43,7 +27,7 @@ const ThemeToggle: React.FC = () => {
                     transition={{ duration: 0.5, ease: 'easeInOut' }}
                 >
                     <IonIcon
-                        icon={isDark ? moon : sunny} // Cambia 'sun' por 'sunny'
+                        icon={isDark ? moon : sunny}
                         className={isDark ? 'moon-icon' : 'sun-icon'}
                     />
                 </motion.div>

@@ -91,7 +91,7 @@ const LoginPage: React.FC = () => {
                             className="login-footer"
                             variants={itemVariants}
                         >
-                            <p>
+                            {/* <p>
                                 ¿Olvidaste tu contraseña?{' '}
                                 <a
                                     href="#"
@@ -103,7 +103,7 @@ const LoginPage: React.FC = () => {
                                 >
                                     Recuperar
                                 </a>
-                            </p>
+                            </p> */}
                             <p>
                                 ¿No tienes cuenta?{' '}
                                 <a

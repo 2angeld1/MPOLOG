@@ -8,7 +8,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import '../styles/Home.scss';
 import { useHome } from '../hooks/useHome';
 import { Registro } from '../../types/types';
-import { containerVariants, itemVariants } from '../animations';
+import { containerVariants, itemVariants, scaleItemVariants, buttonHoverVariants } from '../animations';
 import Toolbar from '../components/Toolbar';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -19,9 +19,12 @@ const Home: React.FC = () => {
     const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
     const history = useHistory(); // Agrega
+    const isLogisticAdmin = user?.rol === 'logisticadmin';
+    const isSuperAdmin = user?.rol === 'superadmin';
+    const isSameAdmin = user?.rol === 'sameadmin';
 
     useIonViewWillEnter(() => {
-        setToolbarTitle && setToolbarTitle(`Bienvenido(a), ${user?.nombre || ''}`);
+        setToolbarTitle && setToolbarTitle('Inicio');
     });
 
     const handleLogout = () => {
@@ -253,14 +256,17 @@ const Home: React.FC = () => {
                                                 <IonCardHeader>
                                                     <IonCardTitle>Personas por Área (Últimos 30 días)</IonCardTitle>
                                                 </IonCardHeader>
-                                                <div className="area-grid">
+                                                    <motion.div
+                                                        className="area-grid"
+                                                        variants={containerVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                    >
                                                     {estadisticasPersonas.registrosPorArea.map((area, index) => (
                                                         <motion.div
                                                             key={index}
                                                             className="area-item"
-                                                            initial={{ opacity: 0, scale: 0.9 }}
-                                                            animate={{ opacity: 1, scale: 1 }}
-                                                            transition={{ delay: index * 0.1 }}
+                                                            variants={scaleItemVariants}
                                                         >
                                                             <div className="area-name">{area.area}</div>
                                                             <div className="area-stats">
@@ -274,7 +280,7 @@ const Home: React.FC = () => {
                                                             </div>
                                                         </motion.div>
                                                     ))}
-                                                </div>
+                                                    </motion.div>
                                             </IonCard>
                                         </div>
                                     )}
@@ -336,14 +342,17 @@ const Home: React.FC = () => {
                                                 <IonCardHeader>
                                                     <IonCardTitle>Materiales por Área (Últimos 30 días)</IonCardTitle>
                                                 </IonCardHeader>
-                                                <div className="area-grid">
+                                                    <motion.div
+                                                        className="area-grid"
+                                                        variants={containerVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                    >
                                                     {estadisticasMateriales.registrosPorArea.map((area, index) => (
                                                         <motion.div
                                                             key={index}
                                                             className="area-item"
-                                                            initial={{ opacity: 0, scale: 0.9 }}
-                                                            animate={{ opacity: 1, scale: 1 }}
-                                                            transition={{ delay: index * 0.1 }}
+                                                            variants={scaleItemVariants}
                                                         >
                                                             <div className="area-name">{area.area}</div>
                                                             <div className="area-stats">
@@ -357,7 +366,7 @@ const Home: React.FC = () => {
                                                             </div>
                                                         </motion.div>
                                                     ))}
-                                                </div>
+                                                    </motion.div>
                                             </IonCard>
                                         </div>
                                     )}
@@ -391,9 +400,17 @@ const Home: React.FC = () => {
                                 <FontAwesomeIcon icon={faUsers} size="3x" />
                                 <h3>No hay datos disponibles</h3>
                                 <p>Comienza agregando registros de conteo de personas o materiales</p>
-                                <IonButton onClick={() => historyProp.push('/tabs/add')}>
-                                    Agregar Registro
-                                </IonButton>
+                                    {(isLogisticAdmin || isSuperAdmin || isSameAdmin) && (
+                                        <motion.div
+                                            variants={buttonHoverVariants}
+                                            whileHover="whileHover"
+                                            whileTap="whileTap"
+                                        >
+                                            <IonButton onClick={() => historyProp.push('/tabs/add')}>
+                                                Agregar Registro
+                                            </IonButton>
+                                        </motion.div>
+                                    )}
                             </motion.div>
                         )}
                     </motion.div>

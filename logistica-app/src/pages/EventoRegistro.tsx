@@ -162,7 +162,6 @@ const EventoRegistro: React.FC = () => {
 
     const toolbarChildren = (
         <>
-            <div className="user-greeting">Hola, {user?.nombre || 'Usuario'}</div>
             <IonButton onClick={handleLogout} className="logout-button">
                 <FontAwesomeIcon icon={faSignOutAlt} />
                 <span className="button-text">Salir</span>

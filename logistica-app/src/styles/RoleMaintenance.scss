@@ -1,0 +1,31 @@
+/* Role Maintenance Styles */
+
+.role-item {
+  margin: 10px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --background: var(--ion-card-background, var(--ion-item-background, #fff));
+
+  ion-label {
+    h2 {
+      font-weight: 700;
+      color: var(--ion-color-primary);
+    }
+    p {
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+.system-role-item {
+  opacity: 0.9;
+  border-left: 4px solid var(--ion-color-medium);
+}
+
+/* Dark mode adjustments */
+.ion-palette-dark {
+  .role-item {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --background: var(--ion-color-step-50, #1e1e1e);
+  }
+}

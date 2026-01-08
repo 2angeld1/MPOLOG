@@ -1,0 +1,72 @@
+.dashboard-container {
+  padding: 16px;
+}
+
+.welcome-section {
+  margin-bottom: 24px;
+  
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    
+    .admin-name {
+      color: var(--ion-color-primary);
+    }
+  }
+  
+  p {
+    margin: 4px 0 0;
+    color: var(--ion-color-medium);
+  }
+}
+
+.stat-card {
+  height: 100%;
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  
+  .icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px auto;
+  }
+  
+  ion-card-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  
+  ion-card-subtitle {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.activity-item {
+  border-bottom: 1px solid var(--ion-color-light);
+  padding: 12px 0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.quick-actions {
+  ion-button {
+    margin: 8px 0;
+  }
+}
+
+/* Dark mode adjustments */
+.ion-palette-dark {
+  .stat-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}

@@ -1,0 +1,53 @@
+/* User Maintenance Styles */
+
+.user-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 8px;
+  margin: 10px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --background: var(--ion-card-background, var(--ion-item-background, #fff));
+
+  ion-label {
+    h2 {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--ion-text-color);
+    }
+    p {
+      color: var(--ion-color-medium);
+      font-size: 0.9rem;
+    }
+  }
+
+  .role-badge {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: var(--ion-color-primary);
+    color: #ffffff;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+    min-width: 100px;
+    text-align: center;
+  }
+}
+
+.edit-button {
+  --color: var(--ion-color-primary);
+  margin-left: 8px;
+}
+
+/* Specific colors for specific roles if needed */
+.role-badge[data-role="superadmin"] { background: var(--ion-color-danger); }
+
+/* Dark mode adjustments */
+.ion-palette-dark {
+  .user-item {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --background: var(--ion-color-step-50, #1e1e1e);
+  }
+}
