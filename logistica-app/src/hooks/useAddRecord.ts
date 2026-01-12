@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { conteoService } from '../services/api';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 import { PersonaRegistro } from '../../types/types';
 
 export const useAddRecord = () => {
@@ -12,9 +13,7 @@ export const useAddRecord = () => {
     const [iglesia, setIglesia] = useState<string>('');
     const [areas, setAreas] = useState<string[]>([]);
     const [registros, setRegistros] = useState<PersonaRegistro[]>([]);
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [loadingAreas, setLoadingAreas] = useState(true);
     const { refreshData, setToolbarTitle } = useData();
@@ -71,9 +70,7 @@ export const useAddRecord = () => {
             setIglesias(response.data);
         } catch (error: any) {
             console.error('❌ Error al cargar iglesias:', error);
-            setToastMessage('Error al cargar las iglesias');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Error al cargar las iglesias', 'danger');
         } finally {
             setLoadingIglesias(false);
         }
@@ -86,9 +83,7 @@ export const useAddRecord = () => {
             setAreasPersonas(response.data);
         } catch (error: any) {
             console.error('❌ Error al cargar áreas de personas:', error);
-            setToastMessage('Error al cargar las áreas de personas');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Error al cargar las áreas de personas', 'danger');
         } finally {
             setLoadingAreasPersonas(false);
         }
@@ -101,9 +96,7 @@ export const useAddRecord = () => {
             setAreasMateriales(response.data);
         } catch (error: any) {
             console.error('❌ Error al cargar áreas de materiales:', error);
-            setToastMessage('Error al cargar las áreas de materiales');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Error al cargar las áreas de materiales', 'danger');
         } finally {
             setLoadingAreasMateriales(false);
         }
@@ -171,27 +164,19 @@ export const useAddRecord = () => {
 
     const handleAddRecord = async () => {
         if (!iglesia || iglesia.trim() === '') {
-            setToastMessage('Por favor selecciona una iglesia');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Por favor selecciona una iglesia', 'danger');
             return;
         }
         if (!cantidad || cantidad <= 0) {
-            setToastMessage('Por favor ingresa una cantidad válida');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Por favor ingresa una cantidad válida', 'danger');
             return;
         }
         if (!area || area.trim() === '') {
-            setToastMessage('Por favor selecciona un área');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Por favor selecciona un área', 'danger');
             return;
         }
         if (tipo === 'materiales' && !subArea) {
-            setToastMessage('Por favor selecciona una sub-área para materiales');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Por favor selecciona una sub-área para materiales', 'danger');
             return;
         }
         setLoading(true);
@@ -206,7 +191,6 @@ export const useAddRecord = () => {
                     tipo: tipo,
                     subArea: subArea,
                 });
-                setToastMessage('Registro actualizado correctamente');
             } else {
                 // Crear nuevo registro
                 await conteoService.crear({
@@ -217,7 +201,6 @@ export const useAddRecord = () => {
                     tipo: tipo,
                     subArea: subArea,
                 });
-                setToastMessage('Registro agregado correctamente');
             }
 
             await cargarRegistros();
@@ -227,14 +210,12 @@ export const useAddRecord = () => {
             setSubArea('');
             setIsEditing(false);
             setEditingRegistroId(null);
-            setToastColor('success');
-            setShowToast(true);
+
+            showToast(isEditing ? 'Registro actualizado correctamente' : 'Registro agregado correctamente', 'success');
             refreshData();
         } catch (error: any) {
             console.error('❌ Error al guardar:', error);
-            setToastMessage(error.response?.data?.message || 'Error al guardar registro');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast(error.response?.data?.message || 'Error al guardar registro', 'danger');
         } finally {
             setLoading(false);
         }
@@ -245,13 +226,9 @@ export const useAddRecord = () => {
         try {
             await conteoService.eliminar(id);
             await cargarRegistros();
-            setToastMessage('Registro eliminado correctamente');
-            setToastColor('success');
-            setShowToast(true);
+            showToast('Registro eliminado correctamente', 'success');
         } catch (error: any) {
-            setToastMessage(error.response?.data?.message || 'Error al eliminar registro');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast(error.response?.data?.message || 'Error al eliminar registro', 'danger');
         }
     };
 
@@ -276,9 +253,7 @@ export const useAddRecord = () => {
             }
         } catch (error: any) {
             console.error('❌ Error al cargar registro para editar:', error);
-            setToastMessage('Error al cargar registro para editar');
-            setToastColor('danger');
-            setShowToast(true);
+            showToast('Error al cargar registro para editar', 'danger');
         }
     };
 
@@ -332,9 +307,6 @@ export const useAddRecord = () => {
         areas,
         registros,
         filteredRegistros,
-        showToast, setShowToast,
-        toastMessage,
-        toastColor,
         loading,
         loadingAreas, // Agrega loadingAreas
         tipoVista, setTipoVista,

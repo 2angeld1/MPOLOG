@@ -10,7 +10,7 @@ import { containerVariants, itemVariants } from '../animations';
 import '../styles/RegisterPage.scss';
 
 const RegisterPage: React.FC = () => {
-    const { formData, showToast, setShowToast, toastMessage, loading, history, handleInputChange, handleRegister } = useRegister();
+    const { formData, loading, history, handleInputChange, handleRegister } = useRegister();
 
     return (
         <IonPage>
@@ -136,14 +136,6 @@ const RegisterPage: React.FC = () => {
                     </form>
                 </motion.div>
 
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={toastMessage}
-                    duration={3000}
-                    position="top"
-                    color={toastMessage.includes('Error') ? 'danger' : 'success'}
-                />
             </IonContent>
         </IonPage>
     );

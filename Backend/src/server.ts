@@ -24,7 +24,9 @@ app.use(cors({
     ],
     credentials: true
 }));
-app.use(express.json());
+// Aumentar el límite de tamaño para permitir imágenes en base64
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // simple request logger (antes de las rutas)
 app.use((req, res, next) => {

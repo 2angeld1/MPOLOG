@@ -1,0 +1,275 @@
+// Variables (deberían venir de un archivo global de variables, pero las defino aquí por completitud o referencia)
+$color-primary: #6366f1;
+$color-primary-light: rgba(99, 102, 241, 0.08);
+$color-primary-lighter: rgba(99, 102, 241, 0.04);
+$color-success: #10b981;
+$color-success-light: rgba(16, 185, 129, 0.08);
+$color-danger: #ef4444;
+$color-danger-light: rgba(239, 68, 68, 0.08);
+
+.global-premium-modal {
+  --border-radius: 28px;
+  --overflow: hidden;
+  --width: 92%;
+  --max-width: 550px;
+  --height: auto;
+  --max-height: 85vh;
+  --box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  &::part(content) {
+    backdrop-filter: blur(10px);
+    background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.95);
+  }
+
+  .global-modal-header {
+    background: linear-gradient(135deg, $color-primary 0%, #4338ca 100%) !important;
+    padding: 32px 24px !important;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    h2 {
+      font-size: 1.4rem !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.5px;
+      margin: 0;
+      color: white !important;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .close-btn {
+      --background: rgba(255, 255, 255, 0.15);
+      --background-hover: rgba(255, 255, 255, 0.25);
+      --color: white;
+      --border-radius: 14px;
+      --padding-start: 12px;
+      --padding-end: 12px;
+      height: 44px;
+      z-index: 1;
+      margin: 0;
+    }
+  }
+
+  .global-modal-content {
+      background: transparent;
+      
+      &.custom-modal-scroll {
+        overflow-y: auto;
+        max-height: calc(80vh - 80px); /* Restar altura aproximada del header */
+        -webkit-overflow-scrolling: touch;
+        
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        &::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.05);
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.2);
+          border-radius: 3px;
+        }
+      }
+  }
+  
+  .modal-content-wrapper {
+      padding: 16px;
+  }
+
+  .modal-footer-actions {
+      padding: 16px;
+      padding-top: 0;
+  }
+
+  // Estilos generales para listas dentro del modal
+  ion-list {
+    background: transparent !important;
+    padding: 0;
+
+    ion-item {
+      --background: transparent;
+      --padding-start: 8px;
+      --padding-end: 8px;
+      margin-bottom: 12px;
+      --min-height: 70px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        --background: $color-primary-lighter;
+        border-color: $color-primary-light;
+        transform: translateX(4px);
+      }
+
+      ion-label {
+        margin: 12px 0;
+
+        h2 {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.75rem !important;
+          font-weight: 700 !important;
+          text-transform: uppercase;
+          letter-spacing: 1.2px;
+          margin-bottom: 6px !important;
+          color: $color-primary;
+          opacity: 0.9;
+        }
+
+        p {
+          font-size: 1.2rem !important;
+          color: var(--ion-text-color) !important;
+          font-weight: 700 !important;
+          line-height: 1.2;
+        }
+        
+        // Links inside modal
+        a {
+          text-decoration: none;
+          color: $color-primary !important;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 16px;
+          background: $color-primary-light;
+          border-radius: 12px;
+          margin-top: 4px;
+          font-weight: 700;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background: $color-primary;
+            color: white !important;
+            transform: translateY(-2px);
+          }
+        }
+      }
+
+      // Images inside modal items
+      img {
+        width: 100%;
+        max-width: 100%;
+        margin: 16px 0;
+        border-radius: 20px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        border: 4px solid white;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:hover {
+          transform: scale(1.03) rotate(1deg);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+      }
+    }
+  }
+
+  // Badges y status generales
+  .status-badge {
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    
+    &.primary {
+        background: linear-gradient(135deg, $color-primary-light 0%, rgba(99, 102, 241, 0.15) 100%);
+        color: $color-primary;
+        border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    &.success {
+      background: $color-success-light;
+      color: $color-success;
+    }
+
+    &.danger {
+      background: $color-danger-light;
+      color: $color-danger;
+    }
+  }
+
+  .btn-cerrar-modal {
+    --border-radius: 18px;
+    --background: var(--ion-color-step-150, #f4f4f5);
+    --background-hover: var(--ion-color-step-200, #e4e4e7);
+    --color: var(--ion-text-color);
+    margin-top: 10px;
+    height: 56px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    ion-icon, svg {
+      font-size: 1.2rem;
+    }
+  }
+
+  // Clases agregadas para eliminar inline styles
+  .image-container {
+    text-align: center;
+    
+    p {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium);
+      margin-top: 4px;
+      text-align: center;
+      font-weight: 500;
+    }
+  }
+
+  .text-muted-italics {
+    color: var(--ion-color-medium);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .flex-abono-detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .abono-amount {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: $color-success;
+    }
+  }
+
+  .text-muted-p {
+    font-size: 0.95rem;
+    opacity: 0.7;
+    margin: 4px 0 0 0;
+  }
+
+  .modal-empty-state {
+    padding: 20px;
+    text-align: center;
+    color: var(--ion-color-medium);
+    font-weight: 500;
+  }
+}
+

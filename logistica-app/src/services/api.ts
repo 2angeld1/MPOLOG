@@ -215,8 +215,11 @@ export const eventoService = {
         nombre: string;
         apellido: string;
         edad: number;
+        telefono: string;
         abono: boolean;
         montoAbono?: number;
+        tipoPago: 'efectivo' | 'yappy';
+        comprobanteYappy?: string | null;
         equipo?: string;
     }) => {
         const response = await api.post(`/eventos/${eventoId}/personas`, data);
@@ -235,8 +238,11 @@ export const eventoService = {
         nombre: string;
         apellido: string;
         edad: number;
+        telefono: string;
         abono: boolean;
         montoAbono?: number;
+        tipoPago: 'efectivo' | 'yappy';
+        comprobanteYappy?: string | null;
         equipo?: string;
     }) => {
         const response = await api.put(`/eventos/${eventoId}/personas/${personaId}`, data);

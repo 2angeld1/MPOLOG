@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import api from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 export const useRegister = () => {
     const [formData, setFormData] = useState({
@@ -9,8 +10,7 @@ export const useRegister = () => {
         confirmPassword: '',
         nombre: ''
     });
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const history = useHistory();
 
@@ -24,32 +24,27 @@ export const useRegister = () => {
         const { email, password, confirmPassword, nombre } = formData;
 
         if (!email || !password || !confirmPassword || !nombre) {
-            setToastMessage('Por favor completa todos los campos');
-            setShowToast(true);
+            showToast('Por favor completa todos los campos', 'warning');
             return;
         }
 
         if (password !== confirmPassword) {
-            setToastMessage('Las contraseñas no coinciden');
-            setShowToast(true);
+            showToast('Las contraseñas no coinciden', 'warning');
             return;
         }
 
         if (password.length < 6) {
-            setToastMessage('La contraseña debe tener al menos 6 caracteres');
-            setShowToast(true);
+            showToast('La contraseña debe tener al menos 6 caracteres', 'warning');
             return;
         }
 
         setLoading(true);
         try {
             await api.post('/auth/register', formData);
-            setToastMessage('Usuario registrado correctamente. Ahora puedes iniciar sesión.');
-            setShowToast(true);
+            showToast('Usuario registrado correctamente. Ahora puedes iniciar sesión.', 'success');
             setTimeout(() => history.push('/login'), 3000);
         } catch (error: any) {
-            setToastMessage(error.message || 'Error al registrar usuario');
-            setShowToast(true);
+            showToast(error.message || 'Error al registrar usuario', 'danger');
         } finally {
             setLoading(false);
         }
@@ -58,9 +53,6 @@ export const useRegister = () => {
     return {
         // Estados
         formData,
-        showToast,
-        setShowToast,
-        toastMessage,
         loading,
         history,
         // Funciones

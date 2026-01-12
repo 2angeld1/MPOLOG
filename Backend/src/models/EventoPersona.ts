@@ -5,8 +5,11 @@ export interface IEventoPersona extends Document {
     nombre: string;
     apellido: string;
     edad: number;
+    telefono: string;
     abono: boolean;
     montoAbono: number;
+    tipoPago: 'efectivo' | 'yappy';
+    comprobanteYappy?: string;
     equipo?: string;
     usuario: mongoose.Types.ObjectId;
     createdAt?: Date;
@@ -35,6 +38,11 @@ const EventoPersonaSchema: Schema = new Schema({
         min: 0,
         max: 120
     },
+    telefono: {
+        type: String,
+        required: true,
+        trim: true
+    },
     abono: {
         type: Boolean,
         default: false
@@ -43,6 +51,15 @@ const EventoPersonaSchema: Schema = new Schema({
         type: Number,
         default: 0,
         min: 0
+    },
+    tipoPago: {
+        type: String,
+        enum: ['efectivo', 'yappy'],
+        default: 'efectivo'
+    },
+    comprobanteYappy: {
+        type: String,
+        trim: true
     },
     equipo: {
         type: String,

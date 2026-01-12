@@ -1,54 +1,11 @@
-import { 
-    IonPage, 
-    IonContent, 
-    IonButton, 
-    IonCard, 
-    IonCardHeader, 
-    IonCardTitle, 
-    IonCardContent, 
-    IonItem, 
-    IonLabel, 
-    IonInput, 
-    IonSelect, 
-    IonSelectOption, 
-    IonGrid, 
-    IonRow, 
-    IonCol, 
-    IonToast, 
-    IonSpinner, 
-    IonRefresher, 
-    IonRefresherContent,
-    IonToggle,
-    IonChip,
-    IonSearchbar,
-    IonAccordion,
-    IonAccordionGroup
-} from '@ionic/react';
+import React, { useMemo, useState, useRef } from 'react';
+import { IonPage, IonContent, IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonGrid, IonRow, IonCol, IonToast, IonSpinner, IonRefresher, IonRefresherContent, IonToggle, IonChip, IonSearchbar, IonAccordion, IonAccordionGroup, IonModal, IonButtons, IonList, IonHeader } from '@ionic/react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale';
-registerLocale('es', es);
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faUserPlus, 
-    faSignOutAlt, 
-    faCalendarAlt, 
-    faUsers, 
-    faPlus,
-    faEdit,
-    faTrash,
-    faCheck,
-    faTimes,
-    faMoneyBillWave,
-    faChartBar,
-    faMapMarkerAlt,
-    faChevronDown,
-    faChevronUp,
-    faClock,
-    faDonate,
-    faDollarSign
-} from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus, faSignOutAlt, faCalendarAlt, faUsers, faPlus, faEdit, faTrash, faCheck, faTimes, faMoneyBillWave, faChartBar, faMapMarkerAlt, faChevronDown, faChevronUp, faClock, faDonate, faDollarSign, faEye, faShareAlt, faPhone, faImage, faCreditCard, faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
 import { useEventoRegistro } from '../hooks/useEventoRegistro';
 import { fadeInVariant, itemVariants, buttonHoverVariants } from '../animations';
 import '../styles/EventoRegistro.scss';
@@ -58,8 +15,18 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useIonViewWillEnter } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
+import DataTable from '../components/DataTable';
+import PersonasTable from '../components/PersonasTable';
+import GlobalModal from '../components/GlobalModal';
+import { ColumnDef } from '@tanstack/react-table';
+import { EventoPersona } from '../../types/types';
+
+registerLocale('es', es);
 
 const EventoRegistro: React.FC = () => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [selectorAccordionValue, setSelectorAccordionValue] = useState<string | undefined>('selector');
+
     const {
         // Eventos
         eventos,
@@ -96,10 +63,17 @@ const EventoRegistro: React.FC = () => {
         setApellido,
         edad,
         setEdad,
+        telefono,
+        setTelefono,
+        handleTelefonoChange,
         abono,
         setAbono,
         montoAbono,
         setMontoAbono,
+        tipoPago,
+        setTipoPago,
+        comprobanteYappy,
+        setComprobanteYappy,
         equipo,
         setEquipo,
         
@@ -108,9 +82,15 @@ const EventoRegistro: React.FC = () => {
         handleEditarPersona,
         handleEliminarPersona,
         handleCancelarEdicion,
+        handleVerDetalle,
+        handleCompartirUbicacion,
+        handleUploadComprobante,
         isEditing,
         showRegistrarPersona,
         setShowRegistrarPersona,
+        showDetallePersona,
+        setShowDetallePersona,
+        personaDetalle,
         
         // Estadísticas
         estadisticas,
@@ -121,10 +101,6 @@ const EventoRegistro: React.FC = () => {
         
         // UI
         loading,
-        showToast,
-        setShowToast,
-        toastMessage,
-        toastColor,
         handleRefresh,
 
         // Ubicación
@@ -147,9 +123,117 @@ const EventoRegistro: React.FC = () => {
         buscarEquipoCoincidente
     } = useEventoRegistro();
 
+    const columns = useMemo<ColumnDef<EventoPersona>[]>(() => [
+        {
+            header: 'Nombre Completo',
+            accessorFn: row => `${row.nombre} ${row.apellido !== '.' ? row.apellido : ''}`,
+            cell: info => <span className="table-cell-bold">{info.getValue() as string}</span>,
+        },
+        {
+            header: 'Edad',
+            accessorKey: 'edad',
+            cell: info => `${info.getValue()} años`,
+        },
+        {
+            header: 'Teléfono',
+            accessorKey: 'telefono',
+            cell: info => info.getValue() ? (
+                <div className="table-cell-phone">
+                    <FontAwesomeIcon icon={faPhone} />
+                    <a href={`tel:${info.getValue()}`}>{info.getValue() as string}</a>
+                </div>
+            ) : <span className="text-muted">-</span>
+        },
+        {
+            header: 'Equipo',
+            accessorKey: 'equipo',
+            cell: info => info.getValue() ? (
+                <span className="equipo-badge">{info.getValue() as string}</span>
+            ) : (
+                <span className="text-muted italic">Sin asignar</span>
+            )
+        },
+        {
+            header: 'Estado de Pago',
+            id: 'estadoPago',
+            cell: info => {
+                const p = info.row.original;
+                return (
+                    <div className="table-cell-payment">
+                        {p.abono ? (
+                            <span className="payment-amount paid">
+                                <FontAwesomeIcon icon={faCheck} />
+                                ${p.montoAbono?.toFixed(2)}
+                            </span>
+                        ) : (
+                            <span className="payment-amount pending">Pendiente</span>
+                        )}
+                        <span className="payment-method">
+                            {p.tipoPago === 'yappy' ? 'Yappy' : 'Efectivo'}
+                        </span>
+                    </div>
+                )
+            }
+        },
+        {
+            id: 'acciones',
+            header: 'Acciones',
+            cell: info => (
+                <div
+                    className="action-btn-group"
+                    onClick={(e) => {
+                        console.log('Div clicked, target:', e.target, 'currentTarget:', e.currentTarget);
+                    }}
+                >
+                    <button
+                        className="action-btn action-btn-view"
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            console.log('Ver detalle clicked for:', info.row.original._id);
+                            handleVerDetalle(info.row.original._id!);
+                        }}
+                        title="Ver detalles"
+                    >
+                        <FontAwesomeIcon icon={faEye} />
+                    </button>
+                    <button
+                        className="action-btn action-btn-edit"
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            console.log('Editar persona clicked for:', info.row.original._id);
+                            handleEditarPersona(info.row.original._id!);
+                        }}
+                        title="Editar"
+                    >
+                        <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button
+                        className="action-btn action-btn-delete"
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            console.log('Eliminar persona clicked for:', info.row.original._id);
+                            handleEliminarPersona(info.row.original._id!);
+                        }}
+                        title="Eliminar"
+                    >
+                        <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                </div>
+            )
+        }
+    ], [handleVerDetalle, handleEditarPersona, handleEliminarPersona]);
+
+
     const { setToolbarTitle } = useData();
     const { logout, user } = useAuth();
     const history = useHistory();
+
 
     useIonViewWillEnter(() => {
         setToolbarTitle && setToolbarTitle('Eventos');
@@ -186,202 +270,211 @@ const EventoRegistro: React.FC = () => {
                         initial="hidden"
                         animate="visible"
                     >
-                        <IonCard className="evento-selector-card">
-                            <IonCardHeader>
-                                <IonCardTitle>
-                                    <FontAwesomeIcon icon={faCalendarAlt} /> Selecciona un Evento
-                                </IonCardTitle>
-                            </IonCardHeader>
-                            <IonCardContent>
-                                <div className="evento-select-row">
-                                    <IonItem lines="none" className="form-item evento-select-item">
-                                        <IonLabel position="stacked">Evento Activo</IonLabel>
-                                        <IonSelect
-                                            value={eventoSeleccionado}
-                                            placeholder={loadingEventos ? "Cargando..." : "Selecciona un evento"}
-                                            onIonChange={(e) => setEventoSeleccionado(e.detail.value)}
-                                            disabled={loadingEventos}
-                                        >
-                                            {eventos.map((evento) => (
-                                                <IonSelectOption key={evento._id} value={evento._id}>
-                                                    {evento.nombre} ({evento.tipo})
-                                                </IonSelectOption>
-                                            ))}
-                                        </IonSelect>
-                                    </IonItem>
-                                    <div className="action-buttons-group">
-                                        <IonButton
-                                            className="crear-evento-btn"
-                                            fill={showCrearEvento && !isEditingEvento ? "solid" : "outline"}
-                                            onClick={() => {
-                                                if (showCrearEvento && isEditingEvento) {
-                                                    limpiarFormularioEvento();
-                                                    setShowCrearEvento(true);
-                                                    setIsEditingEvento(false);
-                                                } else {
-                                                    setShowCrearEvento(!showCrearEvento);
-                                                }
-                                            }}
-                                        >
-                                            <FontAwesomeIcon icon={faPlus} style={{ marginRight: '6px' }} />
-                                            {showCrearEvento && !isEditingEvento ? 'Cancelar' : 'Nuevo Evento'}
-                                        </IonButton>
-
-                                        {eventoSeleccionado && (
-                                            <IonButton
-                                                className="editar-evento-btn"
-                                                fill={isEditingEvento ? "solid" : "outline"}
-                                                color="secondary"
-                                                onClick={() => handleEditarEventoClick(eventoSeleccionado)}
+                        <IonAccordionGroup
+                            value={selectorAccordionValue}
+                            onIonChange={(e) => setSelectorAccordionValue(e.detail.value)}
+                            className="selector-accordion-group"
+                        >
+                            <IonAccordion value="selector">
+                                <IonItem slot="header" lines="none" className="selector-accordion-header">
+                                    <IonLabel>
+                                        <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
+                                        {eventoSeleccionado ? "Cambiar Evento" : "Selecciona un Evento"}
+                                    </IonLabel>
+                                </IonItem>
+                                <div slot="content" className="ion-padding selector-content">
+                                    <div className="evento-select-row">
+                                        <IonItem lines="none" className="form-item evento-select-item">
+                                            <IonLabel position="stacked">Evento Activo</IonLabel>
+                                            <IonSelect
+                                                value={eventoSeleccionado}
+                                                placeholder={loadingEventos ? "Cargando..." : "Selecciona un evento"}
+                                                onIonChange={(e) => {
+                                                    setEventoSeleccionado(e.detail.value);
+                                                    setSelectorAccordionValue(undefined); // Colapsar al seleccionar
+                                                }}
+                                                disabled={loadingEventos}
                                             >
-                                                <FontAwesomeIcon icon={faEdit} style={{ marginRight: '6px' }} />
-                                                Editar Evento
+                                                {eventos.map((evento) => (
+                                                    <IonSelectOption key={evento._id} value={evento._id}>
+                                                        {evento.nombre} ({evento.tipo})
+                                                    </IonSelectOption>
+                                                ))}
+                                            </IonSelect>
+                                        </IonItem>
+                                        <div className="action-buttons-group">
+                                            <IonButton
+                                                className="crear-evento-btn"
+                                                fill={showCrearEvento && !isEditingEvento ? "solid" : "outline"}
+                                                onClick={() => {
+                                                    if (showCrearEvento && isEditingEvento) {
+                                                        limpiarFormularioEvento();
+                                                        setShowCrearEvento(true);
+                                                        setIsEditingEvento(false);
+                                                    } else {
+                                                        setShowCrearEvento(!showCrearEvento);
+                                                    }
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faPlus} style={{ marginRight: '6px' }} />
+                                                {showCrearEvento && !isEditingEvento ? 'Cancelar' : 'Nuevo Evento'}
                                             </IonButton>
-                                        )}
-                                    </div>
-                                </div>
 
-                                {/* Formulario para crear/editar evento */}
-                                {showCrearEvento && (
-                                    <motion.div 
-                                        className="crear-evento-modal"
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                    >
-                                        <h3>{isEditingEvento ? 'Editar Evento' : 'Crear Nuevo Evento'}</h3>
-                                        <IonGrid>
-                                            <IonRow>
-                                                <IonCol size="12" sizeMd="6">
-                                                    <IonItem lines="none" className="form-item">
-                                                        <IonLabel position="stacked">Nombre del Evento *</IonLabel>
-                                                        <IonInput
-                                                            value={nuevoEventoNombre}
-                                                            placeholder="Ej: Campamento Juvenil 2026"
-                                                            onIonInput={(e) => setNuevoEventoNombre(e.detail.value || '')}
-                                                        />
-                                                    </IonItem>
-                                                </IonCol>
-                                                <IonCol size="12" sizeMd="6">
-                                                    <IonItem lines="none" className="form-item">
-                                                        <IonLabel position="stacked">Tipo de Evento</IonLabel>
-                                                        <IonSelect
-                                                            value={nuevoEventoTipo}
-                                                            onIonChange={(e) => setNuevoEventoTipo(e.detail.value)}
-                                                        >
-                                                            <IonSelectOption value="campamento">Campamento</IonSelectOption>
-                                                            <IonSelectOption value="retiro">Retiro</IonSelectOption>
-                                                            <IonSelectOption value="conferencia">Conferencia</IonSelectOption>
-                                                            <IonSelectOption value="otro">Otro</IonSelectOption>
-                                                        </IonSelect>
-                                                    </IonItem>
-                                                </IonCol>
-                                            </IonRow>
-                                            <IonRow>
-                                                <IonCol size="12" sizeMd="8">
-                                                    <IonItem lines="none" className="form-item date-range-picker-item">
-                                                        <IonLabel position="stacked">Rango de Fechas (Inicio - Fin) *</IonLabel>
-                                                        <div className="datepicker-container">
-                                                            <DatePicker
-                                                                selectsRange={true}
-                                                                startDate={nuevoEventoFechaInicio}
-                                                                endDate={nuevoEventoFechaFin}
-                                                                onChange={(update) => {
-                                                                    const [start, end] = update;
-                                                                    setNuevoEventoFechaInicio(start);
-                                                                    setNuevoEventoFechaFin(end);
-                                                                }}
-                                                                isClearable={true}
-                                                                placeholderText="Selecciona el rango de fechas"
-                                                                className="custom-datepicker"
-                                                                locale={es}
-                                                                dateFormat="dd/MM/yyyy"
-                                                                portalId="datepicker-portal"
+                                            {eventoSeleccionado && (
+                                                <IonButton
+                                                    className="editar-evento-btn"
+                                                    fill={isEditingEvento ? "solid" : "outline"}
+                                                    color="secondary"
+                                                    onClick={() => handleEditarEventoClick(eventoSeleccionado)}
+                                                >
+                                                    <FontAwesomeIcon icon={faEdit} style={{ marginRight: '6px' }} />
+                                                    Editar Evento
+                                                </IonButton>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Formulario para crear/editar evento */}
+                                    {showCrearEvento && (
+                                        <motion.div
+                                            className="crear-evento-modal"
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                        >
+                                            <h3>{isEditingEvento ? 'Editar Evento' : 'Crear Nuevo Evento'}</h3>
+                                            <IonGrid>
+                                                <IonRow>
+                                                    <IonCol size="12" sizeMd="6">
+                                                        <IonItem lines="none" className="form-item">
+                                                            <IonLabel position="stacked">Nombre del Evento *</IonLabel>
+                                                            <IonInput
+                                                                value={nuevoEventoNombre}
+                                                                placeholder="Ej: Campamento Juvenil 2026"
+                                                                onIonInput={(e) => setNuevoEventoNombre(e.detail.value || '')}
                                                             />
-                                                        </div>
-                                                    </IonItem>
-                                                </IonCol>
-                                                <IonCol size="12" sizeMd="4">
-                                                    <IonItem lines="none" className="form-item">
-                                                        <IonLabel position="stacked">Precio Total *</IonLabel>
-                                                        <IonInput
-                                                            type="number"
-                                                            value={nuevoEventoPrecio}
-                                                            placeholder="0.00"
-                                                            onIonInput={(e) => setNuevoEventoPrecio(parseFloat(e.detail.value || '0'))}
-                                                        />
-                                                    </IonItem>
-                                                </IonCol>
-                                            </IonRow>
-                                            <IonRow>
-                                                <IonCol size="12">
-                                                    <IonItem lines="none" className="form-item">
-                                                        <IonLabel position="stacked">Descripción (opcional)</IonLabel>
-                                                        <IonInput
-                                                            value={nuevoEventoDescripcion}
-                                                            placeholder="Descripción del evento..."
-                                                            onIonInput={(e) => setNuevoEventoDescripcion(e.detail.value || '')}
-                                                        />
-                                                    </IonItem>
-                                                </IonCol>
-                                            </IonRow>
-                                            <IonRow>
-                                                <IonCol size="12">
-                                                    <div className="ubicacion-form-section">
-                                                        <IonLabel position="stacked">Ubicación del Evento</IonLabel>
-                                                        {nuevoEventoUbicacion ? (
-                                                            <div className="ubicacion-preview-card">
-                                                                <div className="ubicacion-info">
-                                                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="map-icon" />
-                                                                    <div className="text-container">
-                                                                        <p className="lugar-nombre">{nuevoEventoUbicacion.nombreLugar}</p>
-                                                                        <p className="lugar-coords">{nuevoEventoUbicacion.lat.toFixed(4)}, {nuevoEventoUbicacion.lng.toFixed(4)}</p>
+                                                        </IonItem>
+                                                    </IonCol>
+                                                    <IonCol size="12" sizeMd="6">
+                                                        <IonItem lines="none" className="form-item">
+                                                            <IonLabel position="stacked">Tipo de Evento</IonLabel>
+                                                            <IonSelect
+                                                                value={nuevoEventoTipo}
+                                                                onIonChange={(e) => setNuevoEventoTipo(e.detail.value)}
+                                                            >
+                                                                <IonSelectOption value="campamento">Campamento</IonSelectOption>
+                                                                <IonSelectOption value="retiro">Retiro</IonSelectOption>
+                                                                <IonSelectOption value="conferencia">Conferencia</IonSelectOption>
+                                                                <IonSelectOption value="otro">Otro</IonSelectOption>
+                                                            </IonSelect>
+                                                        </IonItem>
+                                                    </IonCol>
+                                                </IonRow>
+                                                <IonRow>
+                                                    <IonCol size="12" sizeMd="8">
+                                                        <IonItem lines="none" className="form-item date-range-picker-item">
+                                                            <IonLabel position="stacked">Rango de Fechas (Inicio - Fin) *</IonLabel>
+                                                            <div className="datepicker-container">
+                                                                <DatePicker
+                                                                    selectsRange={true}
+                                                                    startDate={nuevoEventoFechaInicio}
+                                                                    endDate={nuevoEventoFechaFin}
+                                                                    onChange={(update) => {
+                                                                        const [start, end] = update;
+                                                                        setNuevoEventoFechaInicio(start);
+                                                                        setNuevoEventoFechaFin(end);
+                                                                    }}
+                                                                    isClearable={true}
+                                                                    placeholderText="Selecciona el rango de fechas"
+                                                                    className="custom-datepicker"
+                                                                    locale={es}
+                                                                    dateFormat="dd/MM/yyyy"
+                                                                    portalId="datepicker-portal"
+                                                                />
+                                                            </div>
+                                                        </IonItem>
+                                                    </IonCol>
+                                                    <IonCol size="12" sizeMd="4">
+                                                        <IonItem lines="none" className="form-item">
+                                                            <IonLabel position="stacked">Precio Total *</IonLabel>
+                                                            <IonInput
+                                                                type="number"
+                                                                value={nuevoEventoPrecio}
+                                                                placeholder="0.00"
+                                                                onIonInput={(e) => setNuevoEventoPrecio(parseFloat(e.detail.value || '0'))}
+                                                            />
+                                                        </IonItem>
+                                                    </IonCol>
+                                                </IonRow>
+                                                <IonRow>
+                                                    <IonCol size="12">
+                                                        <IonItem lines="none" className="form-item">
+                                                            <IonLabel position="stacked">Descripción (opcional)</IonLabel>
+                                                            <IonInput
+                                                                value={nuevoEventoDescripcion}
+                                                                placeholder="Descripción del evento..."
+                                                                onIonInput={(e) => setNuevoEventoDescripcion(e.detail.value || '')}
+                                                            />
+                                                        </IonItem>
+                                                    </IonCol>
+                                                </IonRow>
+                                                <IonRow>
+                                                    <IonCol size="12">
+                                                        <div className="ubicacion-form-section">
+                                                            <IonLabel position="stacked">Ubicación del Evento</IonLabel>
+                                                            {nuevoEventoUbicacion ? (
+                                                                <div className="ubicacion-preview-card">
+                                                                    <div className="ubicacion-info">
+                                                                        <FontAwesomeIcon icon={faMapMarkerAlt} className="map-icon" />
+                                                                        <div className="text-container">
+                                                                            <p className="lugar-nombre">{nuevoEventoUbicacion.nombreLugar}</p>
+                                                                            <p className="lugar-coords">{nuevoEventoUbicacion.lat.toFixed(4)}, {nuevoEventoUbicacion.lng.toFixed(4)}</p>
+                                                                        </div>
                                                                     </div>
+                                                                    <IonButton
+                                                                        fill="clear"
+                                                                        size="small"
+                                                                        onClick={() => setShowLocationPicker(true)}
+                                                                    >
+                                                                        Cambiar
+                                                                    </IonButton>
                                                                 </div>
+                                                            ) : (
                                                                 <IonButton
-                                                                    fill="clear"
-                                                                    size="small"
+                                                                    expand="block"
+                                                                    fill="outline"
+                                                                    className="add-location-btn"
                                                                     onClick={() => setShowLocationPicker(true)}
                                                                 >
-                                                                    Cambiar
+                                                                    <FontAwesomeIcon icon={faMapMarkerAlt} style={{ marginRight: '8px' }} />
+                                                                    Añadir Lugar / Mapa
                                                                 </IonButton>
-                                                            </div>
-                                                        ) : (
-                                                            <IonButton
-                                                                expand="block"
-                                                                fill="outline"
-                                                                className="add-location-btn"
-                                                                onClick={() => setShowLocationPicker(true)}
-                                                            >
-                                                                <FontAwesomeIcon icon={faMapMarkerAlt} style={{ marginRight: '8px' }} />
-                                                                Añadir Lugar / Mapa
-                                                            </IonButton>
-                                                        )}
-                                                    </div>
-                                                </IonCol>
-                                            </IonRow>
-                                        </IonGrid>
-                                        <div className="modal-buttons">
-                                            <IonButton 
-                                                fill="outline" 
-                                                color="medium"
-                                                onClick={limpiarFormularioEvento}
-                                            >
-                                                Cancelar
-                                            </IonButton>
-                                            <IonButton 
-                                                onClick={handleCrearEvento}
-                                                disabled={loading}
-                                            >
-                                                {loading ? <IonSpinner name="crescent" /> : (isEditingEvento ? 'Actualizar Evento' : 'Crear Evento')}
-                                            </IonButton>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </IonCardContent>
-                        </IonCard>
+                                                            )}
+                                                        </div>
+                                                    </IonCol>
+                                                </IonRow>
+                                            </IonGrid>
+                                            <div className="modal-buttons">
+                                                <IonButton
+                                                    fill="outline"
+                                                    color="medium"
+                                                    onClick={limpiarFormularioEvento}
+                                                >
+                                                    Cancelar
+                                                </IonButton>
+                                                <IonButton
+                                                    onClick={handleCrearEvento}
+                                                    disabled={loading}
+                                                >
+                                                    {loading ? <IonSpinner name="crescent" /> : (isEditingEvento ? 'Actualizar Evento' : 'Crear Evento')}
+                                                </IonButton>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            </IonAccordion>
+                        </IonAccordionGroup>
                     </motion.div>
 
-                    {/* Mostrar contenido solo si hay evento seleccionado */}
                     {/* Mostrar contenido solo si hay evento seleccionado */}
                     {eventoSeleccionado && (
                         <>
@@ -426,6 +519,21 @@ const EventoRegistro: React.FC = () => {
                                                     </div>
                                                 )}
                                             </div>
+
+                                            {/* Botón para compartir ubicación */}
+                                            {eventoActual.ubicacion && (
+                                                <motion.div variants={buttonHoverVariants} whileHover="whileHover" whileTap="whileTap">
+                                                    <IonButton
+                                                        expand="block"
+                                                        fill="outline"
+                                                        onClick={handleCompartirUbicacion}
+                                                        className="share-location-btn"
+                                                    >
+                                                        <FontAwesomeIcon icon={faShareAlt} style={{ marginRight: '8px' }} />
+                                                        Compartir Ubicación
+                                                    </IonButton>
+                                                </motion.div>
+                                            )}
                                         </IonCardContent>
                                     </IonCard>
                                 </motion.div>
@@ -447,46 +555,38 @@ const EventoRegistro: React.FC = () => {
                                         </IonCardHeader>
                                         <IonCardContent>
                                             <div className="stats-grid">
-                                                <div className="stat-card total">
+                                                <motion.div className="stat-card total" variants={itemVariants}>
                                                     <div className="stat-icon">
                                                         {estadisticas.totalPersonas}
                                                     </div>
                                                     <div className="stat-content">
                                                         <p>Total Personas</p>
                                                     </div>
-                                                </div>
-                                                <div className="stat-card success">
+                                                </motion.div>
+                                                <motion.div className="stat-card success" variants={itemVariants}>
                                                     <div className="stat-icon">
                                                         {estadisticas.personasConAbono}
                                                     </div>
                                                     <div className="stat-content">
                                                         <p>Con Abono</p>
                                                     </div>
-                                                </div>
-                                                <div className="stat-card warning">
+                                                </motion.div>
+                                                <motion.div className="stat-card warning" variants={itemVariants}>
                                                     <div className="stat-icon">
                                                         {estadisticas.personasSinAbono}
                                                     </div>
                                                     <div className="stat-content">
                                                         <p>Sin Abono</p>
                                                     </div>
-                                                </div>
-                                                <div className="stat-card money">
+                                                </motion.div>
+                                                <motion.div className="stat-card money" variants={itemVariants}>
                                                     <div className="stat-icon">
                                                         ${estadisticas.montoTotalRecaudado.toLocaleString()}
                                                     </div>
                                                     <div className="stat-content">
                                                         <p>Recaudado</p>
                                                     </div>
-                                                </div>
-                                                <div className="stat-card danger full-width">
-                                                    <div className="stat-icon">
-                                                        ${estadisticas.montoPendiente.toLocaleString()}
-                                                    </div>
-                                                    <div className="stat-content">
-                                                        <p>Saldo Pendiente</p>
-                                                    </div>
-                                                </div>
+                                                </motion.div>
                                             </div>
 
 
@@ -540,6 +640,116 @@ const EventoRegistro: React.FC = () => {
                                                         </IonItem>
                                                     </IonCol>
                                                 </IonRow>
+                                                <IonRow>
+                                                    <IonCol size="12" sizeMd="6">
+                                                        <IonItem lines="none" className="form-item">
+                                                            <IonLabel position="stacked">Teléfono *</IonLabel>
+                                                            <IonInput
+                                                                type="tel"
+                                                                value={telefono}
+                                                                placeholder="6000-0000"
+                                                                onIonInput={(e) => handleTelefonoChange(e.detail.value || '')}
+                                                                maxlength={9} // 8 dígitos + 1 guion
+                                                            />
+                                                        </IonItem>
+                                                    </IonCol>
+                                                    <IonCol size="12" sizeMd="6">
+                                                        <IonItem lines="none" className="form-item">
+                                                            <IonLabel position="stacked">Tipo de Pago</IonLabel>
+                                                            <IonSelect
+                                                                value={tipoPago}
+                                                                onIonChange={(e) => setTipoPago(e.detail.value)}
+                                                            >
+                                                                <IonSelectOption value="efectivo">
+                                                                    <FontAwesomeIcon icon={faDollarSign} /> Efectivo
+                                                                </IonSelectOption>
+                                                                <IonSelectOption value="yappy">
+                                                                    <FontAwesomeIcon icon={faCreditCard} /> Yappy
+                                                                </IonSelectOption>
+                                                            </IonSelect>
+                                                        </IonItem>
+                                                    </IonCol>
+                                                </IonRow>
+
+                                                {/* Campo de comprobante si es Yappy */}
+                                                {tipoPago === 'yappy' && (
+                                                    <IonRow>
+                                                        <IonCol size="12">
+                                                            <div className="comprobante-header">
+                                                                <FontAwesomeIcon icon={faImage} className="header-icon" />
+                                                                <IonLabel>Comprobante de Yappy</IonLabel>
+                                                            </div>
+                                                            <div className="proof-upload-section">
+                                                                {!comprobanteYappy ? (
+                                                                    <div
+                                                                        className="upload-dropzone"
+                                                                        onClick={() => fileInputRef.current?.click()}
+                                                                    >
+                                                                        <input
+                                                                            type="file"
+                                                                            ref={fileInputRef}
+                                                                            accept="image/*"
+                                                                            hidden
+                                                                            onChange={async (e) => {
+                                                                                const file = e.target.files?.[0];
+                                                                                if (file) {
+                                                                                    try {
+                                                                                        const base64 = await handleUploadComprobante(file);
+                                                                                        setComprobanteYappy(base64);
+                                                                                    } catch (error) {
+                                                                                        console.error('Error al cargar imagen:', error);
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                        <div className="upload-content">
+                                                                            <div className="icon-circle">
+                                                                                <FontAwesomeIcon icon={faCloudUploadAlt} />
+                                                                            </div>
+                                                                            <p className="upload-text">Sube tu comprobante</p>
+                                                                            <span className="upload-hint">Toca para seleccionar imagen</span>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <motion.div
+                                                                        className="proof-preview-container premium-preview"
+                                                                        initial={{ opacity: 0, scale: 0.95 }}
+                                                                        animate={{ opacity: 1, scale: 1 }}
+                                                                    >
+                                                                        <div className="image-wrapper">
+                                                                            <img
+                                                                                src={comprobanteYappy}
+                                                                                alt="Comprobante"
+                                                                                className="proof-image"
+                                                                            />
+                                                                            <div className="image-overlay">
+                                                                                <IonButton
+                                                                                    fill="clear"
+                                                                                    color="light"
+                                                                                    onClick={() => setComprobanteYappy(null)}
+                                                                                    title="Eliminar imagen"
+                                                                                >
+                                                                                    <FontAwesomeIcon icon={faTrash} />
+                                                                                </IonButton>
+                                                                            </div>
+                                                                        </div>
+                                                                        <IonButton
+                                                                            size="default"
+                                                                            fill="outline"
+                                                                            color="danger"
+                                                                            className="delete-proof-btn-large"
+                                                                            onClick={() => setComprobanteYappy(null)}
+                                                                        >
+                                                                            <FontAwesomeIcon icon={faTrash} style={{ marginRight: '8px' }} />
+                                                                            Eliminar Comprobante
+                                                                        </IonButton>
+                                                                    </motion.div>
+                                                                )}
+                                                            </div>
+                                                        </IonCol>
+                                                    </IonRow>
+                                                )}
+
                                                 <IonRow>
                                                     <IonCol size="12" sizeMd="4">
                                                         <IonItem lines="none" className="form-item toggle-item">
@@ -615,10 +825,10 @@ const EventoRegistro: React.FC = () => {
                                                                 disabled={loading}
                                                             >
                                                                 {loading ? (
-                                                                    <>
+                                                                    <div className="loading-container">
                                                                         <IonSpinner name="crescent" />
-                                                                        <span style={{ marginLeft: '10px' }}>Procesando...</span>
-                                                                    </>
+                                                                        <span>Procesando...</span>
+                                                                    </div>
                                                                 ) : (
                                                                     <>
                                                                         <FontAwesomeIcon icon={isEditing ? faEdit : faUserPlus} style={{ marginRight: '8px' }} />
@@ -660,86 +870,20 @@ const EventoRegistro: React.FC = () => {
                                             Personas Registradas ({personas.length})
                                         </IonCardTitle>
                                     </IonCardHeader>
-                                    <IonCardContent style={{ padding: 0 }}>
-                                        <div className="search-container">
-                                            <IonSearchbar
-                                                value={searchTerm}
-                                                onIonInput={(e) => setSearchTerm(e.detail.value || '')}
-                                                placeholder="Buscar por nombre, apellido o equipo..."
-                                                animated={true}
-                                            />
-                                        </div>
-
+                                    <IonCardContent className="no-padding">
                                         {loadingPersonas ? (
-                                            <div style={{ textAlign: 'center', padding: '40px' }}>
+                                            <div className="centered-loading">
                                                 <IonSpinner name="crescent" />
                                                 <p>Cargando personas...</p>
                                             </div>
-                                        ) : personas.length > 0 ? (
-                                            <div className="personas-table-container">
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                                <th>Nombre Completo</th>
-                                                            <th>Edad</th>
-                                                            <th>Abono</th>
-                                                            <th>Monto</th>
-                                                            <th>Equipo</th>
-                                                            <th>Acciones</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {personas.map((persona) => (
-                                                            <tr key={persona._id}>
-                                                                <td className="nombre-cell">
-                                                                    {persona.nombre} {persona.apellido === '.' ? '' : persona.apellido}
-                                                                </td>
-                                                                <td>{persona.edad} años</td>
-                                                                <td>
-                                                                    <span className={`abono-badge ${persona.abono ? 'abono-si' : 'abono-no'}`}>
-                                                                        <FontAwesomeIcon icon={persona.abono ? faCheck : faTimes} />
-                                                                        {persona.abono ? 'Sí' : 'No'}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="monto-cell">
-                                                                    ${persona.montoAbono?.toFixed(2) || '0.00'}
-                                                                </td>
-                                                                <td>
-                                                                    {persona.equipo ? (
-                                                                        <span className="equipo-badge">{persona.equipo}</span>
-                                                                    ) : '-'}
-                                                                </td>
-                                                                <td>
-                                                                    <div className="action-buttons">
-                                                                        <IonButton
-                                                                            size="small"
-                                                                            fill="clear"
-                                                                            color="primary"
-                                                                            onClick={() => handleEditarPersona(persona._id!)}
-                                                                        >
-                                                                            <FontAwesomeIcon icon={faEdit} />
-                                                                        </IonButton>
-                                                                        <IonButton
-                                                                            size="small"
-                                                                            fill="clear"
-                                                                            color="danger"
-                                                                            onClick={() => handleEliminarPersona(persona._id)}
-                                                                        >
-                                                                            <FontAwesomeIcon icon={faTrash} />
-                                                                        </IonButton>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
                                         ) : (
-                                            <div className="empty-state">
-                                                <FontAwesomeIcon icon={faUsers} size="3x" />
-                                                <h3>No hay personas registradas</h3>
-                                                <p>Agrega la primera persona al evento usando el formulario de arriba</p>
-                                            </div>
+                                                <PersonasTable
+                                                    personas={personas}
+                                                    onVerDetalle={handleVerDetalle}
+                                                    onEditar={handleEditarPersona}
+                                                    onEliminar={handleEliminarPersona}
+                                                    loading={loadingPersonas}
+                                                />
                                         )}
                                     </IonCardContent>
                                 </IonCard>
@@ -761,15 +905,155 @@ const EventoRegistro: React.FC = () => {
                     )}
                 </div>
 
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={toastMessage}
-                    duration={3000}
-                    color={toastColor}
-                    position="top"
-                />
-                
+
+                {/* Modal de Detalles de Persona */}
+                <GlobalModal
+                    isOpen={showDetallePersona}
+                    onClose={() => setShowDetallePersona(false)}
+                    title="Detalles del Registro"
+                    icon={faUserPlus}
+                >
+                    {personaDetalle ? (
+                        <IonList lines="none">
+                            <IonItem>
+                                <IonLabel>
+                                    <h2>
+                                        <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '8px' }} />
+                                        Nombre Completo
+                                    </h2>
+                                    <p>{personaDetalle.nombre} {personaDetalle.apellido !== '.' ? personaDetalle.apellido : ''}</p>
+                                </IonLabel>
+                            </IonItem>
+
+                            <IonItem>
+                                <IonLabel>
+                                    <h2>
+                                        <FontAwesomeIcon icon={faClock} style={{ marginRight: '8px' }} />
+                                        Edad
+                                    </h2>
+                                    <p>{personaDetalle.edad} años</p>
+                                </IonLabel>
+                            </IonItem>
+
+                            <IonItem>
+                                <IonLabel>
+                                    <h2>
+                                        <FontAwesomeIcon icon={faPhone} style={{ marginRight: '8px' }} />
+                                        Teléfono
+                                    </h2>
+                                    <p>
+                                        <a href={`tel:${personaDetalle.telefono}`}>
+                                            <FontAwesomeIcon icon={faPhone} />
+                                            {personaDetalle.telefono}
+                                        </a>
+                                    </p>
+                                </IonLabel>
+                            </IonItem>
+
+                            <IonItem>
+                                <IonLabel>
+                                    <h2>
+                                        <FontAwesomeIcon icon={faCreditCard} style={{ marginRight: '8px' }} />
+                                        Tipo de Pago
+                                    </h2>
+                                    <div className="abono-status">
+                                        {personaDetalle.tipoPago === 'yappy' ? (
+                                            <span className="status-badge primary">
+                                                <FontAwesomeIcon icon={faCreditCard} /> Yappy
+                                            </span>
+                                        ) : (
+                                            <span className="status-badge success">
+                                                <FontAwesomeIcon icon={faDollarSign} /> Efectivo
+                                            </span>
+                                        )}
+                                    </div>
+                                </IonLabel>
+                            </IonItem>
+
+                            {personaDetalle.comprobanteYappy && (
+                                <IonItem>
+                                    <IonLabel>
+                                        <h2>
+                                            <FontAwesomeIcon icon={faImage} style={{ marginRight: '8px' }} />
+                                            Comprobante de Pago
+                                        </h2>
+                                        <div className="image-container">
+                                            <img
+                                                src={personaDetalle.comprobanteYappy}
+                                                alt="Comprobante"
+                                                onClick={() => window.open(personaDetalle.comprobanteYappy || undefined, '_blank')}
+                                            />
+                                            <p>Toca la imagen para ampliar</p>
+                                        </div>
+                                    </IonLabel>
+                                </IonItem>
+                            )}
+
+                            <IonItem>
+                                <IonLabel>
+                                    <h2>
+                                        <FontAwesomeIcon icon={faUsers} style={{ marginRight: '8px' }} />
+                                        Equipo
+                                    </h2>
+                                    <div>
+                                        {personaDetalle.equipo ? (
+                                            <span className="equipo-badge">{personaDetalle.equipo}</span>
+                                        ) : (
+                                            <span className="text-muted-italics">Sin equipo asignado</span>
+                                        )}
+                                    </div>
+                                </IonLabel>
+                            </IonItem>
+
+                            <IonItem>
+                                <IonLabel>
+                                    <h2>
+                                        <FontAwesomeIcon icon={faMoneyBillWave} style={{ marginRight: '8px' }} />
+                                        Información de Abono
+                                    </h2>
+                                    <div className="abono-status">
+                                        {personaDetalle.abono ? (
+                                            <div className="flex-abono-detail">
+                                                <span className="status-badge success">
+                                                    <FontAwesomeIcon icon={faCheck} /> ABONADO
+                                                </span>
+                                                <span className="abono-amount">
+                                                    ${personaDetalle.montoAbono?.toFixed(2) || '0.00'}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="status-badge danger">
+                                                <FontAwesomeIcon icon={faTimes} /> PENDIENTE
+                                            </span>
+                                        )}
+                                    </div>
+                                </IonLabel>
+                            </IonItem>
+
+                            {personaDetalle.createdAt && (
+                                <IonItem>
+                                    <IonLabel>
+                                        <h2>
+                                            <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '8px' }} />
+                                            Fecha de Registro
+                                        </h2>
+                                        <p className="text-muted-p">
+                                            {new Date(personaDetalle.createdAt).toLocaleString('es-ES', {
+                                                day: '2-digit', month: 'long', year: 'numeric',
+                                                hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </p>
+                                    </IonLabel>
+                                </IonItem>
+                            )}
+                        </IonList>
+                    ) : (
+                        <div className="modal-empty-state">
+                            No hay información disponible
+                        </div>
+                    )}
+                </GlobalModal>
+
                 {/* Modal de Mapa */}
                 <LocationPicker
                     isOpen={showLocationPicker}

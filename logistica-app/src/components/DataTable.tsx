@@ -81,20 +81,27 @@ function DataTable<T>({ data, columns }: DataTableProps<T>) {
                         ))}
                     </thead>
                     <tbody>
-                        {table.getRowModel().rows.map((row, index) => (
-                            <motion.tr
+                        {table.getRowModel().rows.map((row) => (
+                            <tr
                                 key={row.id}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                whileHover={{ scale: 1.005, backgroundColor: 'var(--ion-color-light)' }}
+                                className="datatable-row"
                             >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
+                                    <td
+                                        key={cell.id}
+                                        onClick={(e) => {
+                                            // Permitir que los clics en botones/enlaces se propaguen normalmente
+                                            const target = e.target as HTMLElement;
+                                            if (target.tagName === 'BUTTON' || target.closest('button') || target.closest('a')) {
+                                                return;
+                                            }
+                                        }}
+                                        style={{ cursor: 'default' }}
+                                    >
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}
-                            </motion.tr>
+                            </tr>
                         ))}
                     </tbody>
                 </table>

@@ -14,7 +14,7 @@ import { useHistory } from 'react-router-dom'; // Agrega si no está
 import { PersonaRegistro } from '../../types/types';
 
 const AddRecord: React.FC = () => {
-    const { fecha, setFecha, cantidad, setCantidad, area, setArea, tipo, setTipo, subArea, setSubArea, iglesia, setIglesia, registros, showToast, setShowToast, toastMessage, toastColor, loading, loadingAreas, tipoVista, setTipoVista, iglesias, loadingIglesias, areasPersonas, areasMateriales, loadingAreasPersonas, loadingAreasMateriales, totalCantidad, isEditing, editingRegistroId, viewGrouped, setViewGrouped, registrosAgrupados, searchTerm, setSearchTerm, filteredRegistros, filteredRegistrosAgrupados, handleAddRecord, handleDeleteRecord, handleEditRecord, handleCancelEdit, handleRefresh } = useAddRecord();
+    const { fecha, setFecha, cantidad, setCantidad, area, setArea, tipo, setTipo, subArea, setSubArea, iglesia, setIglesia, registros, loading, loadingAreas, tipoVista, setTipoVista, iglesias, loadingIglesias, areasPersonas, areasMateriales, loadingAreasPersonas, loadingAreasMateriales, totalCantidad, isEditing, editingRegistroId, viewGrouped, setViewGrouped, registrosAgrupados, searchTerm, setSearchTerm, filteredRegistros, filteredRegistrosAgrupados, handleAddRecord, handleDeleteRecord, handleEditRecord, handleCancelEdit, handleRefresh } = useAddRecord();
     const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
     const history = useHistory(); // Agrega
@@ -567,14 +567,6 @@ const AddRecord: React.FC = () => {
                     )}
                 </div>
 
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={toastMessage}
-                    duration={3000}
-                    color={toastColor}
-                    position="top"
-                />
             </IonContent>
         </IonPage>
     );

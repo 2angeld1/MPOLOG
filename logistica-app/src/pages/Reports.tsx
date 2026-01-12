@@ -14,7 +14,7 @@ import { useIonViewWillEnter } from '@ionic/react';
 import { useHistory } from 'react-router-dom'; // Agrega si no está
 
 const Reports: React.FC = () => {
-    const { periodo, setPeriodo, loading, showToast, setShowToast, toastMessage, descargarReporte } = useReports();
+    const { periodo, setPeriodo, loading, descargarReporte } = useReports();
     const { toolbarTitle, setToolbarTitle } = useData();
     const { logout, user } = useAuth();
     const history = useHistory(); // Agrega
@@ -130,14 +130,6 @@ const Reports: React.FC = () => {
                     </motion.div>
                 </motion.div>
 
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={toastMessage}
-                    duration={3000}
-                    position="top"
-                    color={toastMessage.includes('Error') ? 'danger' : 'success'}
-                />
             </IonContent>
         </IonPage>
     );

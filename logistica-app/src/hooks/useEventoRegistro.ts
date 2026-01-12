@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { eventoService } from '../services/api';
+import { useToast } from '../context/ToastContext';
 import { Evento, EventoPersona, EventoEstadisticas, Ubicacion } from '../../types/types';
 
 export const useEventoRegistro = () => {
@@ -20,8 +21,11 @@ export const useEventoRegistro = () => {
     const [nombre, setNombre] = useState('');
     const [apellido, setApellido] = useState('');
     const [edad, setEdad] = useState<number | undefined>(undefined);
+    const [telefono, setTelefono] = useState('');
     const [abono, setAbono] = useState(false);
     const [montoAbono, setMontoAbono] = useState<number | undefined>(undefined);
+    const [tipoPago, setTipoPago] = useState<'efectivo' | 'yappy'>('efectivo');
+    const [comprobanteYappy, setComprobanteYappy] = useState<string | null>(null);
     const [equipo, setEquipo] = useState('');
 
     // Estado del formulario de evento (para crear)
@@ -41,15 +45,15 @@ export const useEventoRegistro = () => {
     const [isEditingEvento, setIsEditingEvento] = useState(false);
     const [editingEventoId, setEditingEventoId] = useState<string | null>(null);
     const [showRegistrarPersona, setShowRegistrarPersona] = useState(false);
+    const [showDetallePersona, setShowDetallePersona] = useState(false);
+    const [personaDetalle, setPersonaDetalle] = useState<EventoPersona | null>(null);
 
     // Estado de búsqueda
     const [searchTerm, setSearchTerm] = useState('');
 
     // Estado de UI
     const [loading, setLoading] = useState(false);
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [toastColor, setToastColor] = useState<'success' | 'danger' | 'warning'>('success');
+    const { showToast } = useToast();
 
     // Estado de sugerencias de equipo
     const [showEquipoSugerencias, setShowEquipoSugerencias] = useState(false);
@@ -111,17 +115,18 @@ export const useEventoRegistro = () => {
     };
 
     const mostrarToast = (message: string, color: 'success' | 'danger' | 'warning') => {
-        setToastMessage(message);
-        setToastColor(color);
-        setShowToast(true);
+        showToast(message, color);
     };
 
     const limpiarFormularioPersona = () => {
         setNombre('');
         setApellido('');
         setEdad(undefined);
+        setTelefono('');
         setAbono(false);
         setMontoAbono(undefined);
+        setTipoPago('efectivo');
+        setComprobanteYappy(null);
         setEquipo('');
         setIsEditing(false);
         setEditingPersonaId(null);
@@ -206,8 +211,15 @@ export const useEventoRegistro = () => {
             mostrarToast('Selecciona un evento primero', 'warning');
             return;
         }
-        if (!nombre || !edad) {
-            mostrarToast('Por favor completa el nombre completo y la edad', 'warning');
+        if (!nombre || !edad || !telefono) {
+            mostrarToast('Por favor completa el nombre completo, edad y teléfono', 'warning');
+            return;
+        }
+
+        // Validación de teléfono panameño (celular: 8 dígitos empieza con 6, fijos: 7 dígitos)
+        const phoneRegex = /^(\+?507)?\s?(6\d{3}-?\d{4}|[235789]\d{2}-?\d{4})$/;
+        if (!phoneRegex.test(telefono.replace(/\s/g, ''))) {
+            mostrarToast('El formato del teléfono no es válido para Panamá (Ej: 6123-4567 o 234-5678)', 'warning');
             return;
         }
 
@@ -232,8 +244,11 @@ export const useEventoRegistro = () => {
                     nombre: nombreFinal,
                     apellido: apellidoFinal,
                     edad,
+                    telefono,
                     abono,
                     montoAbono: abono ? montoAbono : 0,
+                    tipoPago,
+                    comprobanteYappy,
                     equipo: equipoFinal
                 });
                 mostrarToast('Registro actualizado exitosamente', 'success');
@@ -242,8 +257,11 @@ export const useEventoRegistro = () => {
                     nombre: nombreFinal,
                     apellido: apellidoFinal,
                     edad,
+                    telefono,
                     abono,
                     montoAbono: abono ? montoAbono : 0,
+                    tipoPago,
+                    comprobanteYappy,
                     equipo: equipoFinal
                 });
                 mostrarToast('Persona registrada exitosamente', 'success');
@@ -267,8 +285,11 @@ export const useEventoRegistro = () => {
             setNombre(`${persona.nombre} ${persona.apellido === '.' ? '' : persona.apellido}`.trim());
             setApellido(''); // Ya no se usa individualmente
             setEdad(persona.edad);
+            setTelefono(persona.telefono || '');
             setAbono(persona.abono);
             setMontoAbono(persona.montoAbono);
+            setTipoPago(persona.tipoPago || 'efectivo');
+            setComprobanteYappy(persona.comprobanteYappy || null);
             setEquipo(persona.equipo || '');
             setIsEditing(true);
             setEditingPersonaId(personaId);
@@ -363,6 +384,90 @@ export const useEventoRegistro = () => {
         setShowEquipoSugerencias(false);
     };
 
+    // Handler para ver detalles de una persona
+    const handleVerDetalle = (personaId: string) => {
+        const persona = personas.find(p => p._id === personaId);
+        if (persona) {
+            setPersonaDetalle(persona);
+            setShowDetallePersona(true);
+        }
+    };
+
+    // Handler para compartir ubicación del evento
+    const handleCompartirUbicacion = async () => {
+        const evento = eventos.find(e => e._id === eventoSeleccionado);
+        if (!evento || !evento.ubicacion) {
+            mostrarToast('Este evento no tiene ubicación configurada', 'warning');
+            return;
+        }
+
+        const { lat, lng, nombreLugar } = evento.ubicacion;
+        const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+        const shareText = `📍 ${evento.nombre}\n📍 Ubicación: ${nombreLugar}\n${googleMapsUrl}`;
+
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: evento.nombre,
+                    text: shareText,
+                });
+            } else {
+                // Fallback: copiar al portapapeles
+                await navigator.clipboard.writeText(shareText);
+                mostrarToast('Ubicación copiada al portapapeles', 'success');
+            }
+        } catch (error) {
+            console.error('Error al compartir:', error);
+            // Intentar copiar al portapapeles como fallback
+            try {
+                await navigator.clipboard.writeText(shareText);
+                mostrarToast('Ubicación copiada al portapapeles', 'success');
+            } catch (clipboardError) {
+                mostrarToast('No se pudo compartir la ubicación', 'danger');
+            }
+        }
+    };
+
+    // Handler para subir comprobante de Yappy (simulado - en producción usar servicio de almacenamiento)
+    const handleUploadComprobante = (file: File) => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                // En producción, aquí subirias a un servicio como AWS S3, Cloudinary, etc.
+                // Por ahora, guardamos como base64
+                resolve(reader.result as string);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
+    // Handler para formatear teléfono automáticamente (Panamá)
+    const handleTelefonoChange = (value: string) => {
+        // Solo permitir números
+        const digits = value.replace(/\D/g, '');
+
+        let formatted = '';
+        if (digits.startsWith('6')) {
+            // Formato 6XXX-XXXX (8 dígitos)
+            const d = digits.slice(0, 8);
+            if (d.length > 4) {
+                formatted = `${d.slice(0, 4)}-${d.slice(4)}`;
+            } else {
+                formatted = d;
+            }
+        } else {
+            // Formato XXX-XXXX (7 dígitos)
+            const d = digits.slice(0, 7);
+            if (d.length > 3) {
+                formatted = `${d.slice(0, 3)}-${d.slice(3)}`;
+            } else {
+                formatted = d;
+            }
+        }
+        setTelefono(formatted);
+    };
+
     return {
         // Eventos
         eventos,
@@ -407,10 +512,17 @@ export const useEventoRegistro = () => {
         setApellido,
         edad,
         setEdad,
+        telefono,
+        setTelefono,
+        handleTelefonoChange,
         abono,
         setAbono,
         montoAbono,
         setMontoAbono,
+        tipoPago,
+        setTipoPago,
+        comprobanteYappy,
+        setComprobanteYappy,
         equipo,
         setEquipo,
         
@@ -419,9 +531,15 @@ export const useEventoRegistro = () => {
         handleEditarPersona,
         handleEliminarPersona,
         handleCancelarEdicion,
+        handleVerDetalle,
+        handleCompartirUbicacion,
+        handleUploadComprobante,
         isEditing,
         showRegistrarPersona,
         setShowRegistrarPersona,
+        showDetallePersona,
+        setShowDetallePersona,
+        personaDetalle,
         
         // Estadísticas
         estadisticas,
@@ -433,10 +551,6 @@ export const useEventoRegistro = () => {
         
         // UI
         loading,
-        showToast,
-        setShowToast,
-        toastMessage,
-        toastColor,
         handleRefresh,
 
         // Sugerencias de equipo

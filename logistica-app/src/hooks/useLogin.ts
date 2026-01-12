@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export const useLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const history = useHistory();
     const { login } = useAuth();
@@ -15,8 +15,7 @@ export const useLogin = () => {
         e?.preventDefault();
 
         if (!email || !password) {
-            setToastMessage('Por favor ingresa email y contraseña');
-            setShowToast(true);
+            showToast('Por favor ingresa email y contraseña', 'warning');
             return;
         }
 
@@ -25,8 +24,7 @@ export const useLogin = () => {
             await login(email, password);
             // El contexto maneja el toast de éxito y la redirección
         } catch (error: any) {
-            setToastMessage(error.message || 'Error al iniciar sesión');
-            setShowToast(true);
+            showToast(error.message || 'Error al iniciar sesión', 'danger');
         } finally {
             setLoading(false);
         }
@@ -38,9 +36,6 @@ export const useLogin = () => {
         setEmail,
         password,
         setPassword,
-        showToast,
-        setShowToast,
-        toastMessage,
         loading,
         history,
         // Funciones

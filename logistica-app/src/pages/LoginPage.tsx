@@ -8,7 +8,7 @@ import '../styles/LoginPage.scss';
 import { containerVariants, itemVariants, logoVariants } from '../animations';
 
 const LoginPage: React.FC = () => {
-    const { email, setEmail, password, setPassword, showToast, setShowToast, toastMessage, loading, history, handleLogin } = useLogin();
+    const { email, setEmail, password, setPassword, loading, history, handleLogin } = useLogin();
 
     return (
         <IonPage>
@@ -121,14 +121,6 @@ const LoginPage: React.FC = () => {
                     </form>
                 </motion.div>
 
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={toastMessage}
-                    duration={3000}
-                    color="danger"
-                    position="top"
-                />
             </IonContent>
         </IonPage>
     );

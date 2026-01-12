@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'; // Cambia useNavigate por useHistory (v5)
 import { authService } from '../services/api';
+import { useToast } from './ToastContext';
 import { User, AuthContextType } from '../../types/types'; // Cambia la ruta al archivo central
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [token, setToken] = useState<string | null>(null);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null); // Agrega para temporizador
     const history = useHistory(); // Cambia navigate por history
+    const { showToast } = useToast();
 
     // Función para iniciar temporizador de inactividad
     const startInactivityTimer = () => {
@@ -73,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
             startInactivityTimer(); // Inicia temporizador al loguear
+            showToast(`Bienvenido de nuevo, ${response.user.nombre}`, 'success');
             history.push('/tabs');
         } catch (error: any) {
             console.log('❌ Error en login:', error);

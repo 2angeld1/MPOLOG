@@ -120,7 +120,7 @@ export const eliminarEvento = async (req: Request, res: Response) => {
 export const registrarPersona = async (req: Request, res: Response) => {
     try {
         const { eventoId } = req.params;
-        const { nombre, apellido, edad, abono, montoAbono, equipo } = req.body;
+        const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo } = req.body;
         const userId = (req as any).userId;
 
         // Verificar que el evento existe y está activo
@@ -137,8 +137,11 @@ export const registrarPersona = async (req: Request, res: Response) => {
             nombre,
             apellido,
             edad,
+            telefono,
             abono: abono || false,
             montoAbono: abono ? (montoAbono || 0) : 0,
+            tipoPago: tipoPago || 'efectivo',
+            comprobanteYappy,
             equipo,
             usuario: userId
         });
@@ -185,7 +188,7 @@ export const obtenerPersonasEvento = async (req: Request, res: Response) => {
 export const actualizarPersona = async (req: Request, res: Response) => {
     try {
         const { eventoId, personaId } = req.params;
-        const { nombre, apellido, edad, abono, montoAbono, equipo } = req.body;
+        const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo } = req.body;
 
         const persona = await EventoPersona.findOneAndUpdate(
             { _id: personaId, evento: eventoId },
@@ -193,8 +196,11 @@ export const actualizarPersona = async (req: Request, res: Response) => {
                 nombre,
                 apellido,
                 edad,
+                telefono,
                 abono: abono || false,
                 montoAbono: abono ? (montoAbono || 0) : 0,
+                tipoPago: tipoPago || 'efectivo',
+                comprobanteYappy,
                 equipo
             },
             { new: true, runValidators: true }

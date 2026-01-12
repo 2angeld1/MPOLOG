@@ -21,8 +21,6 @@ const UserMaintenance: React.FC = () => {
         setShowRoleAlert,
         selectedUser,
         setSelectedUser,
-        toastConfig,
-        setToastConfig,
         alertInputs,
         setAlertInputs,
         handleLogout,
@@ -96,13 +94,6 @@ const UserMaintenance: React.FC = () => {
                             }
                         }
                     ]}
-                />
-                <IonToast
-                    isOpen={toastConfig.isOpen}
-                    onDidDismiss={() => setToastConfig({ ...toastConfig, isOpen: false })}
-                    message={toastConfig.message}
-                    color={toastConfig.color}
-                    duration={3000}
                 />
             </IonContent>
         </IonPage>

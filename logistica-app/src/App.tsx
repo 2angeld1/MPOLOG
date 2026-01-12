@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import { ThemeProvider } from './context/ThemeContext';
 import { DataProvider } from './context/DataContext'; // Agrega import
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -60,29 +61,31 @@ const App: React.FC = () => (
   <ThemeProvider>
     <IonApp>
       <IonReactRouter>
-        <DataProvider>
-          <AuthProvider>
-            <IonRouterOutlet>
-              <Route exact path="/login">
-                <LoginPage />
-              </Route>
-              <Route exact path="/register">
-                <RegisterPage />
-              </Route>
-              <Route exact path="/forgot-password">
-                <ForgotPasswordPage />
-              </Route>
-              <Route exact path="/reset-password">
-                <ResetPasswordPage />
-              </Route>
-              {/* Elimina la ruta duplicada y usa solo PrivateRoute */}
-              <PrivateRoute path="/tabs" component={Tabs} />
-              <Route exact path="/">
-                <Redirect to="/login" />
-              </Route>
-            </IonRouterOutlet>
-          </AuthProvider>
-        </DataProvider>
+        <ToastProvider>
+          <DataProvider>
+            <AuthProvider>
+              <IonRouterOutlet>
+                <Route exact path="/login">
+                  <LoginPage />
+                </Route>
+                <Route exact path="/register">
+                  <RegisterPage />
+                </Route>
+                <Route exact path="/forgot-password">
+                  <ForgotPasswordPage />
+                </Route>
+                <Route exact path="/reset-password">
+                  <ResetPasswordPage />
+                </Route>
+                {/* Elimina la ruta duplicada y usa solo PrivateRoute */}
+                <PrivateRoute path="/tabs" component={Tabs} />
+                <Route exact path="/">
+                  <Redirect to="/login" />
+                </Route>
+              </IonRouterOutlet>
+            </AuthProvider>
+          </DataProvider>
+        </ToastProvider>
       </IonReactRouter>
     </IonApp>
   </ThemeProvider>

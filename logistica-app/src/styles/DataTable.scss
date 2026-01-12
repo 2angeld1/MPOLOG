@@ -1,5 +1,7 @@
 .datatable-container {
     width: 100%;
+    position: relative;
+        pointer-events: auto;
 }
 
 .datatable-header {
@@ -16,6 +18,9 @@
 
 .table-wrapper {
     overflow-x: auto;
+    position: relative;
+        pointer-events: auto;
+        width: 100%;
 
     &::-webkit-scrollbar {
         height: 8px;
@@ -78,6 +83,11 @@
         tr {
             border-bottom: 1px solid var(--ion-color-light-shade);
             transition: all 0.2s ease;
+            pointer-events: auto;
+            
+                &:hover {
+                    background: var(--ion-color-light-tint);
+                }
 
             &:last-child {
                 border-bottom: none;
@@ -87,6 +97,7 @@
                 padding: 16px 20px;
                 color: var(--ion-text-color);
                 font-size: 0.95rem;
+                pointer-events: auto;
             }
         }
     }

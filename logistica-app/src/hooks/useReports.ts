@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 
 export const useReports = () => {
     const [periodo, setPeriodo] = useState<string>('mes');
     const [loading, setLoading] = useState(false);
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
+    const { showToast } = useToast();
     const { setToolbarTitle } = useData();
 
     useEffect(() => {
@@ -31,12 +31,10 @@ export const useReports = () => {
             link.click();
             link.remove();
 
-            setToastMessage(`Reporte ${formato.toUpperCase()} descargado correctamente`);
-            setShowToast(true);
+            showToast(`Reporte ${formato.toUpperCase()} descargado correctamente`, 'success');
         } catch (error: any) {
             console.error('Error al descargar reporte:', error);
-            setToastMessage('Error al descargar el reporte');
-            setShowToast(true);
+            showToast('Error al descargar el reporte', 'danger');
         } finally {
             setLoading(false);
         }
@@ -47,9 +45,6 @@ export const useReports = () => {
         periodo,
         setPeriodo,
         loading,
-        showToast,
-        setShowToast,
-        toastMessage,
         // Funciones
         descargarReporte,
     };

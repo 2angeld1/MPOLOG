@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 import { useHistory } from 'react-router-dom';
 import { userService, roleService } from '../services/api';
 import { useIonViewWillEnter } from '@ionic/react';
@@ -17,17 +18,13 @@ export const staticRoles = [
 export const useUserMaintenance = () => {
     const { token, user, logout } = useAuth();
     const { setToolbarTitle } = useData();
+    const { showToast } = useToast();
     const history = useHistory();
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showRoleAlert, setShowRoleAlert] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [toastConfig, setToastConfig] = useState<{ isOpen: boolean; message: string; color: string }>({
-        isOpen: false,
-        message: '',
-        color: 'success'
-    });
     const [roles, setRoles] = useState<any[]>([]);
     const [alertInputs, setAlertInputs] = useState<any[]>([]);
 
@@ -69,21 +66,13 @@ export const useUserMaintenance = () => {
         setLoading(true);
         try {
             await userService.updateUserRole(selectedUser._id, roleValue);
-            setToastConfig({
-                isOpen: true,
-                message: `Rol de ${selectedUser.nombre} actualizado a ${roleValue}`,
-                color: 'success'
-            });
+            showToast(`Rol de ${selectedUser.nombre} actualizado a ${roleValue}`, 'success');
             await fetchData();
             setShowRoleAlert(false);
             setSelectedUser(null);
         } catch (err: any) {
             console.error(err);
-            setToastConfig({
-                isOpen: true,
-                message: err.response?.data?.message || 'Error al actualizar el rol',
-                color: 'danger'
-            });
+            showToast(err.response?.data?.message || 'Error al actualizar el rol', 'danger');
         } finally {
             setLoading(false);
         }
@@ -116,8 +105,6 @@ export const useUserMaintenance = () => {
         setShowRoleAlert,
         selectedUser,
         setSelectedUser,
-        toastConfig,
-        setToastConfig,
         alertInputs,
         setAlertInputs,
         handleLogout,

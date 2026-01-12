@@ -38,6 +38,10 @@ export interface ThemeContextType {
     toggleTheme: () => void;
 }
 
+export interface ToastContextType {
+    showToast: (message: string, color?: 'success' | 'danger' | 'warning' | 'primary' | 'medium') => void;
+}
+
 export interface PersonaRegistro {
     _id?: string;
     id: number;
@@ -92,8 +96,11 @@ export interface EventoPersona {
     nombre: string;
     apellido: string;
     edad: number;
+    telefono: string;
     abono: boolean;
     montoAbono: number;
+    tipoPago: 'efectivo' | 'yappy';
+    comprobanteYappy?: string | null;
     equipo?: string;
     createdAt?: string;
 }
