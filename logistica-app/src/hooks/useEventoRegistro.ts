@@ -428,17 +428,44 @@ export const useEventoRegistro = () => {
         }
     };
 
-    // Handler para subir comprobante de Yappy (simulado - en producción usar servicio de almacenamiento)
+    // Handler para subir comprobante de Yappy con compresión
     const handleUploadComprobante = (file: File) => {
         return new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                // En producción, aquí subirias a un servicio como AWS S3, Cloudinary, etc.
-                // Por ahora, guardamos como base64
-                resolve(reader.result as string);
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1000;
+                    const MAX_HEIGHT = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    // Comprimir a 0.7 de calidad (suficiente para comprobantes)
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(dataUrl);
+                };
             };
             reader.onerror = reject;
-            reader.readAsDataURL(file);
         });
     };
 

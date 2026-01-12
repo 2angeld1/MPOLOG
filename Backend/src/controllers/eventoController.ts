@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Evento, { IEvento } from '../models/Evento';
 import EventoPersona, { IEventoPersona } from '../models/EventoPersona';
+import { uploadImage } from '../utils/imageUpload';
 
 // ==================== EVENTOS ====================
 
@@ -132,6 +133,12 @@ export const registrarPersona = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'El evento no está activo para registro' });
         }
 
+        // Subir comprobante a Cloudinary si existe (y es base64)
+        let comprobanteUrl = comprobanteYappy;
+        if (comprobanteYappy && comprobanteYappy.startsWith('data:image')) {
+            comprobanteUrl = await uploadImage(comprobanteYappy) || undefined;
+        }
+
         const persona = new EventoPersona({
             evento: eventoId,
             nombre,
@@ -141,7 +148,7 @@ export const registrarPersona = async (req: Request, res: Response) => {
             abono: abono || false,
             montoAbono: abono ? (montoAbono || 0) : 0,
             tipoPago: tipoPago || 'efectivo',
-            comprobanteYappy,
+            comprobanteYappy: comprobanteUrl,
             equipo,
             usuario: userId
         });
@@ -190,6 +197,12 @@ export const actualizarPersona = async (req: Request, res: Response) => {
         const { eventoId, personaId } = req.params;
         const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo } = req.body;
 
+        // Subir comprobante a Cloudinary si es nuevo (base64)
+        let comprobanteUrl = comprobanteYappy;
+        if (comprobanteYappy && comprobanteYappy.startsWith('data:image')) {
+            comprobanteUrl = await uploadImage(comprobanteYappy) || undefined;
+        }
+
         const persona = await EventoPersona.findOneAndUpdate(
             { _id: personaId, evento: eventoId },
             {
@@ -200,7 +213,7 @@ export const actualizarPersona = async (req: Request, res: Response) => {
                 abono: abono || false,
                 montoAbono: abono ? (montoAbono || 0) : 0,
                 tipoPago: tipoPago || 'efectivo',
-                comprobanteYappy,
+                comprobanteYappy: comprobanteUrl,
                 equipo
             },
             { new: true, runValidators: true }
