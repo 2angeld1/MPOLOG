@@ -62,8 +62,8 @@ const App: React.FC = () => (
     <IonApp>
       <IonReactRouter>
         <ToastProvider>
-          <DataProvider>
-            <AuthProvider>
+          <AuthProvider>
+            <DataProvider>
               <IonRouterOutlet>
                 <Route exact path="/login">
                   <LoginPage />
@@ -77,14 +77,13 @@ const App: React.FC = () => (
                 <Route exact path="/reset-password">
                   <ResetPasswordPage />
                 </Route>
-                {/* Elimina la ruta duplicada y usa solo PrivateRoute */}
                 <PrivateRoute path="/tabs" component={Tabs} />
                 <Route exact path="/">
                   <Redirect to="/login" />
                 </Route>
               </IonRouterOutlet>
-            </AuthProvider>
-          </DataProvider>
+            </DataProvider>
+          </AuthProvider>
         </ToastProvider>
       </IonReactRouter>
     </IonApp>

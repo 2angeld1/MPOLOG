@@ -8,11 +8,17 @@ import reportesRoutes from './routes/reportes';
 import eventoRoutes from './routes/evento';
 import userRoutes from './routes/users';
 import roleRoutes from './routes/roles';
+import { createServer } from 'http';
+import { initSocket } from './utils/socket';
 
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
+
+// Initialize Socket.io
+initSocket(httpServer);
 
 // Middleware
 app.use(cors({
@@ -51,5 +57,6 @@ app.get('/', (req, res) => {
     res.json({ message: 'API de Logística funcionando correctamente' });
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

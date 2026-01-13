@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import ConteoPersonas from '../models/ConteoPersonas';
 import { AuthRequest } from '../middleware/auth';
+import { getIO } from '../utils/socket';
 
 export const crearConteo = async (req: AuthRequest, res: Response) => {
     try {
@@ -42,6 +43,12 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
                 data: existingConteo,
                 message: 'Registro actualizado o creado correctamente'
             });
+            // Emitir evento (después de respuesta o antes, aquí lo pongo antes del return, pero dentro del bloque if material)
+            try {
+                getIO().emit('cambio_datos', { accion: 'crear', tipo: 'materiales', data: existingConteo });
+            } catch (e) {
+                console.error('Error emitiendo socket', e);
+            }
         } else {
             // Para personas, crear siempre nuevo (lógica original)
             const conteo = new ConteoPersonas({
@@ -56,6 +63,13 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
             });
 
             await conteo.save();
+
+            // Emitir evento
+            try {
+                getIO().emit('cambio_datos', { accion: 'crear', tipo: 'personas', data: conteo });
+            } catch (e) {
+                console.error('Error emitiendo socket', e);
+            }
 
             return res.status(201).json({
                 success: true,
@@ -291,6 +305,12 @@ export const actualizarConteo = async (req: AuthRequest, res: Response) => {
             data: conteo,
             message: 'Conteo actualizado correctamente'
         });
+
+        try {
+            getIO().emit('cambio_datos', { accion: 'actualizar', data: conteo });
+        } catch (e) {
+            console.error('Error emitiendo socket', e);
+        }
     } catch (error) {
         console.error('Error al actualizar conteo:', error);
         res.status(500).json({ message: 'Error del servidor' });
@@ -311,6 +331,12 @@ export const eliminarConteo = async (req: AuthRequest, res: Response) => {
             success: true,
             message: 'Conteo eliminado correctamente'
         });
+
+        try {
+            getIO().emit('cambio_datos', { accion: 'eliminar', id });
+        } catch (e) {
+            console.error('Error emitiendo socket', e);
+        }
     } catch (error) {
         console.error('Error al eliminar conteo:', error);
         res.status(500).json({ message: 'Error del servidor' });

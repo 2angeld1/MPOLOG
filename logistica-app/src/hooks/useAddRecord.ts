@@ -16,7 +16,7 @@ export const useAddRecord = () => {
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [loadingAreas, setLoadingAreas] = useState(true);
-    const { refreshData, setToolbarTitle } = useData();
+    const { refreshData, setToolbarTitle, refreshKey } = useData();
     const [tipoVista, setTipoVista] = useState<'personas' | 'materiales'>('personas');
 
     // Estados para edición
@@ -42,10 +42,10 @@ export const useAddRecord = () => {
         cargarAreasMateriales();
     }, []);
 
-    // Cargar registros cuando cambia fecha, iglesia, tipoVista
+    // Cargar registros cuando cambia fecha, iglesia, tipoVista o refreshKey
     useEffect(() => {
         cargarRegistros();
-    }, [fecha, iglesia, tipoVista]);
+    }, [fecha, iglesia, tipoVista, refreshKey]);
 
     // Recargar cuando cambia viewGrouped
     useEffect(() => {
