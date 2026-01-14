@@ -113,41 +113,49 @@
     }
 }
 
-.login-footer {
+.login-register-section {
+    margin-top: 32px;
     text-align: center;
-    margin-top: 24px;
-    color: var(--ion-color-medium);
-    font-size: 0.875rem;
 
-    .forgot-password-link {
-        color: var(--ion-color-primary);
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
+    .divider {
         position: relative;
+        margin-bottom: 24px;
+            border-bottom: 1px solid var(--ion-color-light-shade);
+            height: 1px;
 
-        &::after {
-            content: '';
+        span {
             position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--ion-color-primary);
-            transition: width 0.3s ease;
-        }
-
-        &:hover {
-            color: var(--ion-color-primary-shade);
-            transform: translateY(-1px);
-
-            &::after {
-                width: 100%;
+            top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--ion-background-color);
+                padding: 0 16px;
+                color: var(--ion-color-medium);
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
+            }
+
+        .register-text {
+            color: var(--ion-color-medium);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
         }
 
-        &:active {
-            transform: translateY(0);
+        .register-secondary-button {
+            --border-width: 2px;
+            --border-color: var(--ion-color-primary);
+            --color: var(--ion-color-primary);
+            height: 50px;
+            font-weight: 600;
+            margin: 0;
+            transition: all 0.3s ease;
+    
+            &:hover {
+                --background: rgba(var(--ion-color-primary-rgb), 0.1);
+                transform: translateY(-2px);
         }
     }
 }

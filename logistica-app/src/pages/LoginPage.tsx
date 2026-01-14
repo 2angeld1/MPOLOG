@@ -2,8 +2,9 @@ import { IonButton, IonContent, IonInput, IonPage, IonItem, IonToast, IonSpinner
 import React from 'react';
 import { motion } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLogin } from '../hooks/useLogin';
+import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../styles/LoginPage.scss';
 import { containerVariants, itemVariants, logoVariants } from '../animations';
 
@@ -88,35 +89,27 @@ const LoginPage: React.FC = () => {
                         </motion.div>
 
                         <motion.div
-                            className="login-footer"
+                            className="login-register-section"
                             variants={itemVariants}
                         >
-                            {/* <p>
-                                ¿Olvidaste tu contraseña?{' '}
-                                <a
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        history.push('/forgot-password');
-                                    }}
-                                    className="forgot-password-link"
-                                >
-                                    Recuperar
-                                </a>
-                            </p> */}
-                            <p>
-                                ¿No tienes cuenta?{' '}
-                                <a
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        history.push('/register');
-                                    }}
-                                    className="register-link"
-                                >
-                                    Regístrate
-                                </a>
-                            </p>
+                            <div className="divider">
+                                <span>O</span>
+                            </div>
+                            <p className="register-text">¿No tienes cuenta todavía?</p>
+                            <IonButton
+                                type="button"
+                                expand="block"
+                                fill="outline"
+                                className="register-secondary-button"
+                                shape="round"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    history.push('/register');
+                                }}
+                            >
+                                <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: '10px' }} />
+                                Regístrate
+                            </IonButton>
                         </motion.div>
                     </form>
                 </motion.div>

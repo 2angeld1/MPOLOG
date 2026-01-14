@@ -126,12 +126,19 @@ const RegisterPage: React.FC = () => {
                             className="register-footer"
                             variants={itemVariants}
                         >
-                            <IonText color="medium">
-                                <p>
-                                    ¿Ya tienes cuenta?{' '}
-                                    <a href="#" onClick={() => history.push('/login')}>Inicia sesión</a>
-                                </p>
-                            </IonText>
+                            <div className="divider">
+                                <span>O</span>
+                            </div>
+                            <p className="login-text">¿Ya tienes cuenta?</p>
+                            <IonButton
+                                type="button"
+                                expand="block"
+                                fill="clear"
+                                className="login-secondary-button"
+                                onClick={() => history.push('/login')}
+                            >
+                                Inicia sesión aquí
+                            </IonButton>
                         </motion.div>
                     </form>
                 </motion.div>
