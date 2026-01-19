@@ -74,6 +74,7 @@ const EventoRegistro: React.FC = () => {
         setTipoPago,
         comprobanteYappy,
         setComprobanteYappy,
+        comprobantes,
         equipo,
         setEquipo,
         
@@ -677,8 +678,28 @@ const EventoRegistro: React.FC = () => {
                                                         <IonCol size="12">
                                                             <div className="comprobante-header">
                                                                 <FontAwesomeIcon icon={faImage} className="header-icon" />
-                                                                <IonLabel>Comprobante de Yappy</IonLabel>
+                                                                <IonLabel>Comprobantes de Yappy</IonLabel>
                                                             </div>
+
+                                                            {/* Galería de comprobantes existentes */}
+                                                            {comprobantes && comprobantes.length > 0 && (
+                                                                <div className="existing-proofs-section">
+                                                                    <IonLabel color="medium" className="section-subtitle">Comprobantes Guardados:</IonLabel>
+                                                                    <div className="proofs-grid">
+                                                                        {comprobantes.map((url, idx) => (
+                                                                            <div key={idx} className="proof-thumbnail">
+                                                                                <img
+                                                                                    src={url}
+                                                                                    alt={`Comprobante ${idx + 1}`}
+                                                                                    onClick={() => window.open(url, '_blank')}
+                                                                                />
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                    <IonLabel color="medium" className="section-subtitle mt-3">Agregar Nuevo Comprobante:</IonLabel>
+                                                                </div>
+                                                            )}
+
                                                             <div className="proof-upload-section">
                                                                 {!comprobanteYappy ? (
                                                                     <div

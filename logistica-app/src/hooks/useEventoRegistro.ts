@@ -26,6 +26,7 @@ export const useEventoRegistro = () => {
     const [montoAbono, setMontoAbono] = useState<number | undefined>(undefined);
     const [tipoPago, setTipoPago] = useState<'efectivo' | 'yappy'>('efectivo');
     const [comprobanteYappy, setComprobanteYappy] = useState<string | null>(null);
+    const [comprobantes, setComprobantes] = useState<string[]>([]);
     const [equipo, setEquipo] = useState('');
 
     // Estado del formulario de evento (para crear)
@@ -126,7 +127,9 @@ export const useEventoRegistro = () => {
         setAbono(false);
         setMontoAbono(undefined);
         setTipoPago('efectivo');
+        setTipoPago('efectivo');
         setComprobanteYappy(null);
+        setComprobantes([]);
         setEquipo('');
         setIsEditing(false);
         setEditingPersonaId(null);
@@ -289,7 +292,11 @@ export const useEventoRegistro = () => {
             setAbono(persona.abono);
             setMontoAbono(persona.montoAbono);
             setTipoPago(persona.tipoPago || 'efectivo');
-            setComprobanteYappy(persona.comprobanteYappy || null);
+            setTipoPago(persona.tipoPago || 'efectivo');
+            setComprobanteYappy(null); // Reset new upload field
+            setComprobantes(persona.comprobantes && persona.comprobantes.length > 0
+                ? persona.comprobantes
+                : (persona.comprobanteYappy ? [persona.comprobanteYappy] : []));
             setEquipo(persona.equipo || '');
             setIsEditing(true);
             setEditingPersonaId(personaId);
@@ -550,6 +557,7 @@ export const useEventoRegistro = () => {
         setTipoPago,
         comprobanteYappy,
         setComprobanteYappy,
+        comprobantes, 
         equipo,
         setEquipo,
         

@@ -10,6 +10,7 @@ export interface IEventoPersona extends Document {
     montoAbono: number;
     tipoPago: 'efectivo' | 'yappy';
     comprobanteYappy?: string;
+    comprobantes?: string[];
     equipo?: string;
     usuario: mongoose.Types.ObjectId;
     createdAt?: Date;
@@ -60,6 +61,10 @@ const EventoPersonaSchema: Schema = new Schema({
     comprobanteYappy: {
         type: String,
         trim: true
+    },
+    comprobantes: {
+        type: [String],
+        default: []
     },
     equipo: {
         type: String,

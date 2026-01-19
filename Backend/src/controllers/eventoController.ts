@@ -149,6 +149,7 @@ export const registrarPersona = async (req: Request, res: Response) => {
             montoAbono: abono ? (montoAbono || 0) : 0,
             tipoPago: tipoPago || 'efectivo',
             comprobanteYappy: comprobanteUrl,
+            comprobantes: comprobanteUrl ? [comprobanteUrl] : [],
             equipo,
             usuario: userId
         });
@@ -203,9 +204,8 @@ export const actualizarPersona = async (req: Request, res: Response) => {
             comprobanteUrl = await uploadImage(comprobanteYappy) || undefined;
         }
 
-        const persona = await EventoPersona.findOneAndUpdate(
-            { _id: personaId, evento: eventoId },
-            {
+        const updateOps: any = {
+            $set: {
                 nombre,
                 apellido,
                 edad,
@@ -215,7 +215,16 @@ export const actualizarPersona = async (req: Request, res: Response) => {
                 tipoPago: tipoPago || 'efectivo',
                 comprobanteYappy: comprobanteUrl,
                 equipo
-            },
+            }
+        };
+
+        if (comprobanteUrl && comprobanteYappy && comprobanteYappy.startsWith('data:image')) {
+            updateOps.$push = { comprobantes: comprobanteUrl };
+        }
+
+        const persona = await EventoPersona.findOneAndUpdate(
+            { _id: personaId, evento: eventoId },
+            updateOps,
             { new: true, runValidators: true }
         );
 

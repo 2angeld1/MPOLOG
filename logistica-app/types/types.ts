@@ -101,6 +101,7 @@ export interface EventoPersona {
     montoAbono: number;
     tipoPago: 'efectivo' | 'yappy';
     comprobanteYappy?: string | null;
+    comprobantes?: string[];
     equipo?: string;
     createdAt?: string;
 }

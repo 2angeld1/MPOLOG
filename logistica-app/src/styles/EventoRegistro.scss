@@ -1239,3 +1239,58 @@ $color-text-muted: rgba(107, 114, 128, 0.7);
     }
   }
 }
+
+// Estilos para la galería de comprobantes existentes
+.existing-proofs-section {
+  margin-bottom: 20px;
+  padding: 0 4px;
+
+  .section-subtitle {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &.mt-3 {
+      margin-top: 16px;
+    }
+  }
+
+  .proofs-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
+
+    .proof-thumbnail {
+      flex-shrink: 0;
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      &:hover {
+        transform: scale(1.05);
+        border-color: #6366f1; // Primary color
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+}
