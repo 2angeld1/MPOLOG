@@ -991,23 +991,47 @@ const EventoRegistro: React.FC = () => {
                                 </IonLabel>
                             </IonItem>
 
-                            {personaDetalle.comprobanteYappy && (
+                            {/* Sección de Comprobantes */}
+                            {(personaDetalle.comprobantes && personaDetalle.comprobantes.length > 0) ? (
                                 <IonItem>
                                     <IonLabel>
                                         <h2>
                                             <FontAwesomeIcon icon={faImage} style={{ marginRight: '8px' }} />
-                                            Comprobante de Pago
+                                            Comprobantes de Pago ({personaDetalle.comprobantes.length})
                                         </h2>
-                                        <div className="image-container">
-                                            <img
-                                                src={personaDetalle.comprobanteYappy}
-                                                alt="Comprobante"
-                                                onClick={() => window.open(personaDetalle.comprobanteYappy || undefined, '_blank')}
-                                            />
-                                            <p>Toca la imagen para ampliar</p>
+                                        <div className="proofs-detail-grid">
+                                            {personaDetalle.comprobantes.map((url, idx) => (
+                                                <div key={idx} className="image-container">
+                                                    <img
+                                                        src={url}
+                                                        alt={`Comprobante ${idx + 1}`}
+                                                        onClick={() => window.open(url, '_blank')}
+                                                    />
+                                                    <p>Comprobante {idx + 1}</p>
+                                                </div>
+                                            ))}
                                         </div>
                                     </IonLabel>
                                 </IonItem>
+                            ) : (
+                                personaDetalle.comprobanteYappy && (
+                                    <IonItem>
+                                        <IonLabel>
+                                            <h2>
+                                                <FontAwesomeIcon icon={faImage} style={{ marginRight: '8px' }} />
+                                                Comprobante de Pago
+                                            </h2>
+                                            <div className="image-container">
+                                                <img
+                                                    src={personaDetalle.comprobanteYappy}
+                                                    alt="Comprobante"
+                                                    onClick={() => window.open(personaDetalle.comprobanteYappy || undefined, '_blank')}
+                                                />
+                                                <p>Toca la imagen para ampliar</p>
+                                            </div>
+                                        </IonLabel>
+                                    </IonItem>
+                                    )
                             )}
 
                             <IonItem>
