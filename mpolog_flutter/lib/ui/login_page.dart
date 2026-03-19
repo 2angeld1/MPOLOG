@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         ),
                         child: Text(
                           '¿No tienes cuenta? Regístrate aquí',
-                          style: AppTextStyles.body.copyWith(color: AppColors.textDim),
+                          style: AppTextStyles.body(context).copyWith(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                         ),
                       ),
                     ],

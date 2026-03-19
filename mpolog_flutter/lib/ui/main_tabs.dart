@@ -6,6 +6,8 @@ import 'home_page.dart';
 import 'super_admin_dashboard.dart';
 import 'user_maintenance_page.dart';
 import 'role_maintenance_page.dart';
+import 'settings_page.dart';
+import 'add_conteo_page.dart';
 
 class MainTabs extends StatefulWidget {
   const MainTabs({super.key});
@@ -21,80 +23,91 @@ class _MainTabsState extends State<MainTabs> {
   Widget build(BuildContext context) {
     final authStore = context.watch<AuthStore>();
     final isSuperAdmin = authStore.isSuperAdmin;
+    final isLogistic = authStore.isLogisticAdmin;
 
     // Define tabs based on role
     final List<Widget> superAdminScreens = [
       const SuperAdminDashboard(),
       const UserMaintenancePage(),
       const RoleMaintenancePage(),
+      const SettingsPage(),
+    ];
+
+    final List<Widget> logisticScreens = [
+      const HomePage(title: 'Inicio'),
+      const AddConteoPage(),
+      const SettingsPage(),
     ];
 
     final List<Widget> userScreens = [
       const HomePage(title: 'Inicio'),
-      const Scaffold(body: Center(child: Text('Agregar Registro'))),
-      const Scaffold(body: Center(child: Text('Reportes'))),
+      const SettingsPage(),
     ];
 
-    final screens = isSuperAdmin ? superAdminScreens : userScreens;
+    List<Widget> screens;
+    List<BottomNavigationBarItem> items;
+
+    if (isSuperAdmin) {
+      screens = superAdminScreens;
+      items = _buildSuperAdminItems();
+    } else if (isLogistic) {
+      screens = logisticScreens;
+      items = _buildLogisticItems();
+    } else {
+      screens = userScreens;
+      items = _buildUserItems();
+    }
+
+    if (_currentIndex >= screens.length) {
+      _currentIndex = 0;
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBody: true,
       body: screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: isDark ? 0.8 : 0.95),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
           ],
-        ),
-        child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Container(
-              height: 70 + MediaQuery.of(context).padding.bottom,
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    width: 1,
-                  ),
-                ),
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 70,
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) => setState(() => _currentIndex = index),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              selectedItemColor: isDark ? Colors.white : Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              type: BottomNavigationBarType.fixed,
+              selectedLabelStyle: const TextStyle(
+                fontSize: 12, 
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.3,
               ),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                ),
-                child: BottomNavigationBar(
-                  currentIndex: _currentIndex,
-                  onTap: (index) => setState(() => _currentIndex = index),
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  selectedItemColor: Colors.white,
-                  unselectedItemColor: Colors.white.withValues(alpha: 0.3),
-                  showSelectedLabels: true,
-                  showUnselectedLabels: true,
-                  type: BottomNavigationBarType.fixed,
-                  selectedLabelStyle: const TextStyle(
-                    fontSize: 12, 
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.3,
-                  ),
-                  unselectedLabelStyle: TextStyle(
-                    fontSize: 11,
-                    color: Colors.white.withValues(alpha: 0.3),
-                  ),
-                  items: isSuperAdmin ? _buildSuperAdminItems() : _buildUserItems(),
-                ),
+              unselectedLabelStyle: const TextStyle(
+                fontSize: 11,
               ),
+              items: items,
             ),
           ),
         ),
@@ -116,10 +129,14 @@ class _MainTabsState extends State<MainTabs> {
         icon: Icon(Icons.admin_panel_settings_rounded),
         label: 'Roles',
       ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.settings_rounded),
+        label: 'Config',
+      ),
     ];
   }
 
-  List<BottomNavigationBarItem> _buildUserItems() {
+  List<BottomNavigationBarItem> _buildLogisticItems() {
     return const [
       BottomNavigationBarItem(
         icon: Icon(Icons.home_rounded),
@@ -130,8 +147,21 @@ class _MainTabsState extends State<MainTabs> {
         label: 'Agregar',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.bar_chart_rounded),
-        label: 'Reportes',
+        icon: Icon(Icons.settings_rounded),
+        label: 'Config',
+      ),
+    ];
+  }
+
+  List<BottomNavigationBarItem> _buildUserItems() {
+    return const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home_rounded),
+        label: 'Inicio',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.settings_rounded),
+        label: 'Config',
       ),
     ];
   }

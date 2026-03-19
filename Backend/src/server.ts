@@ -10,6 +10,7 @@ import userRoutes from './routes/users';
 import roleRoutes from './routes/roles';
 import { createServer } from 'http';
 import { initSocket } from './utils/socket';
+import { seedRoles } from './seeders/roleSeeder';
 
 dotenv.config();
 
@@ -42,7 +43,9 @@ app.use((req, res, next) => {
 });
 
 // Conectar a MongoDB
-connectDB();
+connectDB().then(() => {
+    seedRoles();
+});
 
 // Rutas
 app.use('/api/auth', authRoutes);

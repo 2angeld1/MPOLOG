@@ -1,49 +1,48 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
 
 class AppTextStyles {
-  static const TextStyle h1 = TextStyle(
+  static TextStyle h1(BuildContext context) => TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
-    color: AppColors.textMain,
+    color: Theme.of(context).colorScheme.onSurface,
     letterSpacing: 0.5,
   );
 
-  static const TextStyle h2 = TextStyle(
+  static TextStyle h2(BuildContext context) => TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.bold,
-    color: AppColors.textMain,
+    color: Theme.of(context).colorScheme.onSurface,
   );
 
-  static const TextStyle h3 = TextStyle(
+  static TextStyle h3(BuildContext context) => TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: AppColors.textMain,
+    color: Theme.of(context).colorScheme.onSurface,
   );
 
-  static const TextStyle title = TextStyle(
+  static TextStyle title(BuildContext context) => TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w400,
-    color: AppColors.textMain,
+    color: Theme.of(context).colorScheme.onSurface,
     letterSpacing: 0.8,
   );
 
-  static const TextStyle body = TextStyle(
+  static TextStyle body(BuildContext context) => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w300,
-    color: AppColors.textDim,
+    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
   );
 
-  static const TextStyle label = TextStyle(
+  static TextStyle label(BuildContext context) => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: AppColors.textDim,
+    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
   );
 
-  static const TextStyle button = TextStyle(
+  static TextStyle button(BuildContext context) => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     letterSpacing: 1.2,
-    color: AppColors.textMain,
+    color: Theme.of(context).colorScheme.onPrimaryContainer,
   );
 }

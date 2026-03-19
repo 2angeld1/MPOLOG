@@ -13,6 +13,8 @@ class AuthStore extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   Map<String, dynamic>? get user => _user;
   bool get isSuperAdmin => _user?['rol'] == 'superadmin';
+  bool get isLogisticAdmin => _user?['rol'] == 'logisticadmin' || _user?['rol'] == 'sameadmin';
+  bool get canManageCounts => isSuperAdmin || isLogisticAdmin;
 
   AuthStore() {
     _checkStatus();

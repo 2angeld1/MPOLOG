@@ -30,8 +30,8 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Nuevo Rol', style: AppTextStyles.h3),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text('Nuevo Rol', style: AppTextStyles.h3(context)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -43,7 +43,7 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CANCELAR', style: TextStyle(color: Colors.white54)),
+            child: Text('CANCELAR', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -72,16 +72,23 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
     final adminStore = context.watch<AdminStore>();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Configuración de Roles', style: AppTextStyles.title),
+        title: Text('Configuración de Roles', style: AppTextStyles.title(context)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: _showAddRoleDialog,
+            icon: Icon(Icons.add_circle_outline_rounded, color: Theme.of(context).colorScheme.onSurface, size: 28),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: adminStore.isLoadingRoles
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Added bottom padding for credits/tabs
               itemCount: adminStore.roles.length,
               itemBuilder: (context, index) {
                 final role = adminStore.roles[index];
@@ -94,18 +101,18 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                     borderRadius: 16,
                     child: Row(
                       children: [
-                        const CircleAvatar(
-                          backgroundColor: Colors.white10,
-                          child: Icon(Icons.security_rounded, color: Colors.white70, size: 20),
+                        CircleAvatar(
+                          backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                          child: Icon(Icons.security_rounded, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7), size: 20),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(role['name'], style: AppTextStyles.h3.copyWith(fontSize: 16)),
+                              Text(role['name'], style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
                               Text(role['description'] ?? 'Sin descripción',
-                                  style: AppTextStyles.body.copyWith(fontSize: 12)),
+                                  style: AppTextStyles.body(context).copyWith(fontSize: 12)),
                             ],
                           ),
                         ),
@@ -116,10 +123,10 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  backgroundColor: Colors.grey[900],
-                                  title: const Text('¿Eliminar Rol?', style: AppTextStyles.h3),
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  title: Text('¿Eliminar Rol?', style: AppTextStyles.h3(context)),
                                   content: Text('¿Estás seguro de eliminar el rol "${role['name']}"?', 
-                                      style: AppTextStyles.body),
+                                      style: AppTextStyles.body(context)),
                                   actions: [
                                     TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('NO')),
                                     TextButton(onPressed: () => Navigator.pop(context, true), 
@@ -133,11 +140,11 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                             },
                           ),
                         if (isSystem)
-                          const Tooltip(
+                          Tooltip(
                             message: 'Rol del sistema',
                             child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(Icons.lock_outline, color: Colors.white24, size: 18),
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2), size: 18),
                             ),
                           ),
                       ],
@@ -146,11 +153,6 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddRoleDialog,
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 }

@@ -18,36 +18,42 @@ class GlassButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (isOutlined) {
-      return _buildOutlinedButton();
+      return _buildOutlinedButton(context, isDark);
     }
-    return _buildFilledButton();
+    return _buildFilledButton(context, isDark);
   }
 
-  Widget _buildFilledButton() {
+  Widget _buildFilledButton(BuildContext context, bool isDark) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 54,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white.withValues(alpha: 0.25),
-          foregroundColor: Colors.white,
+          backgroundColor: isDark 
+              ? Colors.white.withValues(alpha: 0.25) 
+              : colorScheme.primary.withValues(alpha: 0.1),
+          foregroundColor: isDark ? Colors.white : colorScheme.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: isDark 
+                  ? Colors.white.withValues(alpha: 0.3) 
+                  : colorScheme.primary.withValues(alpha: 0.2),
             ),
           ),
           elevation: 0,
         ),
         child: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(isDark ? Colors.white : colorScheme.primary),
                 ),
               )
             : Row(
@@ -71,16 +77,19 @@ class GlassButton extends StatelessWidget {
     );
   }
 
-  Widget _buildOutlinedButton() {
+  Widget _buildOutlinedButton(BuildContext context, bool isDark) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
+          foregroundColor: isDark ? Colors.white : colorScheme.primary,
           side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.5),
+            color: isDark 
+                ? Colors.white.withValues(alpha: 0.5) 
+                : colorScheme.primary.withValues(alpha: 0.4),
             width: 1.5,
           ),
           shape: RoundedRectangleBorder(

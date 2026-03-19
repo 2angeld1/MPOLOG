@@ -10,7 +10,8 @@ class ConteoService {
     try {
       final response = await _apiService.get(ApiConstants.conteos);
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return body['data'] as List<dynamic>? ?? [];
       }
       return [];
     } catch (e) {
@@ -29,17 +30,54 @@ class ConteoService {
     }
   }
 
-  Future<List<String>> getAreas() async {
+  Future<List<String>> getAreas({String? tipo}) async {
     try {
-      final response = await _apiService.get(ApiConstants.areas);
+      final url = tipo != null ? '${ApiConstants.areas}?tipo=$tipo' : ApiConstants.areas;
+      final response = await _apiService.get(url);
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        final List<dynamic> data = body['data'];
         return data.map((e) => e.toString()).toList();
       }
       return [];
     } catch (e) {
       debugPrint('Error obteniendo áreas: $e');
       return [];
+    }
+  }
+
+  Future<List<String>> getIglesias() async {
+    try {
+      final response = await _apiService.get(ApiConstants.iglesias);
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        final List<dynamic> data = body['data'];
+        return data.map((e) => e.toString()).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error obteniendo iglesias: $e');
+      return [];
+    }
+  }
+
+  Future<bool> actualizarConteo(String id, Map<String, dynamic> datos) async {
+    try {
+      final response = await _apiService.put('${ApiConstants.conteos}/$id', datos);
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error actualizando conteo: $e');
+      return false;
+    }
+  }
+
+  Future<bool> eliminarConteo(String id) async {
+    try {
+      final response = await _apiService.delete('${ApiConstants.conteos}/$id');
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error eliminando conteo: $e');
+      return false;
     }
   }
 }
