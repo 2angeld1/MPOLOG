@@ -1,13 +1,25 @@
-# Dockerfile Estratégico para Railway (Compilación local -> Servido con Nginx)
+# Stage 1: Compilación en la nube (Sin errores de Root)
+FROM ghcr.io/cirruslabs/flutter:stable AS build
+
+# Crear un usuario no-root para evitar el error de Flutter
+RUN useradd -m -s /bin/bash flutteruser
+USER flutteruser
+WORKDIR /home/flutteruser/app
+
+# Copiar archivos de dependencias primero para cachear capas
+COPY --chown=flutteruser:flutteruser pubspec.yaml pubspec.lock ./
+RUN flutter pub get
+
+# Copiar el resto del código
+COPY --chown=flutteruser:flutteruser . .
+
+# Compilar para Web
+RUN flutter build web --release
+
+# Stage 2: Servir con Nginx (Ultra ligero)
 FROM nginx:alpine
-
-# Copiar el build hecho localmente (Asegúrate de ejecutar flutter build web --release antes)
-# Si te da error de COPY failed, verifica que la carpeta build/web existe en tu PC.
-COPY build/web /usr/share/nginx/html
-
-# Inyectamos nuestra configuración SPA
+COPY --from=build /home/flutteruser/app/build/web /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
