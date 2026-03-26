@@ -1,10 +1,13 @@
-# Stage 1: Compilación en la nube (Sin errores de Root)
+# Stage 1: Compilación en la nube (Blindaje Git + Usuarios)
 FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 # Crear un usuario no-root para evitar el error de Flutter
 RUN useradd -m -s /bin/bash flutteruser
 USER flutteruser
 WORKDIR /home/flutteruser/app
+
+# Configuración de seguridad para Git (Necesario para el SDK de Flutter en la nube)
+RUN git config --global --add safe.directory /sdks/flutter
 
 # Copiar archivos de dependencias primero para cachear capas
 COPY --chown=flutteruser:flutteruser pubspec.yaml pubspec.lock ./
