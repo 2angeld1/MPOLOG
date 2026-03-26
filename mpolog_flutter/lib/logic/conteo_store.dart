@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import '../data/conteo_service.dart';
+import '../data/socket_service.dart';
 
 class ConteoStore with ChangeNotifier {
   final ConteoService _conteoService = ConteoService();
+  final SocketService _socketService = SocketService();
   
+  ConteoStore() {
+    _socketService.addListener((event, data) {
+      if (event == 'conteo-actualizado') {
+        fetchConteos();
+      }
+    });
+  }
+
   List<dynamic> _conteos = [];
   List<String> _areas = [];
   List<String> _iglesias = [];

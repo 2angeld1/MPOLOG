@@ -1,13 +1,15 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../logic/auth_store.dart';
 import 'home_page.dart';
 import 'super_admin_dashboard.dart';
+import '../styles/app_colors.dart';
 import 'user_maintenance_page.dart';
 import 'role_maintenance_page.dart';
 import 'settings_page.dart';
 import 'add_conteo_page.dart';
+import 'eventos_page.dart';
+import 'calendario_page.dart';
 
 class MainTabs extends StatefulWidget {
   const MainTabs({super.key});
@@ -19,42 +21,67 @@ class MainTabs extends StatefulWidget {
 class _MainTabsState extends State<MainTabs> {
   int _currentIndex = 0;
 
+  late List<Widget> _superAdminScreens;
+  late List<Widget> _sameAdminScreens;
+  late List<Widget> _logisticScreens;
+  late List<Widget> _userScreens;
+
+  @override
+  void initState() {
+    super.initState();
+    _superAdminScreens = [
+      const SuperAdminDashboard(key: ValueKey('superadmin')),
+      const CalendarioPage(key: ValueKey('calendar_super')),
+      const UserMaintenancePage(key: ValueKey('users')),
+      const RoleMaintenancePage(key: ValueKey('roles')),
+      const SettingsPage(key: ValueKey('settings_super')),
+    ];
+
+    _sameAdminScreens = [
+      const HomePage(title: 'Inicio', key: ValueKey('home_same')),
+      const CalendarioPage(key: ValueKey('calendar_same')),
+      const AddConteoPage(key: ValueKey('add_same')),
+      const EventosPage(key: ValueKey('events_same')),
+      const SettingsPage(key: ValueKey('settings_same')),
+    ];
+
+    _logisticScreens = [
+      const HomePage(title: 'Inicio', key: ValueKey('home_log')),
+      const CalendarioPage(key: ValueKey('calendar_log')),
+      const AddConteoPage(key: ValueKey('add_log')),
+      const SettingsPage(key: ValueKey('settings_log')),
+    ];
+
+    _userScreens = [
+      const HomePage(title: 'Inicio', key: ValueKey('home_user')),
+      const CalendarioPage(key: ValueKey('calendar_user')),
+      const SettingsPage(key: ValueKey('settings_user')),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final authStore = context.watch<AuthStore>();
+    final userRol = authStore.user?['rol']?.toString().toLowerCase();
+    
     final isSuperAdmin = authStore.isSuperAdmin;
+    final isSameAdmin = userRol == 'sameadmin';
     final isLogistic = authStore.isLogisticAdmin;
-
-    // Define tabs based on role
-    final List<Widget> superAdminScreens = [
-      const SuperAdminDashboard(),
-      const UserMaintenancePage(),
-      const RoleMaintenancePage(),
-      const SettingsPage(),
-    ];
-
-    final List<Widget> logisticScreens = [
-      const HomePage(title: 'Inicio'),
-      const AddConteoPage(),
-      const SettingsPage(),
-    ];
-
-    final List<Widget> userScreens = [
-      const HomePage(title: 'Inicio'),
-      const SettingsPage(),
-    ];
 
     List<Widget> screens;
     List<BottomNavigationBarItem> items;
 
     if (isSuperAdmin) {
-      screens = superAdminScreens;
+      screens = _superAdminScreens;
       items = _buildSuperAdminItems();
+    } else if (isSameAdmin) {
+      screens = _sameAdminScreens;
+      items = _buildSameAdminItems();
     } else if (isLogistic) {
-      screens = logisticScreens;
+      screens = _logisticScreens;
       items = _buildLogisticItems();
     } else {
-      screens = userScreens;
+      screens = _userScreens;
       items = _buildUserItems();
     }
 
@@ -66,10 +93,13 @@ class _MainTabsState extends State<MainTabs> {
 
     return Scaffold(
       extendBody: true,
-      body: screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: screens,
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: isDark ? 0.8 : 0.95),
+          color: AppColors.surface,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -122,12 +152,41 @@ class _MainTabsState extends State<MainTabs> {
         label: 'Inicio',
       ),
       BottomNavigationBarItem(
+        icon: Icon(Icons.calendar_month_rounded),
+        label: 'Calendario',
+      ),
+      BottomNavigationBarItem(
         icon: Icon(Icons.people_alt_rounded),
         label: 'Usuarios',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.admin_panel_settings_rounded),
         label: 'Roles',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.settings_rounded),
+        label: 'Config',
+      ),
+    ];
+  }
+
+  List<BottomNavigationBarItem> _buildSameAdminItems() {
+    return const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home_rounded),
+        label: 'Inicio',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.calendar_month_rounded),
+        label: 'Calendario',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.add_circle_outline_rounded),
+        label: 'Contar',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.confirmation_number_rounded),
+        label: 'Eventos',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.settings_rounded),
@@ -143,8 +202,12 @@ class _MainTabsState extends State<MainTabs> {
         label: 'Inicio',
       ),
       BottomNavigationBarItem(
+        icon: Icon(Icons.calendar_month_rounded),
+        label: 'Calendario',
+      ),
+      BottomNavigationBarItem(
         icon: Icon(Icons.add_circle_outline_rounded),
-        label: 'Agregar',
+        label: 'Contar',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.settings_rounded),
@@ -158,6 +221,10 @@ class _MainTabsState extends State<MainTabs> {
       BottomNavigationBarItem(
         icon: Icon(Icons.home_rounded),
         label: 'Inicio',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.calendar_month_rounded),
+        label: 'Calendario',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.settings_rounded),

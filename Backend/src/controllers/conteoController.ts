@@ -2,6 +2,7 @@ import { Response } from 'express';
 import ConteoPersonas from '../models/ConteoPersonas';
 import { AuthRequest } from '../middleware/auth';
 import { getIO } from '../utils/socket';
+import { saveAndEmitNotification } from './notificationController';
 
 export const crearConteo = async (req: AuthRequest, res: Response) => {
     try {
@@ -38,17 +39,22 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
                 }
             );
 
+            // Notificar persistente
+            saveAndEmitNotification(
+                getIO(), 
+                'Actualización de Materiales', 
+                `Se han registrado ${cantidad} unidades en ${area} (${subArea}) - ${iglesia}`, 
+                'conteo'
+            );
+            
+            // Emitir para los gráficos en tiempo real
+            getIO().emit('conteo-actualizado', { id: existingConteo?._id });
+
             return res.status(201).json({
                 success: true,
                 data: existingConteo,
                 message: 'Registro actualizado o creado correctamente'
             });
-            // Emitir evento (después de respuesta o antes, aquí lo pongo antes del return, pero dentro del bloque if material)
-            try {
-                getIO().emit('cambio_datos', { accion: 'crear', tipo: 'materiales', data: existingConteo });
-            } catch (e) {
-                console.error('Error emitiendo socket', e);
-            }
         } else {
             // Para personas, crear siempre nuevo (lógica original)
             const conteo = new ConteoPersonas({
@@ -64,12 +70,16 @@ export const crearConteo = async (req: AuthRequest, res: Response) => {
 
             await conteo.save();
 
-            // Emitir evento
-            try {
-                getIO().emit('cambio_datos', { accion: 'crear', tipo: 'personas', data: conteo });
-            } catch (e) {
-                console.error('Error emitiendo socket', e);
-            }
+            // Notificar persistente
+            saveAndEmitNotification(
+                getIO(), 
+                'Nuevo Conteo de Personas', 
+                `Se han registrado ${cantidad} personas en ${area} - ${iglesia}`, 
+                'conteo'
+            );
+
+            // Emitir para los gráficos en tiempo real
+            getIO().emit('conteo-actualizado', { id: conteo._id });
 
             return res.status(201).json({
                 success: true,
@@ -231,22 +241,17 @@ export const obtenerEstadisticas = async (req: any, res: any) => {
 
 export const obtenerAreas = async (req: AuthRequest, res: Response) => {
     try {
-        const { tipo } = req.query; // Nuevo parámetro opcional: 'personas' o 'materiales'
+        const { tipo } = req.query; 
 
-        // Lista completa de áreas del enum
         const todasLasAreas = [
-            // Personas
             'Bloque 1 y 2', 'Bloque 3 y 4', 'Altar y Media', 'JEF Teen', 'Genesis', 'Cafetería', 'Seguridad', 'En vivo',
-            // Materiales
             'cafeteria', 'baños', 'media', 'oficina', 'jef teen', 'jef', 'evangelio cambia', 'comedor', 'proyecto dar', 'navidad alegre'
         ];
 
-        // Áreas de personas
         const areasPersonas = [
             'Bloque 1 y 2', 'Bloque 3 y 4', 'Altar y Media', 'JEF Teen', 'Genesis', 'Cafetería', 'Seguridad', 'En vivo'
         ];
 
-        // Áreas de materiales
         const areasMateriales = [
             'cafeteria', 'baños', 'media', 'oficina', 'jef teen', 'jef', 'evangelio cambia', 'comedor', 'proyecto dar', 'navidad alegre'
         ];
@@ -257,7 +262,7 @@ export const obtenerAreas = async (req: AuthRequest, res: Response) => {
         } else if (tipo === 'materiales') {
             areasFiltradas = areasMateriales;
         } else {
-            areasFiltradas = todasLasAreas; // Si no se especifica tipo, devolver todas
+            areasFiltradas = todasLasAreas; 
         }
 
         res.json({ success: true, data: areasFiltradas });
@@ -272,7 +277,6 @@ export const actualizarConteo = async (req: AuthRequest, res: Response) => {
         const { id } = req.params;
         const { fecha, iglesia, tipo, area, cantidad, observaciones, subArea } = req.body;
 
-        // Validar datos
         if (!fecha || !iglesia || !tipo || !area || cantidad === undefined) {
             return res.status(400).json({ message: 'Por favor completa todos los campos requeridos: fecha, iglesia, tipo, area y cantidad' });
         }
@@ -308,6 +312,7 @@ export const actualizarConteo = async (req: AuthRequest, res: Response) => {
 
         try {
             getIO().emit('cambio_datos', { accion: 'actualizar', data: conteo });
+            getIO().emit('conteo-actualizado', { id: conteo._id });
         } catch (e) {
             console.error('Error emitiendo socket', e);
         }
@@ -320,7 +325,6 @@ export const actualizarConteo = async (req: AuthRequest, res: Response) => {
 export const eliminarConteo = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-
         const conteo = await ConteoPersonas.findByIdAndDelete(id);
 
         if (!conteo) {
@@ -334,6 +338,7 @@ export const eliminarConteo = async (req: AuthRequest, res: Response) => {
 
         try {
             getIO().emit('cambio_datos', { accion: 'eliminar', id });
+            getIO().emit('conteo-actualizado', { id });
         } catch (e) {
             console.error('Error emitiendo socket', e);
         }
@@ -345,7 +350,6 @@ export const eliminarConteo = async (req: AuthRequest, res: Response) => {
 
 export const obtenerIglesias = async (req: AuthRequest, res: Response) => {
     try {
-        // Lista de iglesias del enum (puedes extraerla del modelo si es necesario)
         const iglesias = [
             'Arraijan', 'Bique', 'Burunga', 'Capira', 'Central', 'Chiriqui', 'El potrero', 'Este', 'Norte', 'Oeste', 'Penonome', 'Santiago', 'Veracruz'
         ];

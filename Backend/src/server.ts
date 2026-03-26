@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' }); // Forzar carga desde archivo .env local
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { connectDB } from './config/database';
 import authRoutes from './routes/auth';
 import conteoRoutes from './routes/conteo';
@@ -8,11 +10,11 @@ import reportesRoutes from './routes/reportes';
 import eventoRoutes from './routes/evento';
 import userRoutes from './routes/users';
 import roleRoutes from './routes/roles';
+import notificationRoutes from './routes/notificaciones';
 import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
-
-dotenv.config();
+import { seedUsers } from './seeders/userSeeder';
 
 const app = express();
 const httpServer = createServer(app);
@@ -45,6 +47,7 @@ app.use((req, res, next) => {
 // Conectar a MongoDB
 connectDB().then(() => {
     seedRoles();
+    seedUsers();
 });
 
 // Rutas
@@ -54,6 +57,7 @@ app.use('/api/reportes', reportesRoutes);
 app.use('/api/eventos', eventoRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
+app.use('/api/notificaciones', notificationRoutes);
 
 
 // Ruta de prueba

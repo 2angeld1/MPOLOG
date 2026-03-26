@@ -298,53 +298,66 @@ export const generarReportePNG = async (req: AuthRequest, res: Response) => {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Total por Iglesia y Área',
+                    label: 'Registros por Área',
                     data: cantidades,
                     backgroundColor: [
-                        'rgba(56, 128, 255, 0.8)',
-                        'rgba(76, 217, 100, 0.8)',
-                        'rgba(255, 204, 0, 0.8)',
-                        'rgba(255, 59, 48, 0.8)',
-                        'rgba(88, 86, 214, 0.8)',
-                        'rgba(255, 149, 0, 0.8)',
-                        'rgba(175, 82, 222, 0.8)'
+                        '#3880ff', '#4cd964', '#ffcc00', '#ff3b30', '#5856d6', '#ff9500', '#af52de'
                     ],
-                    borderColor: [
-                        'rgba(56, 128, 255, 1)',
-                        'rgba(76, 217, 100, 1)',
-                        'rgba(255, 204, 0, 1)',
-                        'rgba(255, 59, 48, 1)',
-                        'rgba(88, 86, 214, 1)',
-                        'rgba(255, 149, 0, 1)',
-                        'rgba(175, 82, 222, 1)'
-                    ],
-                    borderWidth: 2
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    borderRadius: 8,
                 }]
             },
             options: {
+                responsive: false,
+                devicePixelRatio: 2, // Mejorar resolución
+                layout: {
+                    padding: 40
+                },
                 plugins: {
                     title: {
                         display: true,
-                        text: `Reporte de Logística - ${periodo}`,
-                        font: { size: 20 }
+                        text: `ANÁLISIS DE REGISTROS - ${(periodo as string || 'MES').toUpperCase()}`,
+                        color: '#FFFFFF',
+                        font: { size: 24, weight: 'bold' as any, family: 'Arial' },
+                        padding: { bottom: 30 }
                     },
                     legend: {
                         display: true,
-                        position: 'bottom' as const
+                        position: 'bottom' as const,
+                        labels: {
+                            color: '#AAAAAA',
+                            font: { size: 14 },
+                            padding: 20
+                        }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: {
+                            color: '#888888',
+                            font: { size: 14 }
+                        },
                         title: {
                             display: true,
-                            text: 'Cantidad'
+                            text: 'CANTIDAD',
+                            color: '#666666',
+                            font: { size: 12, weight: 'bold' as any }
                         }
                     },
                     x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#FFFFFF',
+                            font: { size: 14, weight: '500' as any }
+                        },
                         title: {
                             display: true,
-                            text: 'Iglesia - Área'
+                            text: 'IGLESIA / ÁREA',
+                            color: '#666666',
+                            font: { size: 12, weight: 'bold' as any }
                         }
                     }
                 }

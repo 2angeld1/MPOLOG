@@ -77,13 +77,21 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset('assets/images/worship_bg.png', fit: BoxFit.cover),
+          Image.asset(
+            'assets/images/worship_bg.png',
+            fit: BoxFit.cover,
+            color: Colors.black.withValues(alpha: 0.6),
+            colorBlendMode: BlendMode.darken,
+          ),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: AppColors.bgGradient,
+                colors: [
+                  AppColors.bgGradient[0].withValues(alpha: 0.5),
+                  AppColors.bgGradient[1].withValues(alpha: 0.8),
+                ],
               ),
             ),
           ),

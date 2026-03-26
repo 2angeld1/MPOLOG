@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../logic/auth_store.dart';
 import '../../logic/conteo_store.dart';
+import '../../logic/config_store.dart';
+import '../../logic/notification_store.dart';
+import 'calendario_page.dart';
 import '../../widgets/glass_container.dart';
 import '../../styles/app_text_styles.dart';
 import '../styles/app_colors.dart';
@@ -16,52 +19,62 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String _selectedType = 'Personas';
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<ConteoStore>().fetchConteos());
+    Future.microtask(() {
+      context.read<ConteoStore>().fetchConteos();
+      context.read<NotificationStore>().fetchNotifications();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final authStore = context.watch<AuthStore>();
     final conteoStore = context.watch<ConteoStore>();
+    final configStore = context.watch<ConfigStore>();
     final user = authStore.user;
+    final currentIglesia = configStore.selectedIglesia;
+    
+    final churchConteos = conteoStore.conteos.where((c) => c['iglesia'] == currentIglesia).toList();
+    final filteredConteos = churchConteos.where((c) {
+      return c['tipo']?.toString().toLowerCase() == _selectedType.toLowerCase();
+    }).toList();
 
     return Container(
       color: AppColors.background,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 80, right: 10),
-          child: FloatingActionButton(
-            onPressed: () => conteoStore.fetchConteos(),
-            backgroundColor: AppColors.primary,
-            child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
-          ),
-        ),
         body: RefreshIndicator(
           onRefresh: () => conteoStore.fetchConteos(),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // Header con Imagen de Iglesia
               _buildChurchHeader(user),
 
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // Metricas Clave
-                    _buildSectionTitle('MÉTRICAS CLAVE'),
+                    _buildSectionTitle('ACCIONES RÁPIDAS'),
+                    const SizedBox(height: 16),
+                    _buildQuickActions(),
+                    const SizedBox(height: 32),
+
+                    _buildTypeSelector(),
+                    const SizedBox(height: 24),
+
+                    _buildSectionTitle('MÉTRICAS ${_selectedType.toUpperCase()} - ${currentIglesia?.toUpperCase() ?? "SIN SEDE"}'),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
                           child: _buildSummaryCard(
                             context,
-                            'Registros',
-                            '${conteoStore.conteos.length}',
+                            'Total Histórico',
+                            '${filteredConteos.fold<int>(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0))}',
                             Icons.insights_rounded,
                             AppColors.primary,
                           ),
@@ -70,32 +83,34 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: _buildSummaryCard(
                             context,
-                            'Personas/Hoy',
-                            '${_getTotalPeopleToday(conteoStore.conteos)}',
-                            Icons.groups_3_rounded,
+                            'Hoy',
+                            '${_getTotalQuantityToday(filteredConteos)}',
+                            _selectedType == 'Personas' ? Icons.groups_3_rounded : Icons.inventory_2_rounded,
                             AppColors.accent,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 40),
-
-                    // TOP AREAS Section
-                    _buildTopAreas(conteoStore.conteos),
                     const SizedBox(height: 32),
 
-                    // Chart: Distribution
+                    _buildSectionTitle('ACTIVIDAD RECIENTE'),
+                    const SizedBox(height: 16),
+                    _buildRecentActivityList(churchConteos),
+                    const SizedBox(height: 32),
+
+                    _buildTopAreas(filteredConteos),
+                    const SizedBox(height: 32),
+
                     _buildChartSection(
-                      title: 'DISTRIBUCIÓN POR TIPO',
-                      child: _buildDistributionChart(conteoStore.conteos),
+                      title: 'DISTRIBUCIÓN POR ZONA',
+                      child: _buildDistributionByAreaChart(filteredConteos),
                     ),
                     
                     const SizedBox(height: 32),
 
-                    // Chart: Activity last 7 days
                     _buildChartSection(
                       title: 'ACTIVIDAD ÚLTIMA SEMANA',
-                      child: _buildActivityBarChart(conteoStore.conteos),
+                      child: _buildActivityBarChart(filteredConteos),
                     ),
 
                     const SizedBox(height: 140), 
@@ -109,6 +124,92 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildQuickActions() {
+    return Row(
+      children: [
+        _buildActionItem(context, 'Personas', Icons.person_add_rounded, AppColors.primary, 0),
+        const SizedBox(width: 12),
+        _buildActionItem(context, 'Material', Icons.inventory_rounded, AppColors.accent, 1),
+        const SizedBox(width: 12),
+        _buildActionItem(context, 'Eventos', Icons.calendar_month_rounded, const Color(0xFF673AB7), 2),
+      ],
+    );
+  }
+
+  Widget _buildActionItem(BuildContext context, String label, IconData icon, Color color, int tabIndex) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          if (label == 'Eventos') {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarioPage()));
+          }
+        },
+        child: GlassContainer(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          borderRadius: 24,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(height: 12),
+              Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white70)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentActivityList(List<dynamic> allConteos) {
+    final recent = allConteos.take(5).toList();
+    if (recent.isEmpty) return const Center(child: Text('Sin actividad reciente', style: TextStyle(color: Colors.white10)));
+
+    return Column(
+      children: recent.map((c) {
+        final date = DateTime.tryParse(c['fecha'] ?? '') ?? DateTime.now();
+        final isToday = date.day == DateTime.now().day && date.month == DateTime.now().month;
+        
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GlassContainer(
+            padding: const EdgeInsets.all(16),
+            borderRadius: 20,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: (c['tipo'] == 'personas' ? AppColors.primary : AppColors.accent).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    c['tipo'] == 'personas' ? Icons.people_rounded : Icons.inventory_2_rounded,
+                    color: c['tipo'] == 'personas' ? AppColors.primary : AppColors.accent,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(c['area'] ?? 'General', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text(isToday ? 'Hoy' : '${date.day}/${date.month}/${date.year}', style: const TextStyle(fontSize: 10, color: Colors.white38)),
+                    ],
+                  ),
+                ),
+                Text('+${c['cantidad']}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildChurchHeader(dynamic user) {
     return SliverAppBar(
       expandedHeight: 280,
@@ -117,7 +218,6 @@ class _HomePageState extends State<HomePage> {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Imagen de fondo
             Image.asset(
               'assets/images/church_header.png',
               fit: BoxFit.cover,
@@ -126,7 +226,6 @@ class _HomePageState extends State<HomePage> {
                 child: const Center(child: Icon(Icons.church_rounded, color: Colors.white, size: 48)),
               ),
             ),
-            // Overlay de gradiente para legibilidad
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -139,7 +238,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            // Perfil de Usuario
             Positioned(
               bottom: 24,
               left: 24,
@@ -166,20 +264,36 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text('Bienvenido de nuevo,', style: AppTextStyles.label(context).copyWith(fontSize: 10, color: Colors.white70)),
+                        Text(user?['nombre'] ?? 'Usuario', style: AppTextStyles.h2(context).copyWith(fontSize: 28, letterSpacing: -0.5)),
                         Text(
-                          'Bienvenido de nuevo,',
-                          style: AppTextStyles.label(context).copyWith(fontSize: 10, color: Colors.white70),
-                        ),
-                        Text(
-                          user?['nombre'] ?? 'Usuario',
-                          style: AppTextStyles.h2(context).copyWith(fontSize: 28, letterSpacing: -0.5),
+                          (user?['rol']?.toString().toUpperCase() ?? 'ROL DE USUARIO'),
+                          style: AppTextStyles.label(context).copyWith(fontSize: 10, color: AppColors.accent, fontWeight: FontWeight.bold, letterSpacing: 2),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-                    onPressed: () {},
+                  Consumer<NotificationStore>(
+                    builder: (context, store, _) => Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                          onPressed: () => _showNotificationsModal(context),
+                        ),
+                        if (store.unreadCount > 0)
+                          Positioned(
+                            right: 10,
+                            top: 10,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                              constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                              child: Text('${store.unreadCount}', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -199,37 +313,69 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
+  Widget _buildTypeSelector() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          _buildTypeTab('Personas', Icons.people_rounded),
+          _buildTypeTab('Materiales', Icons.inventory_2_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeTab(String type, IconData icon) {
+    final isSelected = _selectedType == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedType = type),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: isSelected ? Colors.white : Colors.white38, size: 18),
+              const SizedBox(width: 8),
+              Text(type, style: TextStyle(color: isSelected ? Colors.white : Colors.white38, fontWeight: FontWeight.bold, fontSize: 14)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTopAreas(List<dynamic> conteos) {
     if (conteos.isEmpty) return const SizedBox.shrink();
-
-    // Calculate top area
     final Map<String, int> areaCounts = {};
     for (var c in conteos) {
-      if (c['tipo']?.toString().toLowerCase() == 'personas') {
+      if (c['tipo']?.toString().toLowerCase() == _selectedType.toLowerCase()) {
         final area = c['area']?.toString() ?? 'Otras';
         areaCounts[area] = (areaCounts[area] ?? 0) + (c['cantidad'] as int? ?? 0);
       }
     }
-
     if (areaCounts.isEmpty) return const SizedBox.shrink();
-
     final sortedAreas = areaCounts.entries.toList()..sort((a,b) => b.value.compareTo(a.value));
     final topArea = sortedAreas.first;
 
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       borderRadius: 24,
-      boxShadow: [
-        BoxShadow(color: AppColors.primary.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10))
-      ],
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(16)),
             child: const Icon(Icons.workspace_premium_rounded, color: Colors.white),
           ),
           const SizedBox(width: 20),
@@ -246,14 +392,13 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text('${topArea.value}', style: AppTextStyles.h2(context).copyWith(color: AppColors.primary, fontSize: 24)),
-              const Text('personas', style: TextStyle(fontSize: 10, color: Colors.white38)),
+              Text(_selectedType.toLowerCase(), style: const TextStyle(fontSize: 10, color: Colors.white38)),
             ],
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildChartSection({required String title, required Widget child}) {
     return Column(
@@ -262,12 +407,7 @@ class _HomePageState extends State<HomePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: AppTextStyles.label(context).copyWith(
-              letterSpacing: 2, 
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
-              color: Colors.white.withValues(alpha: 0.5)
-            )),
+            Text(title, style: AppTextStyles.label(context).copyWith(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 10, color: Colors.white.withValues(alpha: 0.5))),
             const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.white24),
           ],
         ),
@@ -277,104 +417,72 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  int _getTotalPeopleToday(List<dynamic> conteos) {
+  int _getTotalQuantityToday(List<dynamic> conteos) {
     final now = DateTime.now();
     return conteos.where((c) {
       final date = DateTime.tryParse(c['fecha'] ?? '');
-      return date != null && 
-             date.day == now.day && 
-             date.month == now.month && 
-             date.year == now.year &&
-             c['tipo']?.toString().toLowerCase() == 'personas';
+      return date != null && date.day == now.day && date.month == now.month && date.year == now.year && c['tipo']?.toString().toLowerCase() == _selectedType.toLowerCase();
     }).fold(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0));
   }
 
-  Widget _buildDistributionChart(List<dynamic> conteos) {
-    final personas = conteos.where((c) => c['tipo']?.toString().toLowerCase() == 'personas').length;
-    final materiales = conteos.where((c) => c['tipo']?.toString().toLowerCase() == 'materiales').length;
-    final total = personas + materiales;
+  Widget _buildDistributionByAreaChart(List<dynamic> conteos) {
+    final Map<String, int> areaData = {};
+    for (var c in conteos) {
+      if (c['tipo']?.toString().toLowerCase() == _selectedType.toLowerCase()) {
+        final area = c['area']?.toString() ?? 'Otros';
+        areaData[area] = (areaData[area] ?? 0) + (c['cantidad'] as int? ?? 0);
+      }
+    }
+    final total = areaData.values.fold(0, (a, b) => a + b);
+    if (total == 0 || areaData.isEmpty) return const SizedBox(height: 150, child: GlassContainer(child: Center(child: Text('Sin datos'))));
 
-    if (total == 0) return const GlassContainer(child: Center(child: Text('Sin datos disponibles')));
+    final List<Color> chartColors = [AppColors.primary, AppColors.accent, const Color(0xFF3F51B5), const Color(0xFF009688)];
+    final sortedItems = areaData.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final displayItems = sortedItems.take(4).toList();
 
     return GlassContainer(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       borderRadius: 32,
-      child: SizedBox(
-        height: 180,
-        child: Row(
-          children: [
-            Expanded(
-              child: PieChart(
-                PieChartData(
-                  sectionsSpace: 6,
-                  centerSpaceRadius: 40,
-                  sections: [
-                    PieChartSectionData(
-                      value: personas.toDouble(),
-                      color: AppColors.primary,
-                      title: '',
-                      radius: 20,
-                      badgeWidget: _buildChartBadge('${((personas/total)*100).toInt()}%'),
-                      badgePositionPercentageOffset: 1.4,
-                    ),
-                    PieChartSectionData(
-                      value: materiales.toDouble(),
-                      color: AppColors.accent,
-                      title: '',
-                      radius: 20,
-                      badgeWidget: _buildChartBadge('${((materiales/total)*100).toInt()}%'),
-                      badgePositionPercentageOffset: 1.4,
-                    ),
-                  ],
-                ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 180,
+            child: PieChart(
+              PieChartData(
+                sectionsSpace: 4,
+                centerSpaceRadius: 50,
+                sections: displayItems.asMap().entries.map((entry) {
+                  return PieChartSectionData(
+                    value: entry.value.value.toDouble(),
+                    color: chartColors[entry.key % chartColors.length],
+                    radius: 20,
+                    title: '',
+                  );
+                }).toList(),
               ),
             ),
-            const SizedBox(width: 32),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildLegendItem('Personas', AppColors.primary),
-                const SizedBox(height: 16),
-                _buildLegendItem('Materiales', AppColors.accent),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 12,
+            children: displayItems.asMap().entries.map((e) => _buildLegendItem(e.value.key, chartColors[e.key % chartColors.length])).toList(),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildChartBadge(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)],
-      ),
-      child: Text(text, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10)),
     );
   }
 
   Widget _buildLegendItem(String title, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 12),
-        Text(title, style: AppTextStyles.body(context).copyWith(fontSize: 13, fontWeight: FontWeight.w500)),
-      ],
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text(title, style: const TextStyle(fontSize: 10, color: Colors.white70)),
+    ]);
   }
 
   Widget _buildActivityBarChart(List<dynamic> conteos) {
     final now = DateTime.now();
     final List<int> counts = List.filled(7, 0);
-    
     for (var i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: 6 - i));
       counts[i] = conteos.where((c) {
@@ -382,79 +490,87 @@ class _HomePageState extends State<HomePage> {
         return d != null && d.day == date.day && d.month == date.month && d.year == date.year;
       }).length;
     }
-
     return GlassContainer(
-      padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+      padding: const EdgeInsets.all(24),
       borderRadius: 32,
-      child: SizedBox(
-        height: 200,
-        child: BarChart(
-          BarChartData(
-            gridData: const FlGridData(show: false),
-            titlesData: FlTitlesData(
-              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: (val, meta) {
-                    final date = now.subtract(Duration(days: 6 - val.toInt()));
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text('${date.day}', style: const TextStyle(fontSize: 10, color: Colors.white38)),
-                    );
-                  },
-                ),
-              ),
-            ),
-            borderData: FlBorderData(show: false),
-            barGroups: List.generate(7, (i) => BarChartGroupData(
-              x: i,
-              barRods: [
-                BarChartRodData(
-                  toY: counts[i].toDouble(),
-                  color: AppColors.primary,
-                  width: 12,
-                  borderRadius: BorderRadius.circular(12),
-                  backDrawRodData: BackgroundBarChartRodData(
-                    show: true,
-                    toY: (counts.reduce((a, b) => a > b ? a : b).toDouble() + 5),
-                    color: Colors.white.withValues(alpha: 0.05),
-                  ),
-                ),
-              ],
-            )),
-          ),
-        ),
-      ),
+      child: SizedBox(height: 150, child: BarChart(BarChartData(
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        barGroups: List.generate(7, (i) => BarChartGroupData(x: i, barRods: [BarChartRodData(toY: counts[i].toDouble(), color: AppColors.primary, width: 8)])),
+      ))),
     );
   }
 
   Widget _buildSummaryCard(BuildContext context, String title, String value, IconData icon, Color color) {
     return GlassContainer(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       borderRadius: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 12),
+          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(title, style: const TextStyle(fontSize: 9, color: Colors.white38)),
+      ]),
+    );
+  }
+
+  void _showNotificationsModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        builder: (context, scrollController) => GlassContainer(
+          borderRadius: 32,
+          padding: const EdgeInsets.all(24),
+          child: Consumer<NotificationStore>(
+            builder: (context, store, _) => Column(
+              children: [
+                Container(
+                  width: 40, height: 4, margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('NOTIFICACIONES', style: const TextStyle(letterSpacing: 2, color: Colors.white70, fontSize: 12)),
+                    TextButton(onPressed: () => store.markAllAsRead(), child: const Text('Leer todo', style: TextStyle(fontSize: 12, color: AppColors.primary))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: store.notifications.isEmpty
+                      ? const Center(child: Text('Sin alertas pendientes', style: TextStyle(color: Colors.white10)))
+                      : ListView.builder(
+                          controller: scrollController,
+                          itemCount: store.notifications.length,
+                          itemBuilder: (context, index) {
+                            final n = store.notifications[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GlassContainer(
+                                padding: const EdgeInsets.all(16),
+                                borderRadius: 20,
+                                child: Row(children: [
+                                  Icon(n.type == 'conteo' ? Icons.insights_rounded : Icons.calendar_month_rounded, color: AppColors.primary, size: 18),
+                                  const SizedBox(width: 16),
+                                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    Text(n.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                    Text(n.body, style: const TextStyle(fontSize: 11, color: Colors.white54)),
+                                  ])),
+                                ]),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
-            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(height: 20),
-          Text(value, style: AppTextStyles.h1(context).copyWith(fontSize: 32, color: Colors.white)),
-          Text(title.toUpperCase(), style: AppTextStyles.label(context).copyWith(
-            fontSize: 9, 
-            letterSpacing: 1.5,
-            fontWeight: FontWeight.bold,
-            color: Colors.white.withValues(alpha: 0.5)
-          )),
-        ],
+        ),
       ),
     );
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF990000); // Crimson Red
-  static const Color primaryLight = Color(0xFFCC0000);
+  static const Color primary = Color(0xFFFF1744); // Vibrant Crimson Red
+  static const Color primaryLight = Color(0xFFFF5252);
   static const Color accent = Color(0xFFD4AF37); // Warm Gold
   static const Color success = Color(0xFF10B981); 
   static const Color error = Color(0xFFEF4444); 

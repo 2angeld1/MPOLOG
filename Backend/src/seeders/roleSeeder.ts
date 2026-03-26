@@ -1,19 +1,29 @@
 import Role from '../models/Role';
-import mongoose from 'mongoose';
 
 export const seedRoles = async () => {
     try {
-        const count = await Role.countDocuments();
-        if (count === 0) {
-            console.log('Seeding roles...');
-            await Role.create([
-                { name: 'superadmin', description: 'Acceso total al sistema', permissions: ['all'] },
-                { name: 'logisticadmin', description: 'Gestión de conteos y logística', permissions: ['conteo', 'reportes'] },
-                { name: 'user', description: 'Usuario estándar', permissions: ['view'] }
-            ]);
-            console.log('Roles seeded successfully');
+        const rolesToSeed = [
+            { name: 'superadmin', description: 'Acceso total al sistema', permissions: ['all'] },
+            { name: 'eventsadmin', description: 'Gestión completa de eventos', permissions: ['eventos', 'reportes'] },
+            { name: 'sameadmin', description: 'Administrador de servicios SAME', permissions: ['same', 'reportes'] },
+            { name: 'logisticadmin', description: 'Gestión de logística y conteos', permissions: ['conteo', 'reportes'] },
+            { name: 'usuario', description: 'Usuario estándar con acceso limitado', permissions: ['view'] }
+        ];
+
+        console.log('Verificando roles en la base de datos...');
+        
+        for (const roleData of rolesToSeed) {
+            const exists = await Role.findOne({ name: roleData.name });
+            if (!exists) {
+                await Role.create(roleData);
+                console.log(`✅ Rol creado: ${roleData.name}`);
+            } else {
+                console.log(`ℹ️ Rol ya existente: ${roleData.name}`);
+            }
         }
+        
+        console.log('Finalizado el chequeo de roles.');
     } catch (error) {
-        console.error('Error seeding roles:', error);
+        console.error('❌ Error seeding roles:', error);
     }
 };

@@ -2,26 +2,59 @@ import { Request, Response } from 'express';
 import Evento, { IEvento } from '../models/Evento';
 import EventoPersona, { IEventoPersona } from '../models/EventoPersona';
 import { uploadImage } from '../utils/imageUpload';
+import { saveAndEmitNotification } from './notificationController';
+import { getIO } from '../utils/socket';
 
 // ==================== EVENTOS ====================
 
 // Crear un nuevo evento
 export const crearEvento = async (req: Request, res: Response) => {
     try {
-        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, descripcion, ubicacion } = req.body;
+        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, descripcion, ubicacion, departamento, color } = req.body;
+        const userId = (req as any).userId;
+
+        // Validar solapamiento
+        const overlap = await Evento.findOne({
+            activo: true,
+            $or: [
+                { 
+                    fechaInicio: { $lt: new Date(fechaFin) }, 
+                    fechaFin: { $gt: new Date(fechaInicio) } 
+                }
+            ]
+        });
+
+        if (overlap) {
+            return res.status(400).json({ 
+                message: `¡Conflicto de horario! El departamento "${overlap.departamento}" ya tiene programado "${overlap.nombre}" en este bloque de tiempo.`,
+                conflict: overlap
+            });
+        }
 
         const evento = new Evento({
             nombre,
-            tipo: tipo || 'campamento',
+            tipo: tipo || 'asignacion',
             fechaInicio,
             fechaFin,
-            precioTotal,
+            precioTotal: precioTotal || 0,
             descripcion,
             ubicacion,
+            departamento: departamento || 'General',
+            color: color || '#673AB7',
+            usuario: userId,
             activo: true
         });
 
         await evento.save();
+
+        // Notificar persistente
+        saveAndEmitNotification(
+            getIO(), 
+            'Nuevo Evento Publicado', 
+            `Se ha creado el evento: ${nombre}. ¡Inscríbete ya!`, 
+            'evento'
+        );
+
         res.status(201).json(evento);
     } catch (error: any) {
         console.error('Error al crear evento:', error);
@@ -40,6 +73,9 @@ export const obtenerEventos = async (req: Request, res: Response) => {
         }
         if (tipo) {
             filtro.tipo = tipo;
+        }
+        if (req.query.departamento) {
+            filtro.departamento = req.query.departamento;
         }
 
         const eventos = await Evento.find(filtro).sort({ fechaInicio: -1 });
@@ -71,11 +107,32 @@ export const obtenerEventoPorId = async (req: Request, res: Response) => {
 export const actualizarEvento = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion } = req.body;
+        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion, departamento, color } = req.body;
+
+        // Validar solapamiento al actualizar (excluyendo el evento actual)
+        if (fechaInicio && fechaFin) {
+            const overlap = await Evento.findOne({
+                _id: { $ne: id },
+                activo: true,
+                $or: [
+                    { 
+                        fechaInicio: { $lt: new Date(fechaFin) }, 
+                        fechaFin: { $gt: new Date(fechaInicio) } 
+                    }
+                ]
+            });
+
+            if (overlap) {
+                return res.status(400).json({ 
+                    message: `¡Conflicto de horario al actualizar! El departamento "${overlap.departamento}" ya tiene programado "${overlap.nombre}" en este periodo.`,
+                    conflict: overlap
+                });
+            }
+        }
 
         const evento = await Evento.findByIdAndUpdate(
             id,
-            { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion },
+            { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion, departamento, color },
             { new: true, runValidators: true }
         );
 
@@ -155,6 +212,15 @@ export const registrarPersona = async (req: Request, res: Response) => {
         });
 
         await persona.save();
+
+        // Notificar persistente
+        saveAndEmitNotification(
+            getIO(), 
+            'Nuevo Registro en Evento', 
+            `${nombre} ${apellido === '.' ? '' : apellido} se ha registrado en ${evento.nombre}.`, 
+            'evento'
+        );
+
         res.status(201).json(persona);
     } catch (error: any) {
         console.error('Error al registrar persona:', error);

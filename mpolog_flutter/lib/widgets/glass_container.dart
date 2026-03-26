@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double borderRadius;
+  final BorderRadiusGeometry? customBorderRadius;
   final EdgeInsetsGeometry padding;
   final Gradient? gradient;
   final VoidCallback? onTap;
@@ -13,6 +14,7 @@ class GlassContainer extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = 28,
+    this.customBorderRadius,
     this.padding = const EdgeInsets.all(24),
     this.gradient,
     this.onTap,
@@ -21,14 +23,16 @@ class GlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    widget() => ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
+    final BorderRadiusGeometry br = customBorderRadius ?? BorderRadius.circular(borderRadius);
+
+    Widget widget() => ClipRRect(
+      borderRadius: br,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(borderRadius),
+            borderRadius: br,
             gradient: gradient,
             boxShadow: boxShadow,
             color: gradient == null 
@@ -49,7 +53,7 @@ class GlassContainer extends StatelessWidget {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: br is BorderRadius ? br : BorderRadius.circular(borderRadius),
         child: widget(),
       );
     }

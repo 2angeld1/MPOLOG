@@ -29,14 +29,15 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        title: Text('Asignar Rol a ${user['nombre']}', style: AppTextStyles.h3(context)),
+        title: Text('Asignar Rol a ${user['nombre'] ?? 'Usuario'}', style: AppTextStyles.h3(context)),
         content: StatefulBuilder(
           builder: (context, setDialogState) => Column(
             mainAxisSize: MainAxisSize.min,
             children: roles.map((role) {
+              final roleName = role['name'] ?? 'user';
               return RadioListTile<String>(
-                title: Text(role['name'], style: AppTextStyles.body(context)),
-                value: role['name'],
+                title: Text(roleName, style: AppTextStyles.body(context)),
+                value: roleName,
                 groupValue: selectedRole,
                 onChanged: (val) => setDialogState(() => selectedRole = val!),
                 activeColor: AppColors.primary,
@@ -98,11 +99,11 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
                             CircleAvatar(
                               backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                               child: Text(
-                                usr['nombre'][0].toUpperCase(),
+                                (usr['nombre'] ?? 'U')[0].toUpperCase(),
                                 style: TextStyle(
-                                color: isDark ? Colors.white : AppColors.primary, 
-                                fontWeight: FontWeight.bold
-                              ),
+                                  color: isDark ? Colors.white : AppColors.primary, 
+                                  fontWeight: FontWeight.bold
+                                ),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -110,38 +111,38 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(usr['nombre'], style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
-                                  Text(usr['email'], style: AppTextStyles.body(context).copyWith(fontSize: 12)),
+                                  Text(usr['nombre'] ?? 'Sin nombre', style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
+                                  Text(usr['email'] ?? 'Sin email', style: AppTextStyles.body(context).copyWith(fontSize: 12)),
                                 ],
                               ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getRoleColor(usr['rol'], isDark).withValues(alpha: 0.1),
+                                color: _getRoleColor(usr['rol'] ?? 'usuario', isDark).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: _getRoleColor(usr['rol'], isDark).withValues(alpha: 0.3)),
+                                border: Border.all(color: _getRoleColor(usr['rol'] ?? 'usuario', isDark).withValues(alpha: 0.3)),
                               ),
                               child: Text(
-                                usr['rol'].toUpperCase(),
+                                (usr['rol'] ?? 'usuario').toUpperCase(),
                                 style: TextStyle(
-                                  color: _getRoleColor(usr['rol'], isDark),
+                                  color: _getRoleColor(usr['rol'] ?? 'usuario', isDark),
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                             IconButton(
-                            icon: Icon(Icons.edit_outlined, 
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), 
-                              size: 20
+                              icon: Icon(Icons.edit_outlined, 
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), 
+                                size: 20
+                              ),
+                              onPressed: () => _showRoleDialog(usr),
                             ),
-                            onPressed: () => _showRoleDialog(usr),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
+                    );
                 },
               ),
             ),
@@ -153,6 +154,9 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
       switch (role.toLowerCase()) {
         case 'superadmin': return Colors.amberAccent;
         case 'logisticadmin': return Colors.blueAccent;
+        case 'eventsadmin': return Colors.purpleAccent;
+        case 'sameadmin': return Colors.tealAccent;
+        case 'usuario':
         case 'user': return Colors.greenAccent;
         default: return Colors.grey;
       }
@@ -160,6 +164,9 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
       switch (role.toLowerCase()) {
         case 'superadmin': return Colors.orange[800]!;
         case 'logisticadmin': return Colors.blue[800]!;
+        case 'eventsadmin': return Colors.purple[800]!;
+        case 'sameadmin': return Colors.teal[800]!;
+        case 'usuario':
         case 'user': return Colors.green[800]!;
         default: return Colors.grey[700]!;
       }

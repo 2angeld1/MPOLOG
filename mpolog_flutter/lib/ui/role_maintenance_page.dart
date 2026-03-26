@@ -92,7 +92,8 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
               itemCount: adminStore.roles.length,
               itemBuilder: (context, index) {
                 final role = adminStore.roles[index];
-                final isSystem = ['superadmin', 'user', 'logisticadmin'].contains(role['name'].toLowerCase());
+                final String roleName = role['name'] ?? 'user';
+                final isSystem = ['superadmin', 'user', 'logisticadmin'].contains(roleName.toLowerCase());
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -110,7 +111,7 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(role['name'], style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
+                              Text(roleName, style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
                               Text(role['description'] ?? 'Sin descripción',
                                   style: AppTextStyles.body(context).copyWith(fontSize: 12)),
                             ],

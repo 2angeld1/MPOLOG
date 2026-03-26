@@ -5,6 +5,8 @@ import 'package:mpolog_flutter/logic/theme_store.dart';
 import 'package:mpolog_flutter/ui/login_page.dart';
 import 'package:mpolog_flutter/ui/main_tabs.dart';
 
+import 'package:mpolog_flutter/styles/app_colors.dart';
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -20,7 +22,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A237E),
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
           brightness: Brightness.light,
         ),
         scaffoldBackgroundColor: const Color(0xFFF5F7FA),
@@ -34,12 +37,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A237E),
-          primary: const Color(0xFF1A237E),
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
           brightness: Brightness.dark,
-          surface: Colors.black,
+          surface: AppColors.background,
         ),
-        scaffoldBackgroundColor: Colors.black,
+        scaffoldBackgroundColor: AppColors.background,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
