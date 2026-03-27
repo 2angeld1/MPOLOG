@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../data/api_constants.dart';
 
 class ReportesStore extends ChangeNotifier {
-  final String _baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:5000';
+  final String _baseUrl = ApiConstants.baseUrl;
   
   String _selectedPeriodo = 'mes';
   String? _selectedTipo = 'personas';

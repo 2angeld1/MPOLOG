@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/api_constants.dart';
 
 class EventosStore extends ChangeNotifier {
-  final String _baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:5000/api';
+  final String _baseUrl = ApiConstants.baseUrl;
   
   List<dynamic> _eventos = [];
   bool _isLoading = false;

@@ -13,8 +13,11 @@ RUN flutter pub get
 # Copiar el resto
 COPY . .
 
-# Compilar para Web (La advertencia de Root no detiene el build)
-RUN flutter build web --release
+# Definir API_URL como argumento de construcción (Build-time variable)
+ARG API_URL
+
+# Compilar para Web inyectando la URL de la API
+RUN flutter build web --release --dart-define=API_URL=${API_URL}
 
 # Stage 2: Servir con Nginx
 FROM nginx:alpine

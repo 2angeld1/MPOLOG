@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/socket_service.dart';
+import '../data/api_constants.dart';
 
 class AppNotification {
   final String id;
@@ -38,7 +39,7 @@ class NotificationStore with ChangeNotifier {
   final List<AppNotification> _notifications = [];
   int _unreadCount = 0;
   final SocketService _socketService = SocketService();
-  final String _baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:5000/api';
+  final String _baseUrl = ApiConstants.baseUrl;
 
   List<AppNotification> get notifications => _notifications;
   int get unreadCount => _unreadCount;
