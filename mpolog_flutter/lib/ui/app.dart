@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     final themeStore = context.watch<ThemeStore>();
 
     return MaterialApp(
-      title: 'MPOLOG',
+      title: 'maraapp',
       debugShowCheckedModeBanner: false,
       themeMode: themeStore.themeMode,
       theme: ThemeData(

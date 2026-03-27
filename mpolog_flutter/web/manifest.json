@@ -1,11 +1,11 @@
 {
-    "name": "mpolog_flutter",
-    "short_name": "mpolog_flutter",
+    "name": "maraapp",
+    "short_name": "maraapp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Logística maraapp",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
