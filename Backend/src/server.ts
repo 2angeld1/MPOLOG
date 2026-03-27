@@ -31,7 +31,8 @@ app.use(cors({
         'http://localhost:5173',
         'http://localhost:8080',
         'https://mpolog.vercel.app',
-        'https://maranatha.up.railway.app/'
+        'https://maranatha.up.railway.app',
+        'https://mpolog.up.railway.app'
     ],
     credentials: true
 }));
