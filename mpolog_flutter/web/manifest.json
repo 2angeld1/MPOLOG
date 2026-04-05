@@ -1,11 +1,11 @@
 {
-    "name": "maraapp",
-    "short_name": "maraapp",
+    "name": "Numera",
+    "short_name": "Numera",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Logística maraapp",
+    "background_color": "#000000",
+    "theme_color": "#FF1744",
+    "description": "Logística Numera",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     final themeStore = context.watch<ThemeStore>();
 
     return MaterialApp(
-      title: 'maraapp',
+      title: 'Numera',
       debugShowCheckedModeBanner: false,
       themeMode: themeStore.themeMode,
       theme: ThemeData(
