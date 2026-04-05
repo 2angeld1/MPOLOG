@@ -6,6 +6,7 @@ import '../../logic/conteo_store.dart';
 import '../../logic/config_store.dart';
 import '../../logic/notification_store.dart';
 import 'calendario_page.dart';
+import 'add_conteo_page.dart';
 import '../../widgets/glass_container.dart';
 import '../../styles/app_text_styles.dart';
 import '../styles/app_colors.dart';
@@ -68,28 +69,55 @@ class _HomePageState extends State<HomePage> {
 
                     _buildSectionTitle('MÉTRICAS ${_selectedType.toUpperCase()} - ${currentIglesia?.toUpperCase() ?? "SIN SEDE"}'),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildSummaryCard(
-                            context,
-                            'Total Histórico',
-                            '${filteredConteos.fold<int>(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0))}',
-                            Icons.insights_rounded,
-                            AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildSummaryCard(
-                            context,
-                            'Hoy',
-                            '${_getTotalQuantityToday(filteredConteos)}',
-                            _selectedType == 'Personas' ? Icons.groups_3_rounded : Icons.inventory_2_rounded,
-                            AppColors.accent,
-                          ),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        bool useRow = constraints.maxWidth > 340;
+                        if (useRow) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _buildSummaryCard(
+                                  context,
+                                  'Total Histórico',
+                                  '${filteredConteos.fold<int>(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0))}',
+                                  Icons.insights_rounded,
+                                  AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildSummaryCard(
+                                  context,
+                                  'Hoy',
+                                  '${_getTotalQuantityToday(filteredConteos)}',
+                                  _selectedType == 'Personas' ? Icons.groups_3_rounded : Icons.inventory_2_rounded,
+                                  AppColors.accent,
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            children: [
+                              _buildSummaryCard(
+                                context,
+                                'Total Histórico',
+                                '${filteredConteos.fold<int>(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0))}',
+                                Icons.insights_rounded,
+                                AppColors.primary,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildSummaryCard(
+                                context,
+                                'Hoy',
+                                '${_getTotalQuantityToday(filteredConteos)}',
+                                _selectedType == 'Personas' ? Icons.groups_3_rounded : Icons.inventory_2_rounded,
+                                AppColors.accent,
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
                     const SizedBox(height: 32),
 
@@ -142,6 +170,9 @@ class _HomePageState extends State<HomePage> {
         onTap: () {
           if (label == 'Eventos') {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarioPage()));
+          } else {
+            // NAVEGAR A NUEVO REGISTRO PARA PERSONAS O MATERIAL
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const AddConteoPage()));
           }
         },
         child: GlassContainer(
@@ -440,9 +471,11 @@ class _HomePageState extends State<HomePage> {
     final sortedItems = areaData.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     final displayItems = sortedItems.take(4).toList();
 
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+
     return GlassContainer(
-      padding: const EdgeInsets.all(28),
-      borderRadius: 32,
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 28),
+      borderRadius: isSmallScreen ? 24 : 32,
       child: Column(
         children: [
           SizedBox(
@@ -490,9 +523,11 @@ class _HomePageState extends State<HomePage> {
         return d != null && d.day == date.day && d.month == date.month && d.year == date.year;
       }).length;
     }
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+
     return GlassContainer(
-      padding: const EdgeInsets.all(24),
-      borderRadius: 32,
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
+      borderRadius: isSmallScreen ? 24 : 32,
       child: SizedBox(height: 150, child: BarChart(BarChartData(
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),

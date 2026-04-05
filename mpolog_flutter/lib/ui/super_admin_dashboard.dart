@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../../logic/auth_store.dart';
 import '../../widgets/glass_container.dart';
 import '../../styles/app_text_styles.dart';
+import 'user_maintenance_page.dart';
+import 'settings_page.dart';
+import 'reportes_page.dart';
 
 class SuperAdminDashboard extends StatelessWidget {
   const SuperAdminDashboard({super.key});
@@ -62,43 +65,48 @@ class SuperAdminDashboard extends StatelessWidget {
                   // Stats Section
                   Text('Estadísticas Generales', style: AppTextStyles.h3(context)),
                   const SizedBox(height: 16),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.3,
-                    children: [
-                      _buildStatCard(
-                        context,
-                        'Usuarios',
-                        '248',
-                        Icons.people_outline,
-                        Colors.blueAccent,
-                      ),
-                      _buildStatCard(
-                        context,
-                        'Eventos',
-                        '12',
-                        Icons.event_available_outlined,
-                        Colors.purpleAccent,
-                      ),
-                      _buildStatCard(
-                        context,
-                        'Iglesias',
-                        '5',
-                        Icons.church_outlined,
-                        Colors.orangeAccent,
-                      ),
-                      _buildStatCard(
-                        context,
-                        'Reportes',
-                        '84',
-                        Icons.bar_chart_outlined,
-                        Colors.greenAccent,
-                      ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisCount = constraints.maxWidth < 340 ? 1 : 2;
+                      return GridView.count(
+                        crossAxisCount: crossAxisCount,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: crossAxisCount == 1 ? 2.5 : 1.3,
+                        children: [
+                          _buildStatCard(
+                            context,
+                            'Usuarios',
+                            '248',
+                            Icons.people_outline,
+                            Colors.blueAccent,
+                          ),
+                          _buildStatCard(
+                            context,
+                            'Eventos',
+                            '12',
+                            Icons.event_available_outlined,
+                            Colors.purpleAccent,
+                          ),
+                          _buildStatCard(
+                            context,
+                            'Iglesias',
+                            '5',
+                            Icons.church_outlined,
+                            Colors.orangeAccent,
+                          ),
+                          _buildStatCard(
+                            context,
+                            'Reportes',
+                            '84',
+                            Icons.bar_chart_outlined,
+                            Colors.greenAccent,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 32),
 
@@ -110,21 +118,21 @@ class SuperAdminDashboard extends StatelessWidget {
                     'Gestión de Usuarios',
                     'Asignar roles y permisos',
                     Icons.manage_accounts_outlined,
-                    () {},
+                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserMaintenancePage())),
                   ),
                   _buildQuickAction(
                     context,
                     'Configuración Global',
                     'Ajustes del sistema principal',
                     Icons.settings_suggest_outlined,
-                    () {},
+                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage())),
                   ),
                   _buildQuickAction(
                     context,
                     'Ver Reportes Críticos',
                     'Análisis de datos mensual',
                     Icons.analytics_outlined,
-                    () {},
+                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportesPage())),
                   ),
                   const SizedBox(height: 40),
                 ],
