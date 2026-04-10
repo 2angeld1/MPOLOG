@@ -40,11 +40,12 @@ class _CalendarioPageState extends State<CalendarioPage> {
   Color _getColorForDept(String dept) {
     switch (dept.toLowerCase()) {
       case 'media': return Colors.blueAccent;
-      case 'altar': return Colors.amber;
       case 'seguridad': return Colors.redAccent;
-      case 'cafetería': return Colors.teal;
       case 'génesis': return Colors.purpleAccent;
-      case 'jef teen': return Colors.orange;
+      case 'jef': return Colors.orange;
+      case 'logística': return Colors.teal;
+      case 'servidores': return Colors.greenAccent;
+      case 'exploradores del rey': return Colors.brown;
       default: return AppColors.primary;
     }
   }

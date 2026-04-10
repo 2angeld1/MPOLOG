@@ -24,13 +24,18 @@ class _AddEventModalState extends State<AddEventModal> {
   
   String tipoSeleccionado = 'Culto de Adoración';
   String deptoSeleccionado = 'Media';
-  late DateTime fechaSeleccionada;
-  TimeOfDay horaSeleccionada = TimeOfDay.now();
+  
+  late DateTimeRange fechaRange;
+  TimeOfDay horaInicio = const TimeOfDay(hour: 18, minute: 0);
+  TimeOfDay horaFin = const TimeOfDay(hour: 20, minute: 0);
 
   @override
   void initState() {
     super.initState();
-    fechaSeleccionada = widget.initialDate;
+    fechaRange = DateTimeRange(
+      start: widget.initialDate,
+      end: widget.initialDate,
+    );
   }
 
   @override
@@ -38,22 +43,30 @@ class _AddEventModalState extends State<AddEventModal> {
     final store = context.read<EventosStore>();
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      maxChildSize: 0.9,
+      initialChildSize: 0.8,
+      maxChildSize: 0.95,
+      minChildSize: 0.5,
       builder: (context, scrollController) => GlassContainer(
         borderRadius: 32,
         padding: const EdgeInsets.all(28),
         child: ListView(
           controller: scrollController,
           children: [
-            Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 24), decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2))),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                width: 32, height: 4, 
+                margin: const EdgeInsets.only(bottom: 24), 
+                decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2))
+              ),
+            ),
             Text('NUEVO EVENTO', style: AppTextStyles.label(context).copyWith(letterSpacing: 2, color: Colors.white54)),
             const SizedBox(height: 24),
             
             _buildFieldLabel('Nombre del Evento'),
             TextField(
               controller: nombreController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
               decoration: _inputDecoration('Ej: Culto de Primicias'),
             ),
             const SizedBox(height: 20),
@@ -61,7 +74,7 @@ class _AddEventModalState extends State<AddEventModal> {
             _buildFieldLabel('Categoría'),
             _buildDropdown(
               value: tipoSeleccionado,
-              items: ['Hoja Semanal', 'Ayuno', 'Vigilia', 'Culto de Adoración', 'Reunión Liderazgo'],
+              items: ['Evangelismo', 'Ayuno', 'Vigilia', 'Culto de Adoración', 'Reunión Liderazgo'],
               onChanged: (v) => setState(() => tipoSeleccionado = v!),
             ),
             const SizedBox(height: 20),
@@ -69,8 +82,48 @@ class _AddEventModalState extends State<AddEventModal> {
             _buildFieldLabel('Responsable'),
             _buildDropdown(
               value: deptoSeleccionado,
-              items: ['Media', 'Altar', 'Seguridad', 'Cafetería', 'Génesis', 'JEF Teen', 'General'],
+              items: ['Media', 'Seguridad', 'Génesis', 'JEF', 'General', 'Logística', 'Servidores', 'Exploradores del Rey'],
               onChanged: (v) => setState(() => deptoSeleccionado = v!),
+            ),
+            const SizedBox(height: 20),
+
+            _buildFieldLabel('Rango de Fechas'),
+            InkWell(
+              onTap: () async {
+                final picked = await showDateRangePicker(
+                  context: context,
+                  initialDateRange: fechaRange,
+                  firstDate: DateTime(2023),
+                  lastDate: DateTime(2030),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.dark(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          surface: AppColors.surface,
+                          onSurface: Colors.white,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) setState(() => fechaRange = picked);
+              },
+              child: GlassContainer(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14), 
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_today, size: 18, color: AppColors.primary),
+                    const SizedBox(width: 12),
+                    Text(
+                      '${DateFormat('dd MMM').format(fechaRange.start)} - ${DateFormat('dd MMM yyyy').format(fechaRange.end)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
 
@@ -80,18 +133,16 @@ class _AddEventModalState extends State<AddEventModal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildFieldLabel('Fecha'),
+                      _buildFieldLabel('Hora Inicio'),
                       InkWell(
                         onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: fechaSeleccionada,
-                            firstDate: DateTime(2023),
-                            lastDate: DateTime(2030),
-                          );
-                          if (picked != null) setState(() => fechaSeleccionada = picked);
+                          final picked = await showTimePicker(context: context, initialTime: horaInicio);
+                          if (picked != null) setState(() => horaInicio = picked);
                         },
-                        child: GlassContainer(padding: const EdgeInsets.all(14), child: Text(DateFormat('dd/MM/yyyy').format(fechaSeleccionada))),
+                        child: GlassContainer(
+                          padding: const EdgeInsets.all(14), 
+                          child: Center(child: Text(horaInicio.format(context), style: const TextStyle(fontWeight: FontWeight.bold))),
+                        ),
                       ),
                     ],
                   ),
@@ -101,13 +152,16 @@ class _AddEventModalState extends State<AddEventModal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildFieldLabel('Hora'),
+                      _buildFieldLabel('Hora Fin'),
                       InkWell(
                         onTap: () async {
-                          final picked = await showTimePicker(context: context, initialTime: horaSeleccionada);
-                          if (picked != null) setState(() => horaSeleccionada = picked);
+                          final picked = await showTimePicker(context: context, initialTime: horaFin);
+                          if (picked != null) setState(() => horaFin = picked);
                         },
-                        child: GlassContainer(padding: const EdgeInsets.all(14), child: Text(horaSeleccionada.format(context))),
+                        child: GlassContainer(
+                          padding: const EdgeInsets.all(14), 
+                          child: Center(child: Text(horaFin.format(context), style: const TextStyle(fontWeight: FontWeight.bold))),
+                        ),
                       ),
                     ],
                   ),
@@ -120,12 +174,18 @@ class _AddEventModalState extends State<AddEventModal> {
               onPressed: () async {
                 if (nombreController.text.isEmpty) return;
                 
-                final inicio = DateTime(fechaSeleccionada.year, fechaSeleccionada.month, fechaSeleccionada.day, horaSeleccionada.hour, horaSeleccionada.minute);
-                final fin = inicio.add(const Duration(hours: 2));
+                final inicio = DateTime(
+                  fechaRange.start.year, fechaRange.start.month, fechaRange.start.day, 
+                  horaInicio.hour, horaInicio.minute
+                );
+                final fin = DateTime(
+                  fechaRange.end.year, fechaRange.end.month, fechaRange.end.day, 
+                  horaFin.hour, horaFin.minute
+                );
 
                 String tipoFinal = 'asignacion';
                 switch(tipoSeleccionado) {
-                  case 'Hoja Semanal': tipoFinal = 'hoja semanal'; break;
+                  case 'Evangelismo': tipoFinal = 'evangelismo'; break;
                   case 'Ayuno': tipoFinal = 'ayuno'; break;
                   case 'Vigilia': tipoFinal = 'vigilia'; break;
                   case 'Culto de Adoración': tipoFinal = 'culto'; break;
@@ -136,7 +196,7 @@ class _AddEventModalState extends State<AddEventModal> {
                   'nombre': nombreController.text,
                   'tipo': tipoFinal,
                   'departamento': deptoSeleccionado,
-                  'descripcion': descController.text,
+                  'descripcion': '',
                   'fechaInicio': inicio.toIso8601String(),
                   'fechaFin': fin.toIso8601String(),
                   'color': 'primary',
@@ -144,17 +204,24 @@ class _AddEventModalState extends State<AddEventModal> {
 
                 if (success && mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Evento agendado con éxito'), backgroundColor: Colors.green));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Evento agendado con éxito'), 
+                    backgroundColor: AppColors.success
+                  ));
                 } else if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(store.errorMessage ?? 'Error al agendar'), backgroundColor: Colors.redAccent));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(store.errorMessage ?? 'Error al agendar'), 
+                    backgroundColor: AppColors.error
+                  ));
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary, 
                 minimumSize: const Size(double.infinity, 54), 
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
               ),
-              child: const Text('GUARDAR ASIGNACIÓN', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              child: const Text('GUARDAR ASIGNACIÓN', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
             ),
             const SizedBox(height: 40),
           ],
@@ -192,7 +259,7 @@ class _AddEventModalState extends State<AddEventModal> {
         isExpanded: true,
         underline: const SizedBox(),
         dropdownColor: AppColors.surface,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
         onChanged: onChanged,
       ),
@@ -200,7 +267,6 @@ class _AddEventModalState extends State<AddEventModal> {
   }
 }
 
-// Helper function
 void showAddEventModal(BuildContext context, DateTime initialDate) {
   showModalBottomSheet(
     context: context,

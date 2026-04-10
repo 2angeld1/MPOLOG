@@ -82,7 +82,7 @@ class _ConteoFormModalState extends State<ConteoFormModal> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 40, height: 4, margin: const EdgeInsets.only(bottom: 24),
+                  width: 32, height: 4, margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
                 ),
                 Text(_isEditing ? 'EDITAR REGISTRO' : 'NUEVO REGISTRO', style: AppTextStyles.h3(context)),
@@ -113,6 +113,7 @@ class _ConteoFormModalState extends State<ConteoFormModal> {
                   value: _selectedArea,
                   items: conteoStore.areas,
                   icon: Icons.location_on_rounded,
+                  conteoStore: conteoStore,
                   onChanged: (val) => setState(() => _selectedArea = val),
                 ),
                 const SizedBox(height: 16),
@@ -154,10 +155,11 @@ class _ConteoFormModalState extends State<ConteoFormModal> {
                         ? await context.read<ConteoStore>().updateConteo(_editingId!, data)
                         : await context.read<ConteoStore>().registerConteo(data);
 
-                    if (success && mounted) {
-                      if (!context.mounted) return;
-                      Navigator.pop(context);
-                      AppNotifications.showTopToast(context, _isEditing ? 'Actualizado' : 'Guardado');
+                    if (context.mounted) {
+                      if (success) {
+                        Navigator.pop(context);
+                        AppNotifications.showTopToast(context, _isEditing ? 'Actualizado' : 'Guardado');
+                      }
                     }
                   },
                 ),
@@ -219,15 +221,30 @@ class _ConteoFormModalState extends State<ConteoFormModal> {
     );
   }
 
-  Widget _buildDropdown({required String label, required String? value, required List<String> items, required IconData icon, required Function(String?) onChanged}) {
+  Widget _buildDropdown({
+    required String label, 
+    required String? value, 
+    required List<String> items, 
+    required IconData icon, 
+    required ConteoStore conteoStore,
+    required Function(String?) onChanged
+  }) {
     return _buildInputWrapper(
       icon: icon, label: label,
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: value, isExpanded: true, isDense: true,
-          hint: const Text('Seleccionar...', style: TextStyle(color: Colors.white24, fontSize: 14)),
+          value: items.contains(value) ? value : null,
+          isExpanded: true, 
+          isDense: true,
+          hint: Text(
+            conteoStore.isLoading && items.isEmpty ? 'Cargando áreas...' : 'Seleccionar...', 
+            style: const TextStyle(color: Colors.white24, fontSize: 14)
+          ),
           dropdownColor: AppColors.surface,
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)))).toList(),
+          items: items.map((e) => DropdownMenuItem(
+            value: e, 
+            child: Text(e, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold))
+          )).toList(),
           onChanged: onChanged,
         ),
       ),

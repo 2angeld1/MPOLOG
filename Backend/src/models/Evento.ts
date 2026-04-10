@@ -8,7 +8,7 @@ export interface IUbicacion {
 
 export interface IEvento extends Document {
     nombre: string;
-    tipo: 'campamento' | 'retiro' | 'conferencia' | 'asignacion' | 'reunion' | 'ayuno' | 'vigilia' | 'culto' | 'hoja semanal' | 'otro';
+    tipo: 'campamento' | 'retiro' | 'conferencia' | 'asignacion' | 'reunion' | 'ayuno' | 'vigilia' | 'culto' | 'evangelismo' | 'otro';
     departamento: string;
     color?: string; // Hex code para el calendario
     fechaInicio: Date;
@@ -36,7 +36,7 @@ const EventoSchema: Schema = new Schema({
     },
     tipo: {
         type: String,
-        enum: ['campamento', 'retiro', 'conferencia', 'asignacion', 'reunion', 'ayuno', 'vigilia', 'culto', 'hoja semanal', 'otro'],
+        enum: ['campamento', 'retiro', 'conferencia', 'asignacion', 'reunion', 'ayuno', 'vigilia', 'culto', 'evangelismo', 'otro'],
         default: 'asignacion'
     },
     departamento: {
