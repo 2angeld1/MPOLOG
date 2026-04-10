@@ -145,7 +145,7 @@ class _EventosPageState extends State<EventosPage> {
                   GlassTextField(label: 'Costo Total *', controller: _precioController, keyboardType: TextInputType.number),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
-                    value: _tipoEvento,
+                    initialValue: _tipoEvento,
                     dropdownColor: AppColors.surface,
                     decoration: InputDecoration(
                       labelText: 'Tipo de Evento',

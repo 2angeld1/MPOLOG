@@ -25,15 +25,20 @@ initSocket(httpServer);
 
 // Middleware
 app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'http://localhost:8100',
-        'http://localhost:5173',
-        'http://localhost:8080',
-        'https://mpolog.vercel.app',
-        'https://maranatha.up.railway.app',
-        'https://mpolog.up.railway.app'
-    ],
+    origin: (origin, callback) => {
+        // Permitir localhost en cualquier puerto y dominios de producción
+        const allowedOrigins = [
+            'https://mpolog.vercel.app',
+            'https://maranatha.up.railway.app',
+            'https://mpolog.up.railway.app'
+        ];
+        
+        if (!origin || origin.startsWith('http://localhost') || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 // Aumentar el límite de tamaño para permitir imágenes en base64

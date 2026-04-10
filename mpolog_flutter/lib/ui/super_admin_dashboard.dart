@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../logic/auth_store.dart';
-import '../../widgets/glass_container.dart';
 import '../../styles/app_text_styles.dart';
 import 'user_maintenance_page.dart';
 import 'settings_page.dart';
 import 'reportes_page.dart';
+import 'package:mpolog_flutter/widgets/cards/admin_stat_card.dart';
+import 'package:mpolog_flutter/widgets/items/admin_quick_action.dart';
 
 class SuperAdminDashboard extends StatelessWidget {
   const SuperAdminDashboard({super.key});
@@ -17,190 +18,113 @@ class SuperAdminDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background color is handled by Scaffold
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Profile Header with Logout
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Hola, ${user?['nombre'] ?? 'Admin'}',
-                            style: AppTextStyles.h2(context).copyWith(fontSize: 24),
-                          ),
-                          Text(
-                            'Panel de SuperAdmin',
-                            style: AppTextStyles.body(context).copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Hola, ${user?['nombre'] ?? 'Admin'}',
+                        style: AppTextStyles.h2(context).copyWith(fontSize: 24),
                       ),
-                      IconButton(
-                        onPressed: () => authStore.logout(),
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                      Text(
+                        'Panel de SuperAdmin',
+                        style: AppTextStyles.body(context).copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
-
-                  // Stats Section
-                  Text('Estadísticas Generales', style: AppTextStyles.h3(context)),
-                  const SizedBox(height: 16),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final crossAxisCount = constraints.maxWidth < 340 ? 1 : 2;
-                      return GridView.count(
-                        crossAxisCount: crossAxisCount,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: crossAxisCount == 1 ? 2.5 : 1.3,
-                        children: [
-                          _buildStatCard(
-                            context,
-                            'Usuarios',
-                            '248',
-                            Icons.people_outline,
-                            Colors.blueAccent,
-                          ),
-                          _buildStatCard(
-                            context,
-                            'Eventos',
-                            '12',
-                            Icons.event_available_outlined,
-                            Colors.purpleAccent,
-                          ),
-                          _buildStatCard(
-                            context,
-                            'Iglesias',
-                            '5',
-                            Icons.church_outlined,
-                            Colors.orangeAccent,
-                          ),
-                          _buildStatCard(
-                            context,
-                            'Reportes',
-                            '84',
-                            Icons.bar_chart_outlined,
-                            Colors.greenAccent,
-                          ),
-                        ],
-                      );
-                    },
+                  IconButton(
+                    onPressed: () => authStore.logout(),
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                    ),
                   ),
-                  const SizedBox(height: 32),
-
-                  // Quick Actions
-                  Text('Acciones Rápidas', style: AppTextStyles.h3(context)),
-                  const SizedBox(height: 16),
-                  _buildQuickAction(
-                    context,
-                    'Gestión de Usuarios',
-                    'Asignar roles y permisos',
-                    Icons.manage_accounts_outlined,
-                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserMaintenancePage())),
-                  ),
-                  _buildQuickAction(
-                    context,
-                    'Configuración Global',
-                    'Ajustes del sistema principal',
-                    Icons.settings_suggest_outlined,
-                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage())),
-                  ),
-                  _buildQuickAction(
-                    context,
-                    'Ver Reportes Críticos',
-                    'Análisis de datos mensual',
-                    Icons.analytics_outlined,
-                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportesPage())),
-                  ),
-                  const SizedBox(height: 40),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+              const SizedBox(height: 32),
 
-  Widget _buildStatCard(BuildContext context, String label, String value, IconData icon, Color color) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(16),
-      borderRadius: 20,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color.withValues(alpha: 0.8), size: 28),
-          const SizedBox(height: 12),
-          Text(value, style: AppTextStyles.h2(context).copyWith(fontSize: 22)),
-          Text(
-            label,
-            style: AppTextStyles.body(context).copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickAction(BuildContext context, String title, String subtitle, IconData icon, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: GlassContainer(
-          padding: const EdgeInsets.all(16),
-          borderRadius: 16,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7), size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppTextStyles.body(context).copyWith(fontWeight: FontWeight.bold)),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.body(context).copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                        fontSize: 12,
+              // Stats Section
+              Text('Estadísticas Generales', style: AppTextStyles.h3(context)),
+              const SizedBox(height: 16),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth < 340 ? 1 : 2;
+                  return GridView.count(
+                    crossAxisCount: crossAxisCount,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: crossAxisCount == 1 ? 2.5 : 1.3,
+                    children: [
+                      const AdminStatCard(
+                        label: 'Usuarios',
+                        value: '248',
+                        icon: Icons.people_outline,
+                        color: Colors.blueAccent,
                       ),
-                    ),
-                  ],
-                ),
+                      const AdminStatCard(
+                        label: 'Eventos',
+                        value: '12',
+                        icon: Icons.event_available_outlined,
+                        color: Colors.purpleAccent,
+                      ),
+                      const AdminStatCard(
+                        label: 'Iglesias',
+                        value: '5',
+                        icon: Icons.church_outlined,
+                        color: Colors.orangeAccent,
+                      ),
+                      const AdminStatCard(
+                        label: 'Reportes',
+                        value: '84',
+                        icon: Icons.bar_chart_outlined,
+                        color: Colors.greenAccent,
+                      ),
+                    ],
+                  );
+                },
               ),
-              Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
+              const SizedBox(height: 32),
+
+              // Quick Actions
+              Text('Acciones Rápidas', style: AppTextStyles.h3(context)),
+              const SizedBox(height: 16),
+              AdminQuickAction(
+                title: 'Gestión de Usuarios',
+                subtitle: 'Asignar roles y permisos',
+                icon: Icons.manage_accounts_outlined,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserMaintenancePage())),
+              ),
+              AdminQuickAction(
+                title: 'Configuración Global',
+                subtitle: 'Ajustes del sistema principal',
+                icon: Icons.settings_suggest_outlined,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage())),
+              ),
+              AdminQuickAction(
+                title: 'Ver Reportes Críticos',
+                subtitle: 'Análisis de datos mensual',
+                icon: Icons.analytics_outlined,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportesPage())),
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

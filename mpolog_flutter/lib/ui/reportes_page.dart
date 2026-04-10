@@ -5,12 +5,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../logic/reportes_store.dart';
-import '../logic/conteo_store.dart';
-import '../logic/config_store.dart';
 import '../styles/app_colors.dart';
 import '../styles/app_text_styles.dart';
-import '../widgets/glass_container.dart';
-import '../widgets/glass_button.dart';
+import '../widgets/cards/report_filters_card.dart';
+import '../widgets/sections/report_chart_preview.dart';
+import '../widgets/sections/report_export_options.dart';
+import '../widgets/sections/section_header.dart';
 
 class ReportesPage extends StatefulWidget {
   const ReportesPage({super.key});
@@ -36,6 +36,7 @@ class _ReportesPageState extends State<ReportesPage> {
     final token = prefs.getString('token');
 
     if (token == null) {
+      if (!mounted) return;
       setState(() => _isChartLoading = false);
       return;
     }
@@ -46,6 +47,7 @@ class _ReportesPageState extends State<ReportesPage> {
         headers: {'Authorization': 'Bearer $token'},
       );
 
+      if (!mounted) return;
       if (response.statusCode == 200) {
         setState(() {
           _chartImage = response.bodyBytes;
@@ -55,6 +57,7 @@ class _ReportesPageState extends State<ReportesPage> {
         setState(() => _isChartLoading = false);
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isChartLoading = false);
     }
   }
@@ -79,8 +82,7 @@ class _ReportesPageState extends State<ReportesPage> {
   @override
   Widget build(BuildContext context) {
     final store = context.watch<ReportesStore>();
-    final configStore = context.watch<ConfigStore>();
-    final conteoStore = context.watch<ConteoStore>();
+
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -131,19 +133,20 @@ class _ReportesPageState extends State<ReportesPage> {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                _buildFilters(store, configStore, conteoStore),
+                ReportFiltersCard(store: store, onApply: _fetchChart),
                 const SizedBox(height: 24),
                 
-                // Gráfico
-                _buildSectionTitle('ANÁLISIS VISUAL'),
+                const SectionHeader(title: 'ANÁLISIS VISUAL'),
                 const SizedBox(height: 16),
-                _buildChartPreview(),
+                ReportChartPreview(
+                  chartImage: _chartImage,
+                  isLoading: _isChartLoading,
+                ),
                 const SizedBox(height: 32),
                 
-                // Descargas
-                _buildSectionTitle('EXPORTAR DATOS'),
+                const SectionHeader(title: 'EXPORTAR DATOS'),
                 const SizedBox(height: 16),
-                _buildExportOptions(),
+                ReportExportOptions(onDownload: _downloadReport),
                 const SizedBox(height: 48),
               ]),
             ),
@@ -153,220 +156,6 @@ class _ReportesPageState extends State<ReportesPage> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(title, 
-      style: AppTextStyles.label(context).copyWith(fontSize: 10, letterSpacing: 2, color: Colors.white38));
-  }
+  // Los widgets de UI ahora son componentes externos.
 
-  Widget _buildFilters(ReportesStore store, ConfigStore configStore, ConteoStore conteoStore) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(24),
-      borderRadius: 32,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 18),
-              const SizedBox(width: 8),
-              Text('FILTROS DE REPORTE', style: AppTextStyles.label(context)),
-            ],
-          ),
-          const SizedBox(height: 20),
-          
-          // Selector de Periodo
-          _buildSmallLabel('PERÍODO DE TIEMPO'),
-          const SizedBox(height: 8),
-          _buildPeriodSelector(store),
-          const SizedBox(height: 20),
-          
-          // Selector de Tipo
-          _buildSmallLabel('CATEGORÍA'),
-          const SizedBox(height: 8),
-          _buildTypeSelector(store),
-          const SizedBox(height: 20),
-          
-          // Aplicar Cambios
-          GlassButton(
-            text: 'ACTUALIZAR ANÁLISIS',
-            icon: Icons.refresh_rounded,
-            onPressed: _fetchChart,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSmallLabel(String text) {
-    return Text(text, style: const TextStyle(fontSize: 9, color: Colors.white24, fontWeight: FontWeight.bold, letterSpacing: 1.2));
-  }
-
-  Widget _buildPeriodSelector(ReportesStore store) {
-    final periods = {
-      'semana': 'Esta Semana',
-      'mes': 'Este Mes',
-      '6meses': '6 Meses',
-      'año': 'Este Año',
-    };
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: periods.entries.map((p) {
-          final isSelected = store.selectedPeriodo == p.key;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => store.setPeriodo(p.key),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: isSelected ? AppColors.primary : Colors.white10),
-                ),
-                child: Text(
-                  p.value,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white60,
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildTypeSelector(ReportesStore store) {
-    return Row(
-      children: [
-        _buildChoiceChip(
-          label: 'Personas', 
-          isSelected: store.selectedTipo == 'personas',
-          onTap: () => store.setTipo('personas'),
-        ),
-        const SizedBox(width: 12),
-        _buildChoiceChip(
-          label: 'Materiales', 
-          isSelected: store.selectedTipo == 'materiales',
-          onTap: () => store.setTipo('materiales'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChoiceChip({required String label, required bool isSelected, required VoidCallback onTap}) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isSelected ? AppColors.primary : Colors.white.withValues(alpha: 0.05)),
-          ),
-          child: Text(label, style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white38,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          )),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChartPreview() {
-    return GlassContainer(
-      padding: const EdgeInsets.all(12),
-      borderRadius: 24,
-      child: Column(
-        children: [
-          Container(
-            height: 250,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: _isChartLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _chartImage != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.memory(_chartImage!, fit: BoxFit.contain),
-                  )
-                : Center(child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.broken_image_rounded, color: Colors.white10, size: 48),
-                      const SizedBox(height: 8),
-                      Text('Error al cargar gráfico', style: TextStyle(color: Colors.white10)),
-                    ],
-                  )),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Gráfico de distribución por áreas para el período seleccionado.',
-            style: TextStyle(fontSize: 11, color: Colors.white24, fontStyle: FontStyle.italic),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExportOptions() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildExportButton(
-            label: 'PDF DOCUMENT',
-            icon: Icons.picture_as_pdf_rounded,
-            color: Colors.redAccent,
-            onTap: () => _downloadReport('pdf'),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildExportButton(
-            label: 'EXCEL SHEET',
-            icon: Icons.table_view_rounded,
-            color: Colors.greenAccent,
-            onTap: () => _downloadReport('excel'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildExportButton({required String label, required IconData icon, required Color color, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        borderRadius: 24,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(height: 12),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
-          ],
-        ),
-      ),
-    );
-  }
 }

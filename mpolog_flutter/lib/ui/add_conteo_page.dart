@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
+// ignore: avoid_web_libraries_in_dart
+import 'dart:html' as html;
 import '../logic/conteo_store.dart';
 import '../logic/config_store.dart';
-import '../widgets/glass_container.dart';
-import '../widgets/glass_button.dart';
-import '../styles/app_text_styles.dart';
-import '../styles/app_colors.dart';
-import '../utils/app_notifications.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import '../../widgets/glass_container.dart';
+import '../../widgets/glass_button.dart';
+import '../../widgets/dashboard/daily_total_card.dart';
+import '../../widgets/sections/weekly_stats_row.dart';
+import '../../widgets/sections/quick_registration_chips.dart';
+import '../../widgets/sections/daily_records_list.dart';
+import '../../widgets/sections/section_header.dart';
+import '../../styles/app_text_styles.dart';
+import '../../styles/app_colors.dart';
+import '../../utils/app_notifications.dart';
 
 class AddConteoPage extends StatefulWidget {
   const AddConteoPage({super.key});
@@ -19,6 +28,7 @@ class AddConteoPage extends StatefulWidget {
 
 class _AddConteoPageState extends State<AddConteoPage> {
   final _formKey = GlobalKey<FormState>();
+  final GlobalKey _counterKey = GlobalKey();
   
   String? _selectedTipo = 'personas';
   String? _selectedArea;
@@ -158,6 +168,7 @@ class _AddConteoPageState extends State<AddConteoPage> {
                               : await context.read<ConteoStore>().registerConteo(data);
 
                           if (success && mounted) {
+                            if (!context.mounted) return;
                             Navigator.pop(context);
                             AppNotifications.showTopToast(context, _isEditing ? 'Actualizado' : 'Guardado');
                           }
@@ -173,6 +184,58 @@ class _AddConteoPageState extends State<AddConteoPage> {
         },
       ),
     );
+  }
+
+  Future<void> _exportToImage() async {
+    try {
+      AppNotifications.showTopToast(context, '📸 Procesando reporte visual...');
+      
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final boundary = _counterKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      
+      if (byteData != null) {
+        final Uint8List pngBytes = byteData.buffer.asUint8List();
+        
+        // Lógica de descarga según la plataforma
+        await _saveOrShareImage(pngBytes);
+        
+        if (mounted) {
+          AppNotifications.showTopToast(context, '✅ Reporte descargado con éxito');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error exportando: $e');
+      if (mounted) {
+        AppNotifications.showTopToast(context, '❌ Error al generar el reporte');
+      }
+    }
+  }
+
+  Future<void> _saveOrShareImage(Uint8List bytes) async {
+    if (kIsWeb) {
+      _downloadWeb(bytes);
+    } else {
+      // Aquí iría la lógica para móvil usando path_provider e share_plus
+      debugPrint('La exportación de imagen solo está implementada para Web por ahora.');
+    }
+  }
+
+  void _downloadWeb(Uint8List bytes) {
+    try {
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      html.AnchorElement(href: url)
+        ..setAttribute("download", "reporte_conteo_${DateTime.now().millisecondsSinceEpoch}.png")
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    } catch (e) {
+      debugPrint('Error en descarga web: $e');
+    }
   }
 
   @override
@@ -203,22 +266,39 @@ class _AddConteoPageState extends State<AddConteoPage> {
                 if (currentIglesia == null)
                   _buildNoChurchSelected()
                 else ...[
-                  // 1. PANORAMA SEMANAL
-                  _buildSectionTitle('PANORAMA SEMANAL (PERSONAS)'),
-                  const SizedBox(height: 16),
-                  _buildWeeklySummary(conteoStore, currentIglesia),
+                  // 1. TOTAL DE HOY (EN GRANDE)
+                  _buildDailyLargeCounterSection(conteoStore, currentIglesia),
                   const SizedBox(height: 32),
 
-                  // 2. REGISTRO RÁPIDO
-                  _buildSectionTitle('REGISTRO RÁPIDO'),
-                  const SizedBox(height: 16),
-                  _buildAreaSuggestions(conteoStore),
+                  // 2. PANORAMA SEMANAL
+                  const SectionHeader(title: 'PANORAMA SEMANAL (PERSONAS)'),
+                  WeeklyStatsRow(conteos: conteoStore.conteos, iglesia: currentIglesia),
                   const SizedBox(height: 32),
 
-                  // 3. RESUMEN DE HOY
-                  _buildSectionTitle('RESUMEN DE HOY'),
-                  const SizedBox(height: 16),
-                  _buildDailyRecords(conteoStore, currentIglesia),
+                  // 3. REGISTRO RÁPIDO
+                  const SectionHeader(title: 'REGISTRO RÁPIDO'),
+                  QuickRegistrationChips(
+                    selectedTipo: _selectedTipo ?? 'personas',
+                    onAreaSelected: (area) {
+                      setState(() => _selectedArea = area);
+                      _showAddConteoModal();
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 4. RESUMEN DE HOY
+                  const SectionHeader(title: 'RESUMEN DE HOY'),
+                  DailyRecordsList(
+                    records: conteoStore.conteos.where((c) {
+                      final cDate = DateTime.tryParse(c['fecha'] ?? '');
+                      return cDate != null && cDate.day == DateTime.now().day && cDate.month == DateTime.now().month && c['iglesia'] == currentIglesia;
+                    }).toList(),
+                    onEdit: (c) => _showAddConteoModal(c),
+                    onDelete: (id) async {
+                      final success = await conteoStore.deleteConteo(id);
+                      if (success && mounted) AppNotifications.showTopToast(context, 'Eliminado');
+                    },
+                  ),
                   const SizedBox(height: 120),
                 ],
               ]),
@@ -255,149 +335,38 @@ class _AddConteoPageState extends State<AddConteoPage> {
     );
   }
 
-  Widget _buildWeeklySummary(ConteoStore store, String iglesia) {
-    // 1. Obtener todas las fechas únicas que tienen registros para esta iglesia y tipo personas
-    final Map<String, int> dailyTotals = {};
-    for (var c in store.conteos) {
-      if (c['iglesia'] == iglesia && c['tipo'] == 'personas') {
-        final cDate = DateTime.tryParse(c['fecha'] ?? '');
-        if (cDate != null) {
-          final dateKey = '${cDate.year}-${cDate.month.toString().padLeft(2,'0')}-${cDate.day.toString().padLeft(2,'0')}';
-          dailyTotals[dateKey] = (dailyTotals[dateKey] ?? 0) + (c['cantidad'] as int? ?? 0);
-        }
-      }
-    }
-
-    // 2. Ordenar fechas y tomar las últimas 5 (o menos si hay menos)
-    final sortedDates = dailyTotals.keys.toList()..sort();
-    final lastActiveDates = sortedDates.reversed.take(5).toList().reversed.toList();
-
-    if (lastActiveDates.isEmpty) return const SizedBox();
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: lastActiveDates.map((dateKey) {
-          final date = DateTime.parse(dateKey);
-          final now = DateTime.now();
-          final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
-          final total = dailyTotals[dateKey] ?? 0;
-
-          return Container(
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            decoration: BoxDecoration(
-              color: isToday ? AppColors.primary.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.03),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isToday ? AppColors.primary : Colors.white.withValues(alpha: 0.05)),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  isToday ? 'HOY' : '${['D','L','M','M','J','V','S'][date.weekday % 7]} ${date.day}/${date.month}',
-                  style: TextStyle(fontSize: 10, color: isToday ? AppColors.primary : Colors.white38, fontWeight: FontWeight.bold)
-                ),
-                const SizedBox(height: 8),
-                Text('$total', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildAreaSuggestions(ConteoStore store) {
-    final areas = _selectedTipo == 'personas' 
-      ? ['Bloque 1 y 2', 'Bloque 3 y 4', 'Altar y Media', 'Genesis']
-      : ['cafeteria', 'baños', 'comedor'];
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: areas.map((area) => GestureDetector(
-        onTap: () {
-          setState(() => _selectedArea = area);
-          _showAddConteoModal();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.flash_on_rounded, size: 14, color: Colors.amber),
-              const SizedBox(width: 8),
-              Text(area, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-      )).toList(),
-    );
-  }
-
-  Widget _buildDailyRecords(ConteoStore store, String iglesia) {
-    final dailyRecords = store.conteos.where((c) {
+  Widget _buildDailyLargeCounterSection(ConteoStore store, String iglesia) {
+    final now = DateTime.now();
+    final todayRecords = store.conteos.where((c) {
       final cDate = DateTime.tryParse(c['fecha'] ?? '');
-      return cDate != null && cDate.day == DateTime.now().day && cDate.month == DateTime.now().month && c['iglesia'] == iglesia;
+      return cDate != null &&
+          cDate.day == now.day &&
+          cDate.month == now.month &&
+          cDate.year == now.year &&
+          c['iglesia'] == iglesia &&
+          c['tipo'] == 'personas';
     }).toList();
 
-    if (dailyRecords.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(40), child: Text('No hay registros hoy', style: TextStyle(color: Colors.white10))));
-
-    final Map<String, List<dynamic>> grouped = {};
-    for (var r in dailyRecords) {
-      final area = r['area'] ?? 'General';
-      grouped.containsKey(area) ? grouped[area]!.add(r) : grouped[area] = [r];
-    }
-
-    return Column(
-      children: grouped.entries.map((g) {
-        final total = g.value.fold<int>(0, (s, i) => s + (i['cantidad'] as int? ?? 0));
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.location_on_rounded, color: AppColors.primary, size: 16),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(g.key.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2))),
-                    Text('$total', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 18)),
-                  ],
-                ),
-              ),
-              const Divider(height: 1, color: Colors.white10),
-              ...g.value.map((c) => Slidable(
-                key: Key(c['_id']),
-                endActionPane: ActionPane(motion: const DrawerMotion(), children: [
-                  SlidableAction(onPressed: (_) => _showAddConteoModal(c), backgroundColor: Colors.blue.withValues(alpha: 0.1), foregroundColor: Colors.blueAccent, icon: Icons.edit_rounded),
-                  SlidableAction(onPressed: (_) async {
-                    final success = await store.deleteConteo(c['_id']);
-                    if (success && mounted) AppNotifications.showTopToast(context, 'Eliminado');
-                  }, backgroundColor: Colors.red.withValues(alpha: 0.1), foregroundColor: Colors.redAccent, icon: Icons.delete_outline_rounded),
-                ]),
-                child: ListTile(
-                  dense: true,
-                  title: Text(c['tipo'] == 'personas' ? 'Personas' : c['subArea'] ?? 'Material', style: const TextStyle(fontSize: 13)),
-                  trailing: Text('${c['cantidad']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              )),
-            ],
-          ),
-        );
-      }).toList(),
+    final todayTotal = todayRecords.fold(
+      0,
+      (sum, c) => sum + (c['cantidad'] as int? ?? 0),
     );
-  }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(title, style: AppTextStyles.label(context).copyWith(fontSize: 10, letterSpacing: 2.5, color: Colors.white38));
+    final Map<String, int> areaBreakdown = {};
+    for (var r in todayRecords) {
+      final area = r['area'] ?? 'General';
+      areaBreakdown[area] =
+          (areaBreakdown[area] ?? 0) + (r['cantidad'] as int? ?? 0);
+    }
+    final sortedBreakdown = areaBreakdown.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return DailyTotalCard(
+      boundaryKey: _counterKey,
+      total: todayTotal,
+      areaBreakdown: sortedBreakdown,
+      onExport: _exportToImage,
+    );
   }
 
   Widget _buildNoChurchSelected() {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../logic/admin_store.dart';
-import '../../widgets/glass_container.dart';
-import '../../styles/app_colors.dart';
 import '../../styles/app_text_styles.dart';
+import '../../widgets/items/user_list_item.dart';
+import '../../widgets/modals/assign_role_modal.dart';
 
 class UserMaintenancePage extends StatefulWidget {
   const UserMaintenancePage({super.key});
@@ -16,56 +16,11 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<AdminStore>().fetchUsers());
-    Future.microtask(() => context.read<AdminStore>().fetchRoles());
-  }
-
-  void _showRoleDialog(dynamic user) {
-    final adminStore = context.read<AdminStore>();
-    final roles = adminStore.roles;
-    String selectedRole = user['rol'] ?? 'user';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: Text('Asignar Rol a ${user['nombre'] ?? 'Usuario'}', style: AppTextStyles.h3(context)),
-        content: StatefulBuilder(
-          builder: (context, setDialogState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: roles.map((role) {
-              final roleName = role['name'] ?? 'user';
-              return RadioListTile<String>(
-                title: Text(roleName, style: AppTextStyles.body(context)),
-                value: roleName,
-                groupValue: selectedRole,
-                onChanged: (val) => setDialogState(() => selectedRole = val!),
-                activeColor: AppColors.primary,
-              );
-            }).toList(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('CANCELAR', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final success = await adminStore.updateRole(user['_id'], selectedRole);
-              if (mounted) Navigator.pop(context);
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Rol actualizado correctamente')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('GUARDAR', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
+    Future.microtask(() {
+      if (!mounted) return;
+      context.read<AdminStore>().fetchUsers();
+      context.read<AdminStore>().fetchRoles();
+    });
   }
 
   @override
@@ -87,89 +42,14 @@ class _UserMaintenancePageState extends State<UserMaintenancePage> {
                 padding: const EdgeInsets.all(20),
                 itemCount: adminStore.users.length,
                 itemBuilder: (context, index) {
-                    final usr = adminStore.users[index];
-                    final isDark = Theme.of(context).brightness == Brightness.dark;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: GlassContainer(
-                        padding: const EdgeInsets.all(16),
-                        borderRadius: 16,
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                              child: Text(
-                                (usr['nombre'] ?? 'U')[0].toUpperCase(),
-                                style: TextStyle(
-                                  color: isDark ? Colors.white : AppColors.primary, 
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(usr['nombre'] ?? 'Sin nombre', style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
-                                  Text(usr['email'] ?? 'Sin email', style: AppTextStyles.body(context).copyWith(fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _getRoleColor(usr['rol'] ?? 'usuario', isDark).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: _getRoleColor(usr['rol'] ?? 'usuario', isDark).withValues(alpha: 0.3)),
-                              ),
-                              child: Text(
-                                (usr['rol'] ?? 'usuario').toUpperCase(),
-                                style: TextStyle(
-                                  color: _getRoleColor(usr['rol'] ?? 'usuario', isDark),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.edit_outlined, 
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), 
-                                size: 20
-                              ),
-                              onPressed: () => _showRoleDialog(usr),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                  final usr = adminStore.users[index];
+                  return UserListItem(
+                    user: usr,
+                    onEdit: () => showAssignRoleModal(context, usr, adminStore),
+                  );
                 },
               ),
             ),
     );
-  }
-
-  Color _getRoleColor(String role, bool isDark) {
-    if (isDark) {
-      switch (role.toLowerCase()) {
-        case 'superadmin': return Colors.amberAccent;
-        case 'logisticadmin': return Colors.blueAccent;
-        case 'eventsadmin': return Colors.purpleAccent;
-        case 'sameadmin': return Colors.tealAccent;
-        case 'usuario':
-        case 'user': return Colors.greenAccent;
-        default: return Colors.grey;
-      }
-    } else {
-      switch (role.toLowerCase()) {
-        case 'superadmin': return Colors.orange[800]!;
-        case 'logisticadmin': return Colors.blue[800]!;
-        case 'eventsadmin': return Colors.purple[800]!;
-        case 'sameadmin': return Colors.teal[800]!;
-        case 'usuario':
-        case 'user': return Colors.green[800]!;
-        default: return Colors.grey[700]!;
-      }
-    }
   }
 }

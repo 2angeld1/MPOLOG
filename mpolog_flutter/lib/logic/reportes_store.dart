@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../data/api_constants.dart';
 
 class ReportesStore extends ChangeNotifier {
@@ -9,7 +8,7 @@ class ReportesStore extends ChangeNotifier {
   String _selectedPeriodo = 'mes';
   String? _selectedTipo = 'personas';
   String? _selectedIglesia;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   String get selectedPeriodo => _selectedPeriodo;
   String? get selectedTipo => _selectedTipo;
