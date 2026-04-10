@@ -62,7 +62,7 @@ class _MainTabsState extends State<MainTabs> {
   @override
   Widget build(BuildContext context) {
     final authStore = context.watch<AuthStore>();
-    final userRol = authStore.user?['rol']?.toString().toLowerCase();
+    final userRol = authStore.user?.rol.toLowerCase();
     
     final isSuperAdmin = authStore.isSuperAdmin;
     final isSameAdmin = userRol == 'sameadmin';

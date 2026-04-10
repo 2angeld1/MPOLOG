@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'api_constants.dart';
 import 'api_service.dart';
@@ -8,11 +7,8 @@ class UserService {
 
   Future<List<dynamic>> getUsers() async {
     try {
-      final response = await _apiService.get(ApiConstants.usuarios);
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-      return [];
+      final body = await _apiService.get(ApiConstants.usuarios);
+      return body as List<dynamic>? ?? [];
     } catch (e) {
       debugPrint('Error getting users: $e');
       return [];
@@ -21,11 +17,11 @@ class UserService {
 
   Future<bool> updateUserRole(String id, String newRole) async {
     try {
-      final response = await _apiService.put(
+      await _apiService.put(
         '${ApiConstants.usuarios}/$id/role',
         {'rol': newRole},
       );
-      return response.statusCode == 200;
+      return true;
     } catch (e) {
       debugPrint('Error updating role: $e');
       return false;
@@ -34,8 +30,8 @@ class UserService {
 
   Future<bool> deleteUser(String id) async {
     try {
-      final response = await _apiService.delete('${ApiConstants.usuarios}/$id');
-      return response.statusCode == 200;
+      await _apiService.delete('${ApiConstants.usuarios}/$id');
+      return true;
     } catch (e) {
       debugPrint('Error deleting user: $e');
       return false;

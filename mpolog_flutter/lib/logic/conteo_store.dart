@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/conteo_service.dart';
 import '../data/socket_service.dart';
+import '../models/conteo_model.dart';
 
 class ConteoStore with ChangeNotifier {
   final ConteoService _conteoService = ConteoService();
@@ -14,13 +15,13 @@ class ConteoStore with ChangeNotifier {
     });
   }
 
-  List<dynamic> _conteos = [];
+  List<ConteoModel> _conteos = [];
   List<String> _areas = [];
   List<String> _iglesias = [];
   bool _isLoading = false;
   String? _errorMessage;
 
-  List<dynamic> get conteos => _conteos;
+  List<ConteoModel> get conteos => _conteos;
   List<String> get areas => _areas;
   List<String> get iglesias => _iglesias;
   bool get isLoading => _isLoading;
@@ -32,7 +33,8 @@ class ConteoStore with ChangeNotifier {
     notifyListeners();
 
     try {
-      _conteos = await _conteoService.getConteos();
+      final rawData = await _conteoService.getConteos();
+      _conteos = rawData.map((e) => ConteoModel.fromJson(e)).toList();
     } catch (e) {
       _errorMessage = 'Error al cargar los conteos';
     } finally {

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'api_constants.dart';
 import 'api_service.dart';
@@ -8,11 +7,8 @@ class RoleService {
 
   Future<List<dynamic>> getRoles() async {
     try {
-      final response = await _apiService.get(ApiConstants.roles);
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      }
-      return [];
+      final body = await _apiService.get(ApiConstants.roles);
+      return body as List<dynamic>? ?? [];
     } catch (e) {
       debugPrint('Error getting roles: $e');
       return [];
@@ -21,8 +17,8 @@ class RoleService {
 
   Future<bool> createRole(Map<String, dynamic> role) async {
     try {
-      final response = await _apiService.post(ApiConstants.roles, role);
-      return response.statusCode == 201;
+      await _apiService.post(ApiConstants.roles, role);
+      return true;
     } catch (e) {
       debugPrint('Error creating role: $e');
       return false;
@@ -31,8 +27,8 @@ class RoleService {
 
   Future<bool> deleteRole(String id) async {
     try {
-      final response = await _apiService.delete('${ApiConstants.roles}/$id');
-      return response.statusCode == 200;
+      await _apiService.delete('${ApiConstants.roles}/$id');
+      return true;
     } catch (e) {
       debugPrint('Error deleting role: $e');
       return false;

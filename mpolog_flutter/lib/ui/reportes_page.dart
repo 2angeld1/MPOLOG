@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import '../logic/reportes_store.dart';
 import '../styles/app_colors.dart';
 import '../styles/app_text_styles.dart';
@@ -32,30 +31,15 @@ class _ReportesPageState extends State<ReportesPage> {
   Future<void> _fetchChart() async {
     setState(() => _isChartLoading = true);
     final store = context.read<ReportesStore>();
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token == null) {
-      if (!mounted) return;
-      setState(() => _isChartLoading = false);
-      return;
-    }
-
+    
     try {
-      final response = await http.get(
-        Uri.parse(store.getChartUrl()),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
+      final bytes = await store.fetchChartImage();
       if (!mounted) return;
-      if (response.statusCode == 200) {
-        setState(() {
-          _chartImage = response.bodyBytes;
-          _isChartLoading = false;
-        });
-      } else {
-        setState(() => _isChartLoading = false);
-      }
+      
+      setState(() {
+        _chartImage = bytes;
+        _isChartLoading = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() => _isChartLoading = false);
@@ -65,14 +49,12 @@ class _ReportesPageState extends State<ReportesPage> {
   Future<void> _downloadReport(String format) async {
     final store = context.read<ReportesStore>();
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final token = prefs.getString('token');
     
-    // Para descargar archivos en móvil/web que requieren autenticación,
-    // a veces lo más simple es autorizar la URL temporalmente 
-    // o descargar y compartir. Por simplicidad aquí, abriremos un link.
-    // SI el backend no admite token en URL, esto fallará.
     final baseUrl = await store.getReportUrl(format);
-    final url = Uri.parse('$baseUrl&token=$token'); // Suponiendo soporte de token en el backend
+    if (!mounted) return;
+    final url = Uri.parse('$baseUrl&token=$token');
     
     if (await canLaunchUrl(url)) {
       await launchUrl(url);

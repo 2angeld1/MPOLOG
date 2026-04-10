@@ -32,7 +32,7 @@ class SuperAdminDashboard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Hola, ${user?['nombre'] ?? 'Admin'}',
+                        'Hola, ${user?.nombre ?? 'Admin'}',
                         style: AppTextStyles.h2(context).copyWith(fontSize: 24),
                       ),
                       Text(

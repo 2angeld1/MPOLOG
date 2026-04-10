@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
+import 'package:mpolog_flutter/models/evento_model.dart';
 
 class EventInfoCard extends StatelessWidget {
-  final Map<String, dynamic> evento;
+  final EventoModel evento;
 
   const EventInfoCard({
     super.key,
@@ -13,8 +14,8 @@ class EventInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ubicacion = evento['ubicacion']?['nombreLugar'] ?? 'Ubicación por definir';
-    final precio = evento['precioTotal']?.toString() ?? '0';
+    final ubicacion = evento.ubicacion?.nombreLugar ?? 'Ubicación por definir';
+    final precio = evento.precioTotal.toString();
 
     return GlassContainer(
       padding: const EdgeInsets.all(20),
@@ -24,7 +25,7 @@ class EventInfoCard extends StatelessWidget {
           _buildInfoRow(Icons.location_on_rounded, 'UBICACIÓN', ubicacion, AppColors.accent),
           const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(color: Colors.white10)),
           _buildInfoRow(Icons.calendar_month_rounded, 'FECHAS', 
-            'Del ${_formatDate(evento['fechaInicio'])} al ${_formatDate(evento['fechaFin'])}', 
+            'Del ${_formatDate(evento.fechaInicio)} al ${_formatDate(evento.fechaFin)}', 
             Colors.white38),
           const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(color: Colors.white10)),
           _buildInfoRow(Icons.payments_rounded, 'PRECIO TOTAL', '\$$precio', AppColors.primary),
@@ -33,7 +34,7 @@ class EventInfoCard extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _openMap(evento['ubicacion']),
+                  onPressed: () => _openMap(evento.ubicacion),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.accent,
                     side: const BorderSide(color: AppColors.accent),
@@ -87,19 +88,19 @@ class EventInfoCard extends StatelessWidget {
     );
   }
 
-  Future<void> _openMap(dynamic ubicacion) async {
-    if (ubicacion == null || ubicacion['lat'] == null) return;
-    final url = 'https://www.google.com/maps/search/?api=1&query=${ubicacion['lat']},${ubicacion['lng']}';
+  Future<void> _openMap(UbicacionModel? ubicacion) async {
+    if (ubicacion == null || ubicacion.lat == null) return;
+    final url = 'https://www.google.com/maps/search/?api=1&query=${ubicacion.lat},${ubicacion.lng}';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
   }
 
-  Future<void> _shareLocation(dynamic evento) async {
-    final ubicacion = evento['ubicacion'];
+  Future<void> _shareLocation(EventoModel evento) async {
+    final ubicacion = evento.ubicacion;
     if (ubicacion == null) return;
     
-    final text = '📍 EVENTO: ${evento['nombre']}\n📍 Lugar: ${ubicacion['nombreLugar']}\nhttps://www.google.com/maps/search/?api=1&query=${ubicacion['lat']},${ubicacion['lng']}';
+    final text = '📍 EVENTO: ${evento.nombre}\n📍 Lugar: ${ubicacion.nombreLugar}\nhttps://www.google.com/maps/search/?api=1&query=${ubicacion.lat},${ubicacion.lng}';
     
     final url = 'whatsapp://send?text=${Uri.encodeComponent(text)}';
     if (await canLaunchUrl(Uri.parse(url))) {
@@ -110,10 +111,8 @@ class EventInfoCard extends StatelessWidget {
     }
   }
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '--/--/--';
-    final date = DateTime.tryParse(dateStr);
-    if (date == null) return dateStr;
+  String _formatDate(DateTime? date) {
+    if (date == null) return '--/--/--';
     return '${date.day}/${date.month}/${date.year}';
   }
 }

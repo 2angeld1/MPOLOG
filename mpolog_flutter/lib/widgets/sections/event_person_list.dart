@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/persona_model.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
 
 class EventPersonList extends StatelessWidget {
-  final List<dynamic> personas;
+  final List<PersonaModel> personas;
   final String searchQuery;
-  final Function(Map<String, dynamic>) onEdit;
-  final Function(dynamic) onDelete;
+  final Function(PersonaModel) onEdit;
+  final Function(PersonaModel) onDelete;
 
   const EventPersonList({
     super.key,
@@ -22,9 +23,9 @@ class EventPersonList extends StatelessWidget {
   Widget build(BuildContext context) {
     final filteredPersonas = personas.where((p) {
       if (searchQuery.isEmpty) return true;
-      final nombre = p['nombre']?.toString().toLowerCase() ?? '';
-      final apellido = p['apellido']?.toString().toLowerCase() ?? '';
-      final equipo = p['equipo']?.toString().toLowerCase() ?? '';
+      final nombre = p.nombre.toLowerCase();
+      final apellido = p.apellido.toLowerCase();
+      final equipo = p.equipo?.toLowerCase() ?? '';
       final query = searchQuery.toLowerCase();
       return nombre.contains(query) || 
              apellido.contains(query) || 
@@ -51,13 +52,13 @@ class EventPersonList extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: Slidable(
-            key: ValueKey(p['_id']),
+            key: ValueKey(p.id),
             endActionPane: ActionPane(
               motion: const DrawerMotion(),
               extentRatio: 0.45,
               children: [
                 CustomSlidableAction(
-                  onPressed: (context) => onEdit(p as Map<String, dynamic>),
+                  onPressed: (context) => onEdit(p),
                   backgroundColor: Colors.transparent,
                   child: Container(
                     decoration: BoxDecoration(
@@ -90,36 +91,36 @@ class EventPersonList extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    child: Text(p['nombre'][0].toString().toUpperCase(), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                    child: Text(p.nombre[0].toUpperCase(), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${p['nombre']} ${p['apellido'] == '.' ? '' : p['apellido']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        Text('Edad: ${p['edad']} • Tel: ${p['telefono']}', style: const TextStyle(fontSize: 11, color: Colors.white38)),
+                        Text('${p.nombre} ${p.apellido == '.' ? '' : p.apellido}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Edad: ${p.edad} • Tel: ${p.telefono}', style: const TextStyle(fontSize: 11, color: Colors.white38)),
                       ],
                     ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                       Text(p['abono'] ? '\$${p['montoAbono']}' : 'PENDIENTE', 
+                       Text(p.abono ? '\$${p.montoAbono}' : 'PENDIENTE', 
                         style: TextStyle(
-                          color: p['abono'] ? AppColors.success : Colors.redAccent, 
+                          color: p.abono ? AppColors.success : Colors.redAccent, 
                           fontWeight: FontWeight.bold, 
                           fontSize: 12
                         )
                       ),
-                      Text(p['tipoPago'].toString().toUpperCase(), style: const TextStyle(fontSize: 9, color: Colors.white24)),
+                      Text(p.tipoPago.toUpperCase(), style: const TextStyle(fontSize: 9, color: Colors.white24)),
                     ],
                   ),
-                  if (p['comprobanteYappy'] != null) ...[
+                  if (p.comprobanteYappy != null) ...[
                     const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.image_search_rounded, color: AppColors.primary, size: 20),
-                      onPressed: () => launchUrl(Uri.parse(p['comprobanteYappy'].toString())),
+                      onPressed: () => launchUrl(Uri.parse(p.comprobanteYappy!)),
                     ),
                   ],
                 ],

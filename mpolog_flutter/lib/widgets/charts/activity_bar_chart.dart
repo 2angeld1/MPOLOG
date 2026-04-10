@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
 
 class ActivityBarChart extends StatelessWidget {
-  final List<dynamic> conteos;
+  final List<ConteoModel> conteos;
   final String selectedType;
 
   const ActivityBarChart({
@@ -25,10 +26,10 @@ class ActivityBarChart extends StatelessWidget {
         currentWeekLabels.add(weekdays[date.weekday - 1]);
         
         counts[i] = conteos.where((c) {
-            final d = DateTime.tryParse(c['fecha'] ?? '');
-            return d != null && d.day == date.day && d.month == date.month && d.year == date.year 
-                && c['tipo']?.toString().toLowerCase() == selectedType.toLowerCase();
-        }).fold(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0));
+            final d = c.fecha;
+            return d.day == date.day && d.month == date.month && d.year == date.year 
+                && c.tipo.toLowerCase() == selectedType.toLowerCase();
+        }).fold(0, (sum, c) => sum + c.cantidad);
     }
 
     double maxVal = counts.isNotEmpty ? counts.reduce((a, b) => a > b ? a : b).toDouble() : 0;

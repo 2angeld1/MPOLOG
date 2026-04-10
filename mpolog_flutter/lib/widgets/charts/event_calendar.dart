@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/evento_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
@@ -7,11 +8,11 @@ class EventCalendar extends StatelessWidget {
   final DateTime focusedDay;
   final DateTime? selectedDay;
   final CalendarFormat calendarFormat;
-  final List<dynamic> allEvents;
+  final List<EventoModel> allEvents;
   final Function(DateTime, DateTime) onDaySelected;
   final Function(CalendarFormat) onFormatChanged;
   final Function(DateTime) onPageChanged;
-  final List<dynamic> Function(DateTime) eventLoader;
+  final List<EventoModel> Function(DateTime) eventLoader;
   final Color Function(String) getDeptColor;
 
   const EventCalendar({
@@ -66,7 +67,7 @@ class EventCalendar extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: events.take(4).map((event) {
-                    final color = getDeptColor((event as dynamic)['departamento'] ?? '');
+                    final color = getDeptColor((event as EventoModel).departamento ?? 'General');
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 1),
                       width: 5,

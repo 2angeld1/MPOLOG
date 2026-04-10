@@ -4,9 +4,10 @@ import '../modals/notifications_modal.dart';
 import '../../logic/notification_store.dart';
 import '../../styles/app_text_styles.dart';
 import '../../styles/app_colors.dart';
+import '../../models/usuario_model.dart';
 
 class ChurchDashboardHeader extends StatelessWidget {
-  final dynamic user;
+  final UsuarioModel? user;
 
   const ChurchDashboardHeader({
     super.key,
@@ -72,22 +73,22 @@ class ChurchDashboardHeader extends StatelessWidget {
         radius: 32,
         backgroundColor: AppColors.surface,
         child: Text(
-          (user?['nombre'] ?? 'U')[0].toUpperCase(),
+          (user?.nombre ?? 'U')[0].toUpperCase(),
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
         ),
       ),
     );
   }
 
-  Widget _buildWelcomeText(BuildContext context, dynamic user) {
+  Widget _buildWelcomeText(BuildContext context, UsuarioModel? user) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Bienvenido de nuevo,', style: AppTextStyles.label(context).copyWith(fontSize: 10, color: Colors.white70)),
-          Text(user?['nombre'] ?? 'Usuario', style: AppTextStyles.h2(context).copyWith(fontSize: 28, letterSpacing: -0.5)),
+          Text(user?.nombre ?? 'Usuario', style: AppTextStyles.h2(context).copyWith(fontSize: 28, letterSpacing: -0.5)),
           Text(
-            (user?['rol']?.toString().toUpperCase() ?? 'ROL DE USUARIO'),
+            (user?.rol.toUpperCase() ?? 'ROL DE USUARIO'),
             style: AppTextStyles.label(context).copyWith(fontSize: 10, color: AppColors.accent, fontWeight: FontWeight.bold, letterSpacing: 2),
           ),
         ],

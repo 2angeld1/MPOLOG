@@ -2,20 +2,19 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_constants.dart';
 import 'api_service.dart';
+import 'network_exception.dart';
 
 class AuthService {
   final ApiService _apiService = ApiService();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await _apiService.post(ApiConstants.login, {
-      'email': email,
-      'password': password,
-    });
+    try {
+      final data = await _apiService.post(ApiConstants.login, {
+        'email': email,
+        'password': password,
+      });
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
       final token = data['token'];
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
 
@@ -24,13 +23,11 @@ class AuthService {
       }
 
       return {'success': true, 'data': data};
+    } on NetworkException catch (e) {
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      return {'success': false, 'message': 'Error inesperado'};
     }
-
-    final errorBody = jsonDecode(response.body);
-    return {
-      'success': false,
-      'message': errorBody['message'] ?? 'Error al iniciar sesión',
-    };
   }
 
   Future<Map<String, dynamic>> register({
@@ -38,22 +35,18 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final response = await _apiService.post(ApiConstants.register, {
-      'nombre': nombre,
-      'email': email,
-      'password': password,
-    });
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
+    try {
+      final data = await _apiService.post(ApiConstants.register, {
+        'nombre': nombre,
+        'email': email,
+        'password': password,
+      });
       return {'success': true, 'data': data};
+    } on NetworkException catch (e) {
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      return {'success': false, 'message': 'Error inesperado'};
     }
-
-    final errorBody = jsonDecode(response.body);
-    return {
-      'success': false,
-      'message': errorBody['message'] ?? 'Error al registrar usuario',
-    };
   }
 
   Future<Map<String, dynamic>?> getUser() async {

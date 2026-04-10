@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
 
 class DistributionDonutChart extends StatelessWidget {
-  final List<dynamic> conteos;
+  final List<ConteoModel> conteos;
   final String selectedType;
 
   const DistributionDonutChart({
@@ -17,9 +18,9 @@ class DistributionDonutChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<String, int> areaData = {};
     for (var c in conteos) {
-      if (c['tipo']?.toString().toLowerCase() == selectedType.toLowerCase()) {
-        final area = c['area']?.toString() ?? 'Otros';
-        areaData[area] = (areaData[area] ?? 0) + (c['cantidad'] as int? ?? 0);
+      if (c.tipo.toLowerCase() == selectedType.toLowerCase()) {
+        final area = c.area;
+        areaData[area] = (areaData[area] ?? 0) + c.cantidad;
       }
     }
     final total = areaData.values.fold(0, (a, b) => a + b);

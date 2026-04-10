@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../glass_container.dart';
 import '../../logic/notification_store.dart';
 import '../../styles/app_colors.dart';
+import '../../models/notification_model.dart';
 
 class NotificationsModal extends StatelessWidget {
   const NotificationsModal({super.key});
@@ -73,7 +74,7 @@ class NotificationsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationItem(AppNotification n) {
+  Widget _buildNotificationItem(NotificationModel n) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassContainer(

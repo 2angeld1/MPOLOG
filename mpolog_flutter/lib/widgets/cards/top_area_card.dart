@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 import '../glass_container.dart';
 import '../../styles/app_text_styles.dart';
 import '../../styles/app_colors.dart';
 
 class TopAreaCard extends StatelessWidget {
-  final List<dynamic> conteos;
+  final List<ConteoModel> conteos;
   final String selectedType;
 
   const TopAreaCard({
@@ -19,9 +20,9 @@ class TopAreaCard extends StatelessWidget {
     
     final Map<String, int> areaCounts = {};
     for (var c in conteos) {
-      if (c['tipo']?.toString().toLowerCase() == selectedType.toLowerCase()) {
-        final area = c['area']?.toString() ?? 'Otras';
-        areaCounts[area] = (areaCounts[area] ?? 0) + (c['cantidad'] as int? ?? 0);
+      if (c.tipo.toLowerCase() == selectedType.toLowerCase()) {
+        final area = c.area;
+        areaCounts[area] = (areaCounts[area] ?? 0) + c.cantidad;
       }
     }
     

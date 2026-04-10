@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import '../data/user_service.dart';
 import '../data/role_service.dart';
+import '../models/usuario_model.dart';
+import '../models/role_model.dart';
 
 class AdminStore extends ChangeNotifier {
   final UserService _userService = UserService();
   final RoleService _roleService = RoleService();
 
-  List<dynamic> _users = [];
-  List<dynamic> _roles = [];
+  List<UsuarioModel> _users = [];
+  List<RoleModel> _roles = [];
   bool _isLoadingUsers = false;
   bool _isLoadingRoles = false;
   String? _errorMessage;
 
-  List<dynamic> get users => _users;
-  List<dynamic> get roles => _roles;
+  List<UsuarioModel> get users => _users;
+  List<RoleModel> get roles => _roles;
   bool get isLoadingUsers => _isLoadingUsers;
   bool get isLoadingRoles => _isLoadingRoles;
   String? get errorMessage => _errorMessage;
@@ -24,7 +26,8 @@ class AdminStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _users = await _userService.getUsers();
+      final rawData = await _userService.getUsers();
+      _users = rawData.map((e) => UsuarioModel.fromJson(e)).toList();
     } catch (e) {
       _errorMessage = 'Error al cargar usuarios';
     } finally {
@@ -39,7 +42,8 @@ class AdminStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _roles = await _roleService.getRoles();
+      final rawData = await _roleService.getRoles();
+      _roles = rawData.map((e) => RoleModel.fromJson(e)).toList();
     } catch (e) {
       _errorMessage = 'Error al cargar roles';
     } finally {

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/evento_model.dart';
 import 'package:intl/intl.dart';
 import '../glass_container.dart';
 import '../sections/section_header.dart';
 
 class EventListSection extends StatelessWidget {
   final DateTime selectedDay;
-  final List<dynamic> events;
+  final List<EventoModel> events;
   final Color Function(String) getDeptColor;
 
   const EventListSection({
@@ -33,7 +34,8 @@ class EventListSection extends StatelessWidget {
               ),
             ),
           ...events.map((event) {
-            final color = getDeptColor((event as dynamic)['departamento'] ?? '');
+            final dept = event.departamento ?? 'General';
+            final color = getDeptColor(dept);
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: GlassContainer(
@@ -52,11 +54,11 @@ class EventListSection extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start, 
                         children: [
                           Text(
-                            (event as dynamic)['nombre'] ?? 'Tarea', 
+                            event.nombre, 
                             style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14)
                           ),
                           Text(
-                            (event as dynamic)['departamento'] ?? 'General', 
+                            dept, 
                             style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 11)
                           ),
                         ]
@@ -73,9 +75,9 @@ class EventListSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeTag(dynamic event) {
-    if (event['fechaInicio'] == null) return const SizedBox.shrink();
-    final start = DateTime.parse(event['fechaInicio']);
+  Widget _buildTimeTag(EventoModel event) {
+    final start = event.fechaInicio;
+    if (start == null) return const SizedBox.shrink();
     return Text(
       DateFormat('HH:mm').format(start), 
       style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)

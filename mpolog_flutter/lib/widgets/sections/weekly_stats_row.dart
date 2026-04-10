@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 import '../../styles/app_colors.dart';
 
 class WeeklyStatsRow extends StatelessWidget {
-  final List<dynamic> conteos;
+  final List<ConteoModel> conteos;
   final String iglesia;
 
   const WeeklyStatsRow({
@@ -15,12 +16,10 @@ class WeeklyStatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<String, int> dailyTotals = {};
     for (var c in conteos) {
-      if (c['iglesia'] == iglesia && c['tipo'] == 'personas') {
-        final cDate = DateTime.tryParse(c['fecha'] ?? '');
-        if (cDate != null) {
-          final dateKey = '${cDate.year}-${cDate.month.toString().padLeft(2,'0')}-${cDate.day.toString().padLeft(2,'0')}';
-          dailyTotals[dateKey] = (dailyTotals[dateKey] ?? 0) + (c['cantidad'] as int? ?? 0);
-        }
+      if (c.iglesia == iglesia && c.tipo == 'personas') {
+        final cDate = c.fecha;
+        final dateKey = '${cDate.year}-${cDate.month.toString().padLeft(2,'0')}-${cDate.day.toString().padLeft(2,'0')}';
+        dailyTotals[dateKey] = (dailyTotals[dateKey] ?? 0) + c.cantidad;
       }
     }
 

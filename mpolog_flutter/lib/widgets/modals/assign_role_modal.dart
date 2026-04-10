@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../../logic/admin_store.dart';
 import '../../styles/app_colors.dart';
 import '../../styles/app_text_styles.dart';
+import 'package:mpolog_flutter/models/usuario_model.dart';
 
 class AssignRoleModal extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final UsuarioModel user;
   final AdminStore adminStore;
 
   const AssignRoleModal({
@@ -23,7 +24,7 @@ class _AssignRoleModalState extends State<AssignRoleModal> {
   @override
   void initState() {
     super.initState();
-    _selectedRole = widget.user['rol'] ?? 'user';
+    _selectedRole = widget.user.rol;
   }
 
   @override
@@ -33,12 +34,15 @@ class _AssignRoleModalState extends State<AssignRoleModal> {
     return AlertDialog(
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text('Asignar Rol a ${widget.user['nombre'] ?? 'Usuario'}', style: AppTextStyles.h3(context)),
+      title: Text(
+        'Asignar Rol a ${widget.user.nombre}',
+        style: AppTextStyles.h3(context),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: roles.map((role) {
-            final roleName = role['name'] ?? 'user';
+            final roleName = role.name;
             return RadioListTile<String>(
               title: Text(roleName, style: AppTextStyles.body(context)),
               value: roleName,
@@ -56,7 +60,10 @@ class _AssignRoleModalState extends State<AssignRoleModal> {
         ),
         ElevatedButton(
           onPressed: () async {
-            final success = await widget.adminStore.updateRole(widget.user['_id'], _selectedRole);
+            final success = await widget.adminStore.updateRole(
+              widget.user.id,
+              _selectedRole,
+            );
             if (mounted) Navigator.pop(context);
             if (success && mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +82,11 @@ class _AssignRoleModalState extends State<AssignRoleModal> {
   }
 }
 
-void showAssignRoleModal(BuildContext context, Map<String, dynamic> user, AdminStore adminStore) {
+void showAssignRoleModal(
+  BuildContext context,
+  UsuarioModel user,
+  AdminStore adminStore,
+) {
   showDialog(
     context: context,
     builder: (context) => AssignRoleModal(user: user, adminStore: adminStore),

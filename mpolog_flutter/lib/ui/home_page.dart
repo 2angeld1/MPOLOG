@@ -16,6 +16,7 @@ import '../../widgets/sections/section_header.dart';
 import '../../widgets/sections/recent_activity_section.dart';
 import '../../widgets/dashboard/church_dashboard_header.dart';
 import '../styles/app_colors.dart';
+import '../models/conteo_model.dart';
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -46,9 +47,9 @@ class _HomePageState extends State<HomePage> {
     final user = authStore.user;
     final currentIglesia = configStore.selectedIglesia;
     
-    final churchConteos = conteoStore.conteos.where((c) => c['iglesia'] == currentIglesia).toList();
+    final churchConteos = conteoStore.conteos.where((c) => c.iglesia == currentIglesia).toList();
     final filteredConteos = churchConteos.where((c) {
-      return c['tipo']?.toString().toLowerCase() == _selectedType.toLowerCase();
+      return c.tipo.toLowerCase() == _selectedType.toLowerCase();
     }).toList();
 
     return Container(
@@ -86,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                               Expanded(
                                 child: SummaryCard(
                                   title: 'Total Histórico',
-                                  value: '${filteredConteos.fold<int>(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0))}',
+                                  value: '${filteredConteos.fold<int>(0, (int sum, ConteoModel c) => sum + c.cantidad)}',
                                   icon: Icons.insights_rounded,
                                   color: AppColors.primary,
                                 ),
@@ -107,9 +108,9 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               SummaryCard(
                                 title: 'Total Histórico',
-                                value: '${filteredConteos.fold<int>(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0))}',
+                                value: '${filteredConteos.fold<int>(0, (int sum, ConteoModel c) => sum + c.cantidad)}',
                                 icon: Icons.insights_rounded,
-                                color: AppColors.primary,
+                                  color: AppColors.primary,
                               ),
                               const SizedBox(height: 16),
                               SummaryCard(
@@ -191,12 +192,11 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
-
-  int _getTotalQuantityToday(List<dynamic> conteos) {
+  int _getTotalQuantityToday(List<ConteoModel> conteos) {
     final now = DateTime.now();
     return conteos.where((c) {
-      final date = DateTime.tryParse(c['fecha'] ?? '');
-      return date != null && date.day == now.day && date.month == now.month && date.year == now.year && c['tipo']?.toString().toLowerCase() == _selectedType.toLowerCase();
-    }).fold(0, (sum, c) => sum + (c['cantidad'] as int? ?? 0));
+      final date = c.fecha;
+      return date.day == now.day && date.month == now.month && date.year == now.year && c.tipo.toLowerCase() == _selectedType.toLowerCase();
+    }).fold<int>(0, (int sum, ConteoModel c) => sum + c.cantidad);
   }
 }

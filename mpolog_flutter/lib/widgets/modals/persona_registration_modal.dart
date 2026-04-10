@@ -1,3 +1,4 @@
+import 'package:mpolog_flutter/models/persona_model.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,7 @@ import '../items/yappy_comprobante_picker.dart';
 
 class PersonaRegistrationModal extends StatefulWidget {
   final String eventoId;
-  final Map<String, dynamic>? persona;
+  final PersonaModel? persona;
 
   const PersonaRegistrationModal({
     super.key,
@@ -42,14 +43,14 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
   void initState() {
     super.initState();
     if (widget.persona != null) {
-      _nombreController.text = widget.persona!['nombre'].toString();
-      _apellidoController.text = widget.persona!['apellido'] == '.' ? '' : widget.persona!['apellido'].toString();
-      _edadController.text = widget.persona!['edad'].toString();
-      _telefonoController.text = widget.persona!['telefono'].toString();
-      _montoAbonoController.text = widget.persona!['montoAbono'].toString();
-      _tieneAbono = widget.persona!['abono'] ?? false;
-      _tipoPago = widget.persona!['tipoPago'] ?? 'efectivo';
-      _equipoController.text = widget.persona!['equipo']?.toString() ?? '';
+      _nombreController.text = widget.persona!.nombre;
+      _apellidoController.text = widget.persona!.apellido == '.' ? '' : widget.persona!.apellido;
+      _edadController.text = widget.persona!.edad.toString();
+      _telefonoController.text = widget.persona!.telefono;
+      _montoAbonoController.text = widget.persona!.montoAbono.toString();
+      _tieneAbono = widget.persona!.abono;
+      _tipoPago = widget.persona!.tipoPago;
+      _equipoController.text = widget.persona!.equipo ?? '';
     }
   }
 
@@ -137,7 +138,7 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                     const SizedBox(height: 20),
                     YappyComprobantePicker(
                       comprobanteYappyBase64: _comprobanteYappyBase64,
-                      existingUrl: widget.persona?['comprobanteYappy']?.toString(),
+                      existingUrl: widget.persona?.comprobanteYappy,
                       onPickImage: _pickImage,
                       onRemoveImage: () => setState(() => _comprobanteYappyBase64 = null),
                     ),
@@ -169,10 +170,10 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                     if (widget.persona == null) {
                       success = await store.registrarPersona(widget.eventoId, data);
                     } else {
-                      success = await store.actualizarPersona(widget.eventoId, widget.persona!['_id'], data);
+                      success = await store.actualizarPersona(widget.eventoId, widget.persona!.id, data);
                     }
                     
-                    if (mounted) {
+                    if (context.mounted) {
                       setState(() => _isSaving = false);
                       if (success) {
                         Navigator.pop(context);
@@ -249,7 +250,7 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
 }
 
 // Helper function
-void showPersonaRegistrationModal(BuildContext context, String eventoId, {Map<String, dynamic>? persona}) {
+void showPersonaRegistrationModal(BuildContext context, String eventoId, {PersonaModel? persona}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,

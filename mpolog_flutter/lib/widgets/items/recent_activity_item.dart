@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 
 class RecentActivityItem extends StatelessWidget {
-  final Map<String, dynamic> conteo;
+  final ConteoModel conteo;
 
   const RecentActivityItem({
     super.key,
@@ -12,9 +13,9 @@ class RecentActivityItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = DateTime.tryParse(conteo['fecha'] ?? '') ?? DateTime.now();
+    final date = conteo.fecha;
     final isToday = date.day == DateTime.now().day && date.month == DateTime.now().month;
-    final isPersonas = conteo['tipo'] == 'personas';
+    final isPersonas = conteo.tipo.toLowerCase() == 'personas';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -41,7 +42,7 @@ class RecentActivityItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    conteo['area'] ?? 'General', 
+                    conteo.area, 
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)
                   ),
                   Text(
@@ -52,7 +53,7 @@ class RecentActivityItem extends StatelessWidget {
               ),
             ),
             Text(
-              '+${conteo['cantidad']}', 
+              '+${conteo.cantidad}', 
               style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)
             ),
           ],

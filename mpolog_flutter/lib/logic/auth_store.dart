@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import '../data/auth_service.dart';
+import '../models/usuario_model.dart';
 
 class AuthStore extends ChangeNotifier {
   final AuthService _authService = AuthService();
   bool _isLoggedIn = false;
   bool _isLoading = false;
   String? _errorMessage;
-  Map<String, dynamic>? _user;
+  UsuarioModel? _user;
 
   bool get isLoggedIn => _isLoggedIn;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  Map<String, dynamic>? get user => _user;
-  bool get isSuperAdmin => _user?['rol'] == 'superadmin';
-  bool get isLogisticAdmin => _user?['rol'] == 'logisticadmin' || _user?['rol'] == 'sameadmin';
+  UsuarioModel? get user => _user;
+  
+  bool get isSuperAdmin => _user?.rol == 'superadmin';
+  bool get isLogisticAdmin => _user?.rol == 'logisticadmin' || _user?.rol == 'sameadmin';
   bool get canManageCounts => isSuperAdmin || isLogisticAdmin;
 
   AuthStore() {
@@ -23,7 +25,10 @@ class AuthStore extends ChangeNotifier {
   Future<void> _checkStatus() async {
     _isLoggedIn = await _authService.isLoggedIn();
     if (_isLoggedIn) {
-      _user = await _authService.getUser();
+      final userData = await _authService.getUser();
+      if (userData != null) {
+        _user = UsuarioModel.fromJson(userData);
+      }
     }
     notifyListeners();
   }
@@ -39,7 +44,7 @@ class AuthStore extends ChangeNotifier {
       if (result['success'] == true) {
         _isLoggedIn = true;
         _isLoading = false;
-        _user = result['data']['user'];
+        _user = UsuarioModel.fromJson(result['data']['user']);
         notifyListeners();
         return true;
       }
@@ -91,6 +96,7 @@ class AuthStore extends ChangeNotifier {
   Future<void> logout() async {
     await _authService.logout();
     _isLoggedIn = false;
+    _user = null;
     notifyListeners();
   }
 

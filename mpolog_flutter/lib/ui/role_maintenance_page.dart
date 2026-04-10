@@ -92,7 +92,7 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
               itemCount: adminStore.roles.length,
               itemBuilder: (context, index) {
                 final role = adminStore.roles[index];
-                final String roleName = role['name'] ?? 'user';
+                final String roleName = role.name;
                 final isSystem = ['superadmin', 'user', 'logisticadmin'].contains(roleName.toLowerCase());
 
                 return Padding(
@@ -112,7 +112,7 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(roleName, style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
-                              Text(role['description'] ?? 'Sin descripción',
+                              Text(role.description ?? 'Sin descripción',
                                   style: AppTextStyles.body(context).copyWith(fontSize: 12)),
                             ],
                           ),
@@ -126,7 +126,7 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                                 builder: (context) => AlertDialog(
                                   backgroundColor: Theme.of(context).colorScheme.surface,
                                   title: Text('¿Eliminar Rol?', style: AppTextStyles.h3(context)),
-                                  content: Text('¿Estás seguro de eliminar el rol "${role['name']}"?', 
+                                  content: Text('¿Estás seguro de eliminar el rol "${role.name}"?', 
                                       style: AppTextStyles.body(context)),
                                   actions: [
                                     TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('NO')),
@@ -136,7 +136,7 @@ class _RoleMaintenancePageState extends State<RoleMaintenancePage> {
                                 ),
                               );
                               if (confirm == true) {
-                                await adminStore.deleteRole(role['_id']);
+                                await adminStore.deleteRole(role.id);
                               }
                             },
                           ),

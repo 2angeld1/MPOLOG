@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 import '../items/recent_activity_item.dart';
 
 class RecentActivitySection extends StatelessWidget {
-  final List<dynamic> conteos;
+  final List<ConteoModel> conteos;
 
   const RecentActivitySection({
     super.key,

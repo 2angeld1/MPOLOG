@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import '../data/api_constants.dart';
+import '../models/evento_model.dart';
+import '../models/persona_model.dart';
+import '../data/eventos_service.dart';
+import '../data/network_exception.dart';
 
 class EventosStore extends ChangeNotifier {
-  final String _baseUrl = ApiConstants.baseUrl;
+  final EventosService _eventosService = EventosService();
   
-  List<dynamic> _eventos = [];
+  List<EventoModel> _eventos = [];
   bool _isLoading = false;
   String? _errorMessage;
   String? _selectedEventoId;
   Map<String, dynamic>? _estadisticas;
-  List<dynamic> _personas = [];
+  List<PersonaModel> _personas = [];
 
-  List<dynamic> get eventos => _eventos;
-  List<dynamic> get personas => _personas;
+  List<EventoModel> get eventos => _eventos;
+  List<PersonaModel> get personas => _personas;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get selectedEventoId => _selectedEventoId;
@@ -30,38 +30,15 @@ class EventosStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Map<String, String>> _getHeaders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-  }
-
   Future<void> fetchEventos({String? departamento, bool? activo}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      String url = '$_baseUrl/eventos?';
-      if (departamento != null) url += 'departamento=$departamento&';
-      if (activo != null) url += 'activo=$activo&';
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _eventos = data as List;
-      } else {
-        _errorMessage = 'Error al cargar eventos';
-      }
+      _eventos = await _eventosService.getEventos(departamento: departamento, activo: activo);
     } catch (e) {
-      _errorMessage = 'Error de conexión';
+      _errorMessage = 'Error al cargar eventos';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -73,22 +50,12 @@ class EventosStore extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/eventos'),
-        headers: await _getHeaders(),
-        body: json.encode(data),
-      );
-
-      final responseData = json.decode(response.body);
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        await fetchEventos();
-        return true;
-      } else {
-        // Capturar mensaje de error del backend (ej. solapamiento)
-        _errorMessage = responseData['message'] ?? 'Error al crear el evento';
-        return false;
-      }
+      await _eventosService.crearEvento(data);
+      await fetchEventos();
+      return true;
+    } on NetworkException catch (e) {
+      _errorMessage = e.message;
+      return false;
     } catch (e) {
       _errorMessage = 'Error de conexión con el servidor';
       return false;
@@ -100,15 +67,8 @@ class EventosStore extends ChangeNotifier {
 
   Future<void> fetchPersonas(String eventoId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/eventos/$eventoId/personas'),
-        headers: await _getHeaders(),
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _personas = data as List;
-        notifyListeners();
-      }
+      _personas = await _eventosService.getPersonas(eventoId);
+      notifyListeners();
     } catch (e) {
       debugPrint('Error fetching personas: $e');
     }
@@ -116,15 +76,8 @@ class EventosStore extends ChangeNotifier {
 
   Future<void> fetchEstadisticas(String eventoId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/eventos/$eventoId/estadisticas'),
-        headers: await _getHeaders(),
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _estadisticas = data as Map<String, dynamic>;
-        notifyListeners();
-      }
+      _estadisticas = await _eventosService.getEstadisticas(eventoId);
+      notifyListeners();
     } catch (e) {
       debugPrint('Error fetching stats: $e');
     }
@@ -132,17 +85,12 @@ class EventosStore extends ChangeNotifier {
 
   Future<bool> registrarPersona(String eventoId, Map<String, dynamic> data) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/eventos/$eventoId/personas'),
-        headers: await _getHeaders(),
-        body: json.encode(data),
-      );
-      if (response.statusCode == 201 || response.statusCode == 200) {
+      final success = await _eventosService.registrarPersona(eventoId, data);
+      if (success) {
         await fetchPersonas(eventoId);
         await fetchEstadisticas(eventoId);
-        return true;
       }
-      return false;
+      return success;
     } catch (e) {
       return false;
     }
@@ -150,16 +98,12 @@ class EventosStore extends ChangeNotifier {
 
   Future<bool> eliminarPersona(String eventoId, String personaId) async {
     try {
-      final response = await http.delete(
-        Uri.parse('$_baseUrl/eventos/$eventoId/personas/$personaId'),
-        headers: await _getHeaders(),
-      );
-      if (response.statusCode == 200) {
+      final success = await _eventosService.eliminarPersona(eventoId, personaId);
+      if (success) {
         await fetchPersonas(eventoId);
         await fetchEstadisticas(eventoId);
-        return true;
       }
-      return false;
+      return success;
     } catch (e) {
       return false;
     }
@@ -167,17 +111,12 @@ class EventosStore extends ChangeNotifier {
 
   Future<bool> actualizarPersona(String eventoId, String personaId, Map<String, dynamic> data) async {
     try {
-      final response = await http.put(
-        Uri.parse('$_baseUrl/eventos/$eventoId/personas/$personaId'),
-        headers: await _getHeaders(),
-        body: json.encode(data),
-      );
-      if (response.statusCode == 200) {
+      final success = await _eventosService.actualizarPersona(eventoId, personaId, data);
+      if (success) {
         await fetchPersonas(eventoId);
         await fetchEstadisticas(eventoId);
-        return true;
       }
-      return false;
+      return success;
     } catch (e) {
       return false;
     }

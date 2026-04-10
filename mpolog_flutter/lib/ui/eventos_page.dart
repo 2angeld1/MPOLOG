@@ -272,8 +272,8 @@ class _EventosPageState extends State<EventosPage> {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final evento = store.eventos[index];
-                        final ubicacion = evento['ubicacion']?['nombreLugar'] ?? 'Ubicación por definir';
-                        final precio = evento['precioTotal']?.toString() ?? '0';
+                        final ubicacion = evento.ubicacion?.nombreLugar ?? 'Ubicación por definir';
+                        final precio = evento.precioTotal.toString();
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16),
@@ -293,7 +293,7 @@ class _EventosPageState extends State<EventosPage> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          evento['nombre']?.toString().toUpperCase() ?? 'EVENTO SIN NOMBRE',
+                                          evento.nombre.toUpperCase(),
                                           style: AppTextStyles.h3(context).copyWith(fontSize: 16, fontWeight: FontWeight.bold),
                                         ),
                                       ),
@@ -322,7 +322,7 @@ class _EventosPageState extends State<EventosPage> {
                                       const Icon(Icons.calendar_month_rounded, size: 14, color: Colors.white38),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Del ${_formatDate(evento['fechaInicio'])} al ${_formatDate(evento['fechaFin'])}',
+                                        'Del ${_formatDate(evento.fechaInicio)} al ${_formatDate(evento.fechaFin)}',
                                         style: const TextStyle(fontSize: 11, color: Colors.white38),
                                       ),
                                       const Spacer(),
@@ -431,10 +431,8 @@ class _EventosPageState extends State<EventosPage> {
     }
   }
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '--/--/--';
-    final date = DateTime.tryParse(dateStr);
-    if (date == null) return dateStr;
+  String _formatDate(DateTime? date) {
+    if (date == null) return '--/--/--';
     return '${date.day}/${date.month}/${date.year}';
   }
 }

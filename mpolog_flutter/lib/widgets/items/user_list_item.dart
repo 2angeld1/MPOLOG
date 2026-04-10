@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
 import '../../styles/app_text_styles.dart';
+import 'package:mpolog_flutter/models/usuario_model.dart';
 
 class UserListItem extends StatelessWidget {
-  final Map<String, dynamic> user;
+  final UsuarioModel user;
   final VoidCallback onEdit;
 
   const UserListItem({
@@ -16,7 +17,7 @@ class UserListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final role = user['rol'] ?? 'usuario';
+    final role = user.rol;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -28,7 +29,7 @@ class UserListItem extends StatelessWidget {
             CircleAvatar(
               backgroundColor: AppColors.primary.withValues(alpha: 0.2),
               child: Text(
-                (user['nombre'] ?? 'U')[0].toUpperCase(),
+                user.nombre.isNotEmpty ? user.nombre[0].toUpperCase() : 'U',
                 style: TextStyle(
                   color: isDark ? Colors.white : AppColors.primary, 
                   fontWeight: FontWeight.bold
@@ -40,8 +41,8 @@ class UserListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user['nombre'] ?? 'Sin nombre', style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
-                  Text(user['email'] ?? 'Sin email', style: AppTextStyles.body(context).copyWith(fontSize: 12)),
+                  Text(user.nombre, style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
+                  Text(user.email, style: AppTextStyles.body(context).copyWith(fontSize: 12)),
                 ],
               ),
             ),

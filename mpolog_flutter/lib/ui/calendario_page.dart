@@ -12,6 +12,7 @@ import '../widgets/charts/event_calendar.dart';
 import '../widgets/sections/event_list_section.dart';
 import '../widgets/modals/add_event_modal.dart';
 import '../styles/app_text_styles.dart';
+import '../models/evento_model.dart';
 
 class CalendarioPage extends StatefulWidget {
   const CalendarioPage({super.key});
@@ -28,6 +29,7 @@ class _CalendarioPageState extends State<CalendarioPage> {
   @override
   void initState() {
     super.initState();
+    _focusedDay = DateTime.now();
     _selectedDay = _focusedDay;
     Future.microtask(() {
       if (!mounted) return;
@@ -47,11 +49,13 @@ class _CalendarioPageState extends State<CalendarioPage> {
     }
   }
 
-  List<dynamic> _getEventsForDay(DateTime day, List<dynamic> allEvents) {
+  List<EventoModel> _getEventsForDay(DateTime day, List<EventoModel> allEvents) {
     return allEvents.where((event) {
-      if (event['fechaInicio'] == null) return false;
-      final start = DateTime.parse(event['fechaInicio']);
-      final end = event['fechaFin'] != null ? DateTime.parse(event['fechaFin']) : start;
+      final start = event.fechaInicio;
+      if (start == null) return false;
+      
+      final end = event.fechaFin ?? start;
+      
       final dayOnly = DateTime(day.year, day.month, day.day);
       final startOnly = DateTime(start.year, start.month, start.day);
       final endOnly = DateTime(end.year, end.month, end.day);
@@ -148,8 +152,6 @@ class _CalendarioPageState extends State<CalendarioPage> {
     );
   }
 
-  // Los widgets de UI ahora son componentes externos.
-
 
   Future<void> _exportToExcel() async {
     final store = context.read<EventosStore>();
@@ -158,9 +160,15 @@ class _CalendarioPageState extends State<CalendarioPage> {
 
     sheet.appendRow([TextCellValue('FECHA'), TextCellValue('EVENTO'), TextCellValue('DEPARTAMENTO'), TextCellValue('HORA')]);
     for (var ev in store.eventos) {
-      if (ev['fechaInicio'] == null) continue;
-      final start = DateTime.parse(ev['fechaInicio']);
-      sheet.appendRow([TextCellValue(DateFormat('yyyy-MM-dd').format(start)), TextCellValue(ev['nombre']?.toString() ?? ''), TextCellValue(ev['departamento']?.toString() ?? 'General'), TextCellValue(DateFormat('HH:mm').format(start))]);
+      final start = ev.fechaInicio;
+      if (start == null) continue;
+
+      sheet.appendRow([
+        TextCellValue(DateFormat('yyyy-MM-dd').format(start)), 
+        TextCellValue(ev.nombre), 
+        TextCellValue(ev.departamento ?? 'General'), 
+        TextCellValue(DateFormat('HH:mm').format(start))
+      ]);
     }
 
     try {

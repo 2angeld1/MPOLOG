@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:mpolog_flutter/models/evento_model.dart';
+import 'package:mpolog_flutter/models/persona_model.dart';
 import 'dart:ui';
 import '../logic/eventos_store.dart';
 import '../styles/app_colors.dart';
@@ -12,7 +14,7 @@ import '../widgets/modals/persona_registration_modal.dart';
 import '../widgets/sections/section_header.dart';
 
 class DetalleEventoPage extends StatefulWidget {
-  final Map<String, dynamic> evento;
+  final EventoModel evento;
   const DetalleEventoPage({super.key, required this.evento});
 
   @override
@@ -28,12 +30,9 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EventosStore>().setSelectedEvento(widget.evento['_id']);
+      context.read<EventosStore>().setSelectedEvento(widget.evento.id);
     });
   }
-
-  // Los métodos de formulario y selección de imagen se han movido a componentes externos.
-
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +45,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
         child: FloatingActionButton.extended(
           heroTag: 'fab_detalle_evento',
           onPressed: () =>
-              showPersonaRegistrationModal(context, widget.evento['_id']),
+              showPersonaRegistrationModal(context, widget.evento.id),
           backgroundColor: AppColors.primary,
           icon: const Icon(Icons.person_add_rounded, color: Colors.white),
           label: const Text('REGISTRAR', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -59,7 +58,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
             pinned: true,
             backgroundColor: AppColors.background,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(widget.evento['nombre']?.toString().toUpperCase() ?? 'EVENTO', 
+              title: Text(widget.evento.nombre.toUpperCase(), 
                 style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
               background: Stack(
                 fit: StackFit.expand,
@@ -121,7 +120,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
                   searchQuery: _searchQuery,
                   onEdit: (p) => showPersonaRegistrationModal(
                     context,
-                    widget.evento['_id'],
+                    widget.evento.id,
                     persona: p,
                   ),
                   onDelete: (p) => _confirmDelete(p),
@@ -135,21 +134,18 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
     );
   }
 
-  // Los widgets de UI ahora son componentes externos.
-
-
-  void _confirmDelete(dynamic p) {
+  void _confirmDelete(PersonaModel p) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text('¿Eliminar registro?'),
-        content: Text('¿Deseas eliminar a ${p['nombre']} de este evento?'),
+        content: Text('¿Deseas eliminar a ${p.nombre} de este evento?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCELAR')),
           TextButton(
             onPressed: () {
-              context.read<EventosStore>().eliminarPersona(widget.evento['_id'], p['_id']);
+              context.read<EventosStore>().eliminarPersona(widget.evento.id, p.id);
               Navigator.pop(context);
             }, 
             child: const Text('ELIMINAR', style: TextStyle(color: Colors.redAccent))

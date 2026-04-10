@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mpolog_flutter/models/conteo_model.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../styles/app_colors.dart';
 
 class DailyRecordsList extends StatelessWidget {
-  final List<dynamic> records;
-  final Function(dynamic) onEdit;
+  final List<ConteoModel> records;
+  final Function(ConteoModel) onEdit;
   final Function(String) onDelete;
 
   const DailyRecordsList({
@@ -25,15 +26,15 @@ class DailyRecordsList extends StatelessWidget {
       );
     }
 
-    final Map<String, List<dynamic>> grouped = {};
+    final Map<String, List<ConteoModel>> grouped = {};
     for (var r in records) {
-      final area = r['area'] ?? 'General';
+      final area = r.area;
       grouped.containsKey(area) ? grouped[area]!.add(r) : grouped[area] = [r];
     }
 
     return Column(
       children: grouped.entries.map((g) {
-        final total = g.value.fold<int>(0, (s, i) => s + (i['cantidad'] as int? ?? 0));
+        final total = g.value.fold<int>(0, (s, i) => s + i.cantidad);
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
@@ -71,9 +72,9 @@ class DailyRecordsList extends StatelessWidget {
     );
   }
 
-  Widget _buildSlidableItem(dynamic c) {
+  Widget _buildSlidableItem(ConteoModel c) {
     return Slidable(
-      key: Key(c['_id']),
+      key: Key(c.id),
       endActionPane: ActionPane(
         motion: const DrawerMotion(), 
         children: [
@@ -84,7 +85,7 @@ class DailyRecordsList extends StatelessWidget {
             icon: Icons.edit_rounded
           ),
           SlidableAction(
-            onPressed: (_) => onDelete(c['_id']), 
+            onPressed: (_) => onDelete(c.id), 
             backgroundColor: Colors.red.withValues(alpha: 0.1), 
             foregroundColor: Colors.redAccent, 
             icon: Icons.delete_outline_rounded
@@ -94,11 +95,11 @@ class DailyRecordsList extends StatelessWidget {
       child: ListTile(
         dense: true,
         title: Text(
-          c['tipo'] == 'personas' ? 'Personas' : c['subArea'] ?? 'Material', 
+          c.tipo == 'personas' ? 'Personas' : c.subArea ?? 'Material', 
           style: const TextStyle(fontSize: 13)
         ),
         trailing: Text(
-          '${c['cantidad']}', 
+          '${c.cantidad}', 
           style: const TextStyle(fontWeight: FontWeight.bold)
         ),
       ),

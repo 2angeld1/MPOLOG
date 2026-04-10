@@ -5,6 +5,7 @@ import '../logic/notification_store.dart';
 import '../styles/app_colors.dart';
 import '../styles/app_text_styles.dart';
 import '../widgets/glass_container.dart';
+import '../models/notification_model.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -67,7 +68,7 @@ class NotificationsPage extends StatelessWidget {
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final n = store.notifications[index];
+                      final NotificationModel n = store.notifications[index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: _buildNotificationCard(context, n),
@@ -84,7 +85,7 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationCard(BuildContext context, AppNotification n) {
+  Widget _buildNotificationCard(BuildContext context, NotificationModel n) {
     IconData icon;
     Color color;
 
