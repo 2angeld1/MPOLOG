@@ -13,6 +13,10 @@ RUN flutter pub get
 # Copiar el resto
 COPY . .
 
+# Asegurar que existe un archivo .env (aunque esté vacío) para que Flutter no falle al compilar
+# ya que está declarado como asset en pubspec.yaml
+RUN touch .env
+
 # Definir API_URL como argumento de construcción (Build-time variable)
 ARG API_URL
 
