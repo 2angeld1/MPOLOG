@@ -11,9 +11,14 @@ class ConfigStore with ChangeNotifier {
   }
 
   Future<void> _loadConfig() async {
-    final prefs = await SharedPreferences.getInstance();
-    _selectedIglesia = prefs.getString('selected_iglesia');
-    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _selectedIglesia = prefs.getString('selected_iglesia');
+    } catch (e) {
+      debugPrint("Error cargando configuración: $e");
+    } finally {
+      notifyListeners();
+    }
   }
 
   Future<void> setSelectedIglesia(String? iglesia) async {

@@ -23,14 +23,20 @@ class AuthStore extends ChangeNotifier {
   }
 
   Future<void> _checkStatus() async {
-    _isLoggedIn = await _authService.isLoggedIn();
-    if (_isLoggedIn) {
-      final userData = await _authService.getUser();
-      if (userData != null) {
-        _user = UsuarioModel.fromJson(userData);
+    try {
+      _isLoggedIn = await _authService.isLoggedIn();
+      if (_isLoggedIn) {
+        final userData = await _authService.getUser();
+        if (userData != null) {
+          _user = UsuarioModel.fromJson(userData);
+        }
       }
+    } catch (e) {
+      debugPrint("Error verificando estado de autenticación: $e");
+      _isLoggedIn = false;
+    } finally {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<bool> login(String email, String password) async {
