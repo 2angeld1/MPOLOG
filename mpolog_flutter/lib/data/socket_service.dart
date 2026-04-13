@@ -14,27 +14,31 @@ class SocketService {
   }
 
   void _initSocket() {
-    final socketUrl = ApiConstants.baseUrl.replaceAll('/api', '');
-    
-    _socket = IO.io(socketUrl, IO.OptionBuilder()
-      .setTransports(['websocket'])
-      .enableAutoConnect()
-      .build());
+    try {
+      final socketUrl = ApiConstants.baseUrl.replaceAll('/api', '');
+      
+      _socket = IO.io(socketUrl, IO.OptionBuilder()
+        .setTransports(['websocket'])
+        .enableAutoConnect()
+        .build());
 
-    _socket.onConnect((_) {
-      _isConnected = true;
-      debugPrint('SocketService: Conectado');
-    });
+      _socket.onConnect((_) {
+        _isConnected = true;
+        debugPrint('SocketService: Conectado');
+      });
 
-    _socket.onDisconnect((_) {
-      _isConnected = false;
-      debugPrint('SocketService: Desconectado');
-    });
+      _socket.onDisconnect((_) {
+        _isConnected = false;
+        debugPrint('SocketService: Desconectado');
+      });
 
-    // Escuchar eventos comunes
-    _socket.on('conteo-actualizado', (data) => _notifyListeners('conteo-actualizado', data));
-    _socket.on('nuevo-evento', (data) => _notifyListeners('nuevo-evento', data));
-    _socket.on('notificacion-global', (data) => _notifyListeners('notificacion-global', data));
+      // Escuchar eventos comunes
+      _socket.on('conteo-actualizado', (data) => _notifyListeners('conteo-actualizado', data));
+      _socket.on('nuevo-evento', (data) => _notifyListeners('nuevo-evento', data));
+      _socket.on('notificacion-global', (data) => _notifyListeners('notificacion-global', data));
+    } catch (e) {
+      debugPrint('SocketService: Error al inicializar socket: $e');
+    }
   }
 
   void addListener(Function(String, dynamic) callback) {
