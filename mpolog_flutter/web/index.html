@@ -34,14 +34,20 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBC_tPGHgdjsRanleoXtDzqbk00ewSATQo&loading=async" async defer></script>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Detector de "Blank Screen" - Si después de 10 segundos no hay nada, intentamos limpiar caché y recargar
+    setTimeout(function() {
+      if (typeof window.flutterConfiguration === 'undefined' && document.body.innerHTML === '') {
+        console.warn('Detectada pantalla en blanco, intentando reiniciar PWA...');
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            for(let reg of regs) reg.unregister();
+            window.location.reload();
+          });
+        }
+      }
+    }, 10000);
+  </script>
 </body>
 </html>

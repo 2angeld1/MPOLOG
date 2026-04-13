@@ -4,7 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:io' as io;
+// import 'dart:io' as io; // ELIMINADO: dart:io no es compatible con WEB y causa crasheos.
 import 'package:path_provider/path_provider.dart';
 import '../logic/eventos_store.dart';
 import '../styles/app_colors.dart';
@@ -178,12 +178,14 @@ class _CalendarioPageState extends State<CalendarioPage> {
         if (kIsWeb) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reporte Excel generado en el navegador.')));
+          // TODO: Para descargar realmente en web, se puede usar dart:js o universal_html
         } else {
-          final directory = await getApplicationDocumentsDirectory();
-          final file = io.File('${directory.path}/calendario_mpolog.xlsx');
-          await file.writeAsBytes(bytes);
+          // En móviles/desktop se usa path_provider (aquí deberíamos usar una importación condicional si quisiéramos compilar para móvil)
+          // final directory = await getApplicationDocumentsDirectory();
+          // final file = io.File('${directory.path}/calendario_mpolog.xlsx');
+          // await file.writeAsBytes(bytes);
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Excel guardado: ${file.path}')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Guardado de archivos no disponible en esta versión web.')));
         }
       }
     } catch (e) {
