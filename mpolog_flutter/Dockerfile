@@ -20,8 +20,8 @@ RUN touch .env
 # Definir API_URL como argumento de construcción (Build-time variable)
 ARG API_URL
 
-# Compilar para Web usando el renderizador HTML para máxima compatibilidad
-RUN flutter build web --release --web-renderer html --dart-define=API_URL=${API_URL}
+# Compilar para Web inyectando la URL de la API
+RUN flutter build web --release --dart-define=API_URL=${API_URL}
 
 # Stage 2: Servir con Nginx
 FROM nginx:alpine
