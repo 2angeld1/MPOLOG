@@ -11,6 +11,7 @@ import { fadeInVariant, itemVariants, buttonHoverVariants } from '../animations'
 import '../styles/EventoRegistro.scss';
 import Toolbar from '../components/Toolbar';
 import LocationPicker from '../components/LocationPicker';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useIonViewWillEnter } from '@ionic/react';
@@ -49,6 +50,10 @@ const EventoRegistro: React.FC = () => {
         setNuevoEventoPrecio,
         nuevoEventoDescripcion,
         setNuevoEventoDescripcion,
+        nuevoEventoDuracionDias,
+        setNuevoEventoDuracionDias,
+        nuevoEventoRequiereAlojamiento,
+        setNuevoEventoRequiereAlojamiento,
         handleCrearEvento,
         limpiarFormularioEvento,
         
@@ -77,6 +82,10 @@ const EventoRegistro: React.FC = () => {
         comprobantes,
         equipo,
         setEquipo,
+        diasAlojamiento,
+        setDiasAlojamiento,
+        soloCulto,
+        setSoloCulto,
         
         // Acciones
         handleRegistrarPersona,
@@ -365,6 +374,7 @@ const EventoRegistro: React.FC = () => {
                                                                 <IonSelectOption value="campamento">Campamento</IonSelectOption>
                                                                 <IonSelectOption value="retiro">Retiro</IonSelectOption>
                                                                 <IonSelectOption value="conferencia">Conferencia</IonSelectOption>
+                                                                <IonSelectOption value="convencion">Convención</IonSelectOption>
                                                                 <IonSelectOption value="otro">Otro</IonSelectOption>
                                                             </IonSelect>
                                                         </IonItem>
@@ -396,7 +406,7 @@ const EventoRegistro: React.FC = () => {
                                                     </IonCol>
                                                     <IonCol size="12" sizeMd="4">
                                                         <IonItem lines="none" className="form-item">
-                                                            <IonLabel position="stacked">Precio Total *</IonLabel>
+                                                            <IonLabel position="stacked">Precio Total (Opcional)</IonLabel>
                                                             <IonInput
                                                                 type="number"
                                                                 value={nuevoEventoPrecio}
@@ -418,10 +428,36 @@ const EventoRegistro: React.FC = () => {
                                                         </IonItem>
                                                     </IonCol>
                                                 </IonRow>
+
+                                                {nuevoEventoTipo === 'convencion' && (
+                                                    <IonRow>
+                                                        <IonCol size="12" sizeMd="6">
+                                                            <IonItem lines="none" className="form-item">
+                                                                <IonLabel position="stacked">Duración (Ej: 3 días)</IonLabel>
+                                                                <IonInput
+                                                                    type="number"
+                                                                    value={nuevoEventoDuracionDias}
+                                                                    placeholder="3"
+                                                                    onIonInput={(e) => setNuevoEventoDuracionDias(parseInt(e.detail.value || '0', 10))}
+                                                                />
+                                                            </IonItem>
+                                                        </IonCol>
+                                                        <IonCol size="12" sizeMd="6">
+                                                            <IonItem lines="none" className="form-item toggle-item">
+                                                                <IonLabel>¿Requiere Alojamiento?</IonLabel>
+                                                                <IonToggle
+                                                                    checked={nuevoEventoRequiereAlojamiento}
+                                                                    onIonChange={(e) => setNuevoEventoRequiereAlojamiento(e.detail.checked)}
+                                                                />
+                                                            </IonItem>
+                                                        </IonCol>
+                                                    </IonRow>
+                                                )}
+
                                                 <IonRow>
                                                     <IonCol size="12">
                                                         <div className="ubicacion-form-section">
-                                                            <IonLabel position="stacked">Ubicación del Evento</IonLabel>
+                                                            <IonLabel position="stacked">Ubicación del Evento (Opcional)</IonLabel>
                                                             {nuevoEventoUbicacion ? (
                                                                 <div className="ubicacion-preview-card">
                                                                     <div className="ubicacion-info">
@@ -588,6 +624,34 @@ const EventoRegistro: React.FC = () => {
                                                         <p>Recaudado</p>
                                                     </div>
                                                 </motion.div>
+                                            </div>
+
+                                            {/* Gráficos */}
+                                            <div className="stats-charts-container" style={{ marginTop: '2rem' }}>
+                                                <div style={{ height: '300px', width: '100%' }}>
+                                                    <ResponsiveContainer>
+                                                        <BarChart
+                                                            data={[
+                                                                {
+                                                                    name: 'Asistencia',
+                                                                    Total: estadisticas.totalPersonas,
+                                                                    Abonados: estadisticas.personasConAbono,
+                                                                    SinAbono: estadisticas.personasSinAbono,
+                                                                }
+                                                            ]}
+                                                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                                                        >
+                                                            <CartesianGrid strokeDasharray="3 3" />
+                                                            <XAxis dataKey="name" />
+                                                            <YAxis />
+                                                            <Tooltip />
+                                                            <Legend />
+                                                            <Bar dataKey="Total" fill="#8884d8" name="Inscritos" />
+                                                            <Bar dataKey="Abonados" fill="#82ca9d" name="Con Abono" />
+                                                            <Bar dataKey="SinAbono" fill="#ffc658" name="Sin Abono" />
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </div>
                                             </div>
 
 
@@ -832,6 +896,32 @@ const EventoRegistro: React.FC = () => {
                                                         </div>
                                                     </IonCol>
                                                 </IonRow>
+
+                                                {eventoActual?.tipo === 'convencion' && eventoActual?.requiereAlojamiento && (
+                                                    <IonRow>
+                                                        <IonCol size="12" sizeMd="6">
+                                                            <IonItem lines="none" className="form-item">
+                                                                <IonLabel position="stacked">Días de Alojamiento (Todos: vacío)</IonLabel>
+                                                                <IonInput
+                                                                    type="number"
+                                                                    value={diasAlojamiento}
+                                                                    placeholder={`Máx ${eventoActual.duracionDias || 'N'} días`}
+                                                                    onIonInput={(e) => setDiasAlojamiento(e.detail.value ? parseInt(e.detail.value, 10) : undefined)}
+                                                                />
+                                                            </IonItem>
+                                                        </IonCol>
+                                                        <IonCol size="12" sizeMd="6">
+                                                            <IonItem lines="none" className="form-item toggle-item">
+                                                                <IonLabel>¿Asiste solo al culto?</IonLabel>
+                                                                <IonToggle
+                                                                    checked={soloCulto}
+                                                                    onIonChange={(e) => setSoloCulto(e.detail.checked)}
+                                                                />
+                                                            </IonItem>
+                                                        </IonCol>
+                                                    </IonRow>
+                                                )}
+
                                                 <IonRow className="ion-margin-top">
                                                     <IonCol size="12" sizeMd={isEditing ? "6" : "12"}>
                                                         <motion.div

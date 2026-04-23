@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:math';
 import '../glass_container.dart';
 import '../glass_button.dart';
 import '../../logic/eventos_store.dart';
@@ -32,9 +33,11 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
   final _telefonoController = TextEditingController();
   final _montoAbonoController = TextEditingController();
   final _equipoController = TextEditingController();
+  final _diasAlojamientoController = TextEditingController();
   
   bool _tieneAbono = false;
   String _tipoPago = 'efectivo';
+  bool _soloCulto = false;
   bool _isSaving = false;
   String? _comprobanteYappyBase64;
   final ImagePicker _picker = ImagePicker();
@@ -51,6 +54,8 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
       _tieneAbono = widget.persona!.abono;
       _tipoPago = widget.persona!.tipoPago;
       _equipoController.text = widget.persona!.equipo ?? '';
+      _diasAlojamientoController.text = (widget.persona!.diasAlojamiento ?? '').toString();
+      _soloCulto = widget.persona!.soloCulto;
     }
   }
 
@@ -73,6 +78,12 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
 
   @override
   Widget build(BuildContext context) {
+    final store = context.watch<EventosStore>();
+    final currentEvento = store.eventos.firstWhere(
+      (e) => e.id == widget.eventoId,
+      orElse: () => store.eventos.first,
+    );
+
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: GlassContainer(
@@ -108,7 +119,31 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                 ),
                 const SizedBox(height: 16),
                 _buildField('Equipo / Grupo', _equipoController, Icons.group_work_outlined),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                if (currentEvento.tipo == 'convencion' && (currentEvento.requiereAlojamiento == true)) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildField('Días de Alojamiento (Todos: vacío)', _diasAlojamientoController, Icons.hotel, keyboardType: TextInputType.number),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Text('¿Solo Culto?', style: TextStyle(color: Colors.white, fontSize: 10)),
+                            Switch(
+                              value: _soloCulto,
+                              onChanged: (val) => setState(() => _soloCulto = val),
+                              activeColor: AppColors.primary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
                 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,6 +199,9 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                       'tipoPago': _tipoPago,
                       'comprobanteYappy': _comprobanteYappyBase64,
                       'equipo': _equipoController.text,
+                      'diasAlojamiento': int.tryParse(_diasAlojamientoController.text),
+                      'soloCulto': _soloCulto,
+                      'color': Colors.primaries[Random().nextInt(Colors.primaries.length)].value.toRadixString(16).substring(2),
                     };
 
                     final bool success;

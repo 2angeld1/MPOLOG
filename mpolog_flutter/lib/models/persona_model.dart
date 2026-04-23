@@ -9,6 +9,9 @@ class PersonaModel {
   final double montoAbono;
   final String tipoPago;
   final String? comprobanteYappy;
+  final dynamic diasAlojamiento;
+  final bool soloCulto;
+  final String? color;
 
   PersonaModel({
     required this.id,
@@ -21,6 +24,9 @@ class PersonaModel {
     required this.montoAbono,
     required this.tipoPago,
     this.comprobanteYappy,
+    this.diasAlojamiento,
+    this.soloCulto = false,
+    this.color,
   });
 
   factory PersonaModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +41,9 @@ class PersonaModel {
       montoAbono: (json['montoAbono'] ?? 0.0).toDouble(),
       tipoPago: json['tipoPago'] ?? 'efectivo',
       comprobanteYappy: json['comprobanteYappy'],
+      diasAlojamiento: json['diasAlojamiento'],
+      soloCulto: json['soloCulto'] ?? false,
+      color: json['color'],
     );
   }
 
@@ -50,6 +59,9 @@ class PersonaModel {
       'montoAbono': montoAbono,
       'tipoPago': tipoPago,
       'comprobanteYappy': comprobanteYappy,
+      'diasAlojamiento': diasAlojamiento,
+      'soloCulto': soloCulto,
+      'color': color,
     };
   }
 

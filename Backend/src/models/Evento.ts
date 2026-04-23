@@ -8,7 +8,7 @@ export interface IUbicacion {
 
 export interface IEvento extends Document {
     nombre: string;
-    tipo: 'campamento' | 'retiro' | 'conferencia' | 'asignacion' | 'reunion' | 'ayuno' | 'vigilia' | 'culto' | 'evangelismo' | 'otro';
+    tipo: 'campamento' | 'retiro' | 'conferencia' | 'asignacion' | 'reunion' | 'ayuno' | 'vigilia' | 'culto' | 'evangelismo' | 'convencion' | 'otro';
     departamento: string;
     color?: string; // Hex code para el calendario
     fechaInicio: Date;
@@ -18,6 +18,8 @@ export interface IEvento extends Document {
     descripcion?: string;
     ubicacion?: IUbicacion;
     usuario?: mongoose.Types.ObjectId;
+    duracionDias?: number;
+    requiereAlojamiento?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -25,7 +27,7 @@ export interface IEvento extends Document {
 const UbicacionSchema: Schema = new Schema({
     lat: { type: Number, required: false },
     lng: { type: Number, required: false },
-    nombreLugar: { type: String, required: true }
+    nombreLugar: { type: String, required: false }
 }, { _id: false });
 
 const EventoSchema: Schema = new Schema({
@@ -36,7 +38,7 @@ const EventoSchema: Schema = new Schema({
     },
     tipo: {
         type: String,
-        enum: ['campamento', 'retiro', 'conferencia', 'asignacion', 'reunion', 'ayuno', 'vigilia', 'culto', 'evangelismo', 'otro'],
+        enum: ['campamento', 'retiro', 'conferencia', 'asignacion', 'reunion', 'ayuno', 'vigilia', 'culto', 'evangelismo', 'convencion', 'otro'],
         default: 'asignacion'
     },
     departamento: {
@@ -58,7 +60,7 @@ const EventoSchema: Schema = new Schema({
     },
     precioTotal: {
         type: Number,
-        required: true,
+        required: false,
         default: 0
     },
     activo: {
@@ -75,6 +77,14 @@ const EventoSchema: Schema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,
         ref: 'User'
+    },
+    duracionDias: {
+        type: Number,
+        required: false
+    },
+    requiereAlojamiento: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

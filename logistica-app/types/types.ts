@@ -73,21 +73,23 @@ export interface Registro {
 }
 
 export interface Ubicacion {
-    lat: number;
-    lng: number;
-    nombreLugar: string;
+    lat?: number;
+    lng?: number;
+    nombreLugar?: string;
 }
 
 export interface Evento {
     _id: string;
     nombre: string;
-    tipo: 'campamento' | 'retiro' | 'conferencia' | 'otro';
+    tipo: 'campamento' | 'retiro' | 'conferencia' | 'asignacion' | 'reunion' | 'ayuno' | 'vigilia' | 'culto' | 'evangelismo' | 'convencion' | 'otro';
     fechaInicio: string;
     fechaFin: string;
-    precioTotal: number;
+    precioTotal?: number;
     activo: boolean;
     descripcion?: string;
     ubicacion?: Ubicacion;
+    duracionDias?: number;
+    requiereAlojamiento?: boolean;
 }
 
 export interface EventoPersona {
@@ -103,6 +105,9 @@ export interface EventoPersona {
     comprobanteYappy?: string | null;
     comprobantes?: string[];
     equipo?: string;
+    diasAlojamiento?: number | string;
+    soloCulto?: boolean;
+    color?: string;
     createdAt?: string;
 }
 

@@ -28,6 +28,8 @@ export const useEventoRegistro = () => {
     const [comprobanteYappy, setComprobanteYappy] = useState<string | null>(null);
     const [comprobantes, setComprobantes] = useState<string[]>([]);
     const [equipo, setEquipo] = useState('');
+    const [diasAlojamiento, setDiasAlojamiento] = useState<number | string | undefined>(undefined);
+    const [soloCulto, setSoloCulto] = useState<boolean>(false);
 
     // Estado del formulario de evento (para crear)
     const [nuevoEventoNombre, setNuevoEventoNombre] = useState('');
@@ -37,6 +39,8 @@ export const useEventoRegistro = () => {
     const [nuevoEventoPrecio, setNuevoEventoPrecio] = useState<number | undefined>(undefined);
     const [nuevoEventoDescripcion, setNuevoEventoDescripcion] = useState('');
     const [nuevoEventoUbicacion, setNuevoEventoUbicacion] = useState<Ubicacion | undefined>(undefined);
+    const [nuevoEventoDuracionDias, setNuevoEventoDuracionDias] = useState<number | undefined>(undefined);
+    const [nuevoEventoRequiereAlojamiento, setNuevoEventoRequiereAlojamiento] = useState<boolean>(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
 
     // Estado de edición
@@ -131,6 +135,8 @@ export const useEventoRegistro = () => {
         setComprobanteYappy(null);
         setComprobantes([]);
         setEquipo('');
+        setDiasAlojamiento(undefined);
+        setSoloCulto(false);
         setIsEditing(false);
         setEditingPersonaId(null);
     };
@@ -143,13 +149,15 @@ export const useEventoRegistro = () => {
         setNuevoEventoPrecio(undefined);
         setNuevoEventoDescripcion('');
         setNuevoEventoUbicacion(undefined);
+        setNuevoEventoDuracionDias(undefined);
+        setNuevoEventoRequiereAlojamiento(false);
         setShowCrearEvento(false);
         setIsEditingEvento(false);
         setEditingEventoId(null);
     };
 
     const handleCrearEvento = async () => {
-        if (!nuevoEventoNombre || !nuevoEventoFechaInicio || !nuevoEventoFechaFin || !nuevoEventoPrecio) {
+        if (!nuevoEventoNombre || !nuevoEventoFechaInicio || !nuevoEventoFechaFin) {
             mostrarToast('Por favor completa todos los campos requeridos', 'warning');
             return;
         }
@@ -164,7 +172,9 @@ export const useEventoRegistro = () => {
                     fechaFin: nuevoEventoFechaFin!.toISOString(),
                     precioTotal: nuevoEventoPrecio,
                     descripcion: nuevoEventoDescripcion,
-                    ubicacion: nuevoEventoUbicacion
+                    ubicacion: nuevoEventoUbicacion,
+                    duracionDias: nuevoEventoDuracionDias,
+                    requiereAlojamiento: nuevoEventoRequiereAlojamiento
                 });
 
                 setEventos(eventos.map(e => e._id === editingEventoId ? eventoActualizado : e));
@@ -177,7 +187,9 @@ export const useEventoRegistro = () => {
                     fechaFin: nuevoEventoFechaFin!.toISOString(),
                     precioTotal: nuevoEventoPrecio,
                     descripcion: nuevoEventoDescripcion || undefined,
-                    ubicacion: nuevoEventoUbicacion
+                    ubicacion: nuevoEventoUbicacion,
+                    duracionDias: nuevoEventoDuracionDias,
+                    requiereAlojamiento: nuevoEventoRequiereAlojamiento
                 });
 
                 setEventos([nuevoEvento, ...eventos]);
@@ -203,6 +215,8 @@ export const useEventoRegistro = () => {
             setNuevoEventoPrecio(evento.precioTotal);
             setNuevoEventoDescripcion(evento.descripcion || '');
             setNuevoEventoUbicacion(evento.ubicacion);
+            setNuevoEventoDuracionDias(evento.duracionDias);
+            setNuevoEventoRequiereAlojamiento(evento.requiereAlojamiento || false);
             setIsEditingEvento(true);
             setEditingEventoId(eventoId);
             setShowCrearEvento(true);
@@ -252,7 +266,11 @@ export const useEventoRegistro = () => {
                     montoAbono: abono ? montoAbono : 0,
                     tipoPago,
                     comprobanteYappy,
-                    equipo: equipoFinal
+                    equipo: equipoFinal,
+                    diasAlojamiento,
+                    soloCulto,
+                    // If a random color is required from backend, backend can generate it or frontend can. Here we let backend generate or we pass one
+                    color: Math.floor(Math.random()*16777215).toString(16)
                 });
                 mostrarToast('Registro actualizado exitosamente', 'success');
             } else {
@@ -265,7 +283,10 @@ export const useEventoRegistro = () => {
                     montoAbono: abono ? montoAbono : 0,
                     tipoPago,
                     comprobanteYappy,
-                    equipo: equipoFinal
+                    equipo: equipoFinal,
+                    diasAlojamiento,
+                    soloCulto,
+                    color: Math.floor(Math.random()*16777215).toString(16)
                 });
                 mostrarToast('Persona registrada exitosamente', 'success');
             }
@@ -298,6 +319,8 @@ export const useEventoRegistro = () => {
                 ? persona.comprobantes
                 : (persona.comprobanteYappy ? [persona.comprobanteYappy] : []));
             setEquipo(persona.equipo || '');
+            setDiasAlojamiento(persona.diasAlojamiento);
+            setSoloCulto(persona.soloCulto || false);
             setIsEditing(true);
             setEditingPersonaId(personaId);
             setShowRegistrarPersona(true); // Expandir al editar
@@ -527,6 +550,10 @@ export const useEventoRegistro = () => {
         setNuevoEventoDescripcion,
         nuevoEventoUbicacion,
         setNuevoEventoUbicacion,
+        nuevoEventoDuracionDias,
+        setNuevoEventoDuracionDias,
+        nuevoEventoRequiereAlojamiento,
+        setNuevoEventoRequiereAlojamiento,
         showLocationPicker,
         setShowLocationPicker,
         handleCrearEvento,
@@ -560,6 +587,10 @@ export const useEventoRegistro = () => {
         comprobantes, 
         equipo,
         setEquipo,
+        diasAlojamiento,
+        setDiasAlojamiento,
+        soloCulto,
+        setSoloCulto,
         
         // Acciones persona
         handleRegistrarPersona,

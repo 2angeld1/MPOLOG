@@ -12,6 +12,9 @@ export interface IEventoPersona extends Document {
     comprobanteYappy?: string;
     comprobantes?: string[];
     equipo?: string;
+    diasAlojamiento?: number | string;
+    soloCulto?: boolean;
+    color?: string;
     usuario: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
@@ -69,6 +72,17 @@ const EventoPersonaSchema: Schema = new Schema({
     equipo: {
         type: String,
         trim: true
+    },
+    diasAlojamiento: {
+        type: Schema.Types.Mixed,
+        required: false
+    },
+    soloCulto: {
+        type: Boolean,
+        default: false
+    },
+    color: {
+        type: String
     },
     usuario: {
         type: Schema.Types.ObjectId,

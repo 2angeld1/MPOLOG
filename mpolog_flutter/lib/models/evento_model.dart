@@ -6,8 +6,11 @@ class EventoModel {
   final DateTime? fechaFin;
   final bool activo;
   final String? departamento;
-  final double precioTotal;
+  final double? precioTotal;
   final UbicacionModel? ubicacion;
+  final String? tipo;
+  final int? duracionDias;
+  final bool? requiereAlojamiento;
 
   EventoModel({
     required this.id,
@@ -19,6 +22,9 @@ class EventoModel {
     this.departamento,
     this.precioTotal = 0.0,
     this.ubicacion,
+    this.tipo,
+    this.duracionDias,
+    this.requiereAlojamiento,
   });
 
   factory EventoModel.fromJson(Map<String, dynamic> json) {
@@ -30,8 +36,11 @@ class EventoModel {
       fechaFin: json['fechaFin'] != null ? DateTime.tryParse(json['fechaFin']) : null,
       activo: json['activo'] ?? true,
       departamento: json['departamento'],
-      precioTotal: (json['precioTotal'] ?? 0.0).toDouble(),
+      precioTotal: (json['precioTotal'] != null) ? (json['precioTotal'] as num).toDouble() : null,
       ubicacion: json['ubicacion'] != null ? UbicacionModel.fromJson(json['ubicacion']) : null,
+      tipo: json['tipo'],
+      duracionDias: json['duracionDias'],
+      requiereAlojamiento: json['requiereAlojamiento'],
     );
   }
 
@@ -46,6 +55,9 @@ class EventoModel {
       'departamento': departamento,
       'precioTotal': precioTotal,
       'ubicacion': ubicacion?.toJson(),
+      'tipo': tipo,
+      'duracionDias': duracionDias,
+      'requiereAlojamiento': requiereAlojamiento,
     };
   }
 }

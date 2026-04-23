@@ -27,6 +27,8 @@ class _EventosPageState extends State<EventosPage> {
   DateTime _fechaFin = DateTime.now().add(const Duration(days: 3));
   String _tipoEvento = 'campamento';
   LatLng? _selectedLocation;
+  final _duracionController = TextEditingController();
+  bool _requiereAlojamiento = false;
 
   @override
   void initState() {
@@ -64,6 +66,8 @@ class _EventosPageState extends State<EventosPage> {
     _descController.clear();
     _precioController.clear();
     _lugarController.clear();
+    _duracionController.clear();
+    _requiereAlojamiento = false;
 
     showModalBottomSheet(
       context: context,
@@ -88,7 +92,7 @@ class _EventosPageState extends State<EventosPage> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: GlassTextField(label: 'Lugar / Ubicación *', controller: _lugarController)),
+                      Expanded(child: GlassTextField(label: 'Lugar / Ubicación (Opcional)', controller: _lugarController)),
                       const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () => _showMapPicker(setDialogState),
@@ -142,7 +146,7 @@ class _EventosPageState extends State<EventosPage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  GlassTextField(label: 'Costo Total *', controller: _precioController, keyboardType: TextInputType.number),
+                  GlassTextField(label: 'Costo Total (opcional)', controller: _precioController, keyboardType: TextInputType.number),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: _tipoEvento,
@@ -154,10 +158,31 @@ class _EventosPageState extends State<EventosPage> {
                       labelStyle: const TextStyle(color: Colors.white38, fontSize: 12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                     ),
-                    items: ['campamento', 'retiro', 'conferencia', 'otro'].map((t) => DropdownMenuItem(value: t, child: Text(t.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 13)))).toList(),
+                    items: ['campamento', 'retiro', 'conferencia', 'convencion', 'otro'].map((t) => DropdownMenuItem(value: t, child: Text(t.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 13)))).toList(),
                     onChanged: (val) => setDialogState(() => _tipoEvento = val!),
                   ),
                   const SizedBox(height: 16),
+                  if (_tipoEvento == 'convencion') ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GlassTextField(label: 'Duración (Días)', controller: _duracionController, keyboardType: TextInputType.number),
+                        ),
+                        const SizedBox(width: 16),
+                        Row(
+                          children: [
+                            const Text('¿Alojamiento?', style: TextStyle(color: Colors.white)),
+                            Switch(
+                              value: _requiereAlojamiento,
+                              onChanged: (val) => setDialogState(() => _requiereAlojamiento = val),
+                              activeColor: AppColors.primary,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   GlassTextField(label: 'Descripción (opcional)', controller: _descController),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -165,7 +190,10 @@ class _EventosPageState extends State<EventosPage> {
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (_nameController.text.isEmpty || _precioController.text.isEmpty || _lugarController.text.isEmpty) return;
+                        if (_nameController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('El nombre del evento es obligatorio')));
+                          return;
+                        }
                         final success = await context.read<EventosStore>().crearEvento({
                           'nombre': _nameController.text,
                           'descripcion': _descController.text,
@@ -174,11 +202,15 @@ class _EventosPageState extends State<EventosPage> {
                           'precioTotal': double.tryParse(_precioController.text) ?? 0.0,
                           'tipo': _tipoEvento,
                           'activo': true,
-                          'ubicacion': {
-                            'nombreLugar': _lugarController.text,
-                            'lat': _selectedLocation?.latitude ?? 0.0,
-                            'lng': _selectedLocation?.longitude ?? 0.0
-                          }
+                          'duracionDias': int.tryParse(_duracionController.text),
+                          'requiereAlojamiento': _requiereAlojamiento,
+                          'ubicacion': _lugarController.text.isNotEmpty 
+                            ? {
+                                'nombreLugar': _lugarController.text,
+                                'lat': _selectedLocation?.latitude ?? 0.0,
+                                'lng': _selectedLocation?.longitude ?? 0.0
+                              }
+                            : null
                         });
                         if (mounted) Navigator.pop(context);
                         if (success) {
