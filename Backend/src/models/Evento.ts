@@ -20,6 +20,7 @@ export interface IEvento extends Document {
     usuario?: mongoose.Types.ObjectId;
     duracionDias?: number;
     requiereAlojamiento?: boolean;
+    equipos?: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -85,6 +86,10 @@ const EventoSchema: Schema = new Schema({
     requiereAlojamiento: {
         type: Boolean,
         default: false
+    },
+    equipos: {
+        type: [String],
+        default: []
     }
 }, {
     timestamps: true

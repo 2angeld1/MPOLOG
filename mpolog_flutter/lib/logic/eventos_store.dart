@@ -65,6 +65,40 @@ class EventosStore extends ChangeNotifier {
     }
   }
 
+  Future<bool> actualizarEvento(String id, Map<String, dynamic> data) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _eventosService.actualizarEvento(id, data);
+      await fetchEventos();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error al actualizar evento';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> eliminarEvento(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _eventosService.eliminarEvento(id);
+      await fetchEventos();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error al eliminar evento';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchPersonas(String eventoId) async {
     try {
       _personas = await _eventosService.getPersonas(eventoId);

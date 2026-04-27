@@ -37,6 +37,10 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
   @override
   Widget build(BuildContext context) {
     final store = context.watch<EventosStore>();
+    final currentEvento = store.eventos.firstWhere(
+      (e) => e.id == widget.evento.id,
+      orElse: () => widget.evento,
+    );
     final stats = store.estadisticas;
 
     return Scaffold(
@@ -45,7 +49,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
         child: FloatingActionButton.extended(
           heroTag: 'fab_detalle_evento',
           onPressed: () =>
-              showPersonaRegistrationModal(context, widget.evento.id),
+              showPersonaRegistrationModal(context, currentEvento.id),
           backgroundColor: AppColors.primary,
           icon: const Icon(Icons.person_add_rounded, color: Colors.white),
           label: const Text('REGISTRAR', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -58,7 +62,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
             pinned: true,
             backgroundColor: AppColors.background,
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(widget.evento.nombre.toUpperCase(), 
+              title: Text(currentEvento.nombre.toUpperCase(), 
                 style: AppTextStyles.h3(context).copyWith(fontSize: 16)),
               background: Stack(
                 fit: StackFit.expand,
@@ -88,7 +92,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
             padding: const EdgeInsets.all(24),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                EventInfoCard(evento: widget.evento),
+                EventInfoCard(evento: currentEvento),
                 const SizedBox(height: 32),
 
                 if (stats != null) EventStatsRow(stats: stats),
@@ -120,10 +124,10 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
                   searchQuery: _searchQuery,
                   onEdit: (p) => showPersonaRegistrationModal(
                     context,
-                    widget.evento.id,
+                    currentEvento.id,
                     persona: p,
                   ),
-                  onDelete: (p) => _confirmDelete(p),
+                  onDelete: (p) => _confirmDelete(p, currentEvento.id),
                 ),
                 const SizedBox(height: 120),
               ]),
@@ -134,7 +138,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
     );
   }
 
-  void _confirmDelete(PersonaModel p) {
+  void _confirmDelete(PersonaModel p, String eventoId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -145,7 +149,7 @@ class _DetalleEventoPageState extends State<DetalleEventoPage> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCELAR')),
           TextButton(
             onPressed: () {
-              context.read<EventosStore>().eliminarPersona(widget.evento.id, p.id);
+              context.read<EventosStore>().eliminarPersona(eventoId, p.id);
               Navigator.pop(context);
             }, 
             child: const Text('ELIMINAR', style: TextStyle(color: Colors.redAccent))

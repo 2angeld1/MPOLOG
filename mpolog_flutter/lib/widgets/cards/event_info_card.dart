@@ -29,6 +29,11 @@ class EventInfoCard extends StatelessWidget {
             Colors.white38),
           const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(color: Colors.white10)),
           _buildInfoRow(Icons.payments_rounded, 'PRECIO TOTAL', '\$$precio', AppColors.primary),
+          
+          if (evento.equipos.isNotEmpty) ...[
+            const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(color: Colors.white10)),
+            _buildInfoRow(Icons.color_lens_rounded, 'EQUIPOS / COLORES', evento.equipos.join(', '), Colors.orangeAccent),
+          ],
           const SizedBox(height: 20),
           Row(
             children: [

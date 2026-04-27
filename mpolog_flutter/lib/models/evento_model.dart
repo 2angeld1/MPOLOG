@@ -11,6 +11,7 @@ class EventoModel {
   final String? tipo;
   final int? duracionDias;
   final bool? requiereAlojamiento;
+  final List<String> equipos;
 
   EventoModel({
     required this.id,
@@ -25,6 +26,7 @@ class EventoModel {
     this.tipo,
     this.duracionDias,
     this.requiereAlojamiento,
+    this.equipos = const [],
   });
 
   factory EventoModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class EventoModel {
       tipo: json['tipo'],
       duracionDias: json['duracionDias'],
       requiereAlojamiento: json['requiereAlojamiento'],
+      equipos: json['equipos'] != null ? List<String>.from(json['equipos']) : [],
     );
   }
 
@@ -58,6 +61,7 @@ class EventoModel {
       'tipo': tipo,
       'duracionDias': duracionDias,
       'requiereAlojamiento': requiereAlojamiento,
+      'equipos': equipos,
     };
   }
 }

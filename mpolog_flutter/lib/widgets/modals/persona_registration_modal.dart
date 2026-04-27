@@ -38,6 +38,7 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
   bool _tieneAbono = false;
   String _tipoPago = 'efectivo';
   bool _soloCulto = false;
+  String _modalidadAsistencia = 'completa';
   bool _isSaving = false;
   String? _comprobanteYappyBase64;
   final ImagePicker _picker = ImagePicker();
@@ -45,6 +46,13 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
   @override
   void initState() {
     super.initState();
+    // Accedemos al store de forma síncrona para inicializar datos si es necesario
+    final store = context.read<EventosStore>();
+    final currentEvento = store.eventos.firstWhere(
+      (e) => e.id == widget.eventoId,
+      orElse: () => store.eventos.first,
+    );
+
     if (widget.persona != null) {
       _nombreController.text = widget.persona!.nombre;
       _apellidoController.text = widget.persona!.apellido == '.' ? '' : widget.persona!.apellido;
@@ -56,6 +64,18 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
       _equipoController.text = widget.persona!.equipo ?? '';
       _diasAlojamientoController.text = (widget.persona!.diasAlojamiento ?? '').toString();
       _soloCulto = widget.persona!.soloCulto;
+      if (_soloCulto) {
+        _modalidadAsistencia = 'solo_culto';
+      } else if (widget.persona!.diasAlojamiento == 0) {
+        _modalidadAsistencia = 'solo_actividades';
+      } else {
+        _modalidadAsistencia = 'completa';
+      }
+    } else {
+      // Registro nuevo: Asignación aleatoria de equipo si existen
+      if (currentEvento.equipos.isNotEmpty) {
+        _equipoController.text = currentEvento.equipos[Random().nextInt(currentEvento.equipos.length)];
+      }
     }
   }
 
@@ -121,62 +141,59 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                 _buildField('Equipo / Grupo', _equipoController, Icons.group_work_outlined),
                 const SizedBox(height: 16),
 
-                if (currentEvento.tipo == 'convencion' && (currentEvento.requiereAlojamiento == true)) ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildField('Días de Alojamiento (Todos: vacío)', _diasAlojamientoController, Icons.hotel, keyboardType: TextInputType.number),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            const Text('¿Solo Culto?', style: TextStyle(color: Colors.white, fontSize: 10)),
-                            Switch(
-                              value: _soloCulto,
-                              onChanged: (val) => setState(() => _soloCulto = val),
-                              activeColor: AppColors.primary,
-                            ),
-                          ],
-                        ),
-                      ),
+                if (currentEvento.tipo?.toLowerCase() == 'convencion') ...[
+                  const Text('DORMITORIO / ASISTENCIA', style: TextStyle(fontSize: 9, color: Colors.white38, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _modalidadAsistencia,
+                    dropdownColor: AppColors.surface,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'completa', child: Text('Se queda a dormir todos los días', style: TextStyle(color: Colors.white, fontSize: 13))),
+                      DropdownMenuItem(value: 'solo_actividades', child: Text('Asiste a actividades pero NO se queda a dormir', style: TextStyle(color: Colors.white, fontSize: 13))),
+                      DropdownMenuItem(value: 'solo_culto', child: Text('Solo asiste a los cultos', style: TextStyle(color: Colors.white, fontSize: 13))),
                     ],
+                    onChanged: (val) => setState(() => _modalidadAsistencia = val!),
                   ),
                   const SizedBox(height: 24),
                 ],
                 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('¿Tiene abono?', style: AppTextStyles.body(context)),
-                    Switch(
-                      value: _tieneAbono,
-                      onChanged: (v) => setState(() => _tieneAbono = v),
-                      activeThumbColor: AppColors.primary,
-                    ),
-                  ],
-                ),
-                
-                if (_tieneAbono) ...[
-                  const SizedBox(height: 16),
-                  _buildField('Monto de Abono', _montoAbonoController, Icons.attach_money_rounded, keyboardType: TextInputType.number),
-                  const SizedBox(height: 16),
+                if ((currentEvento.precioTotal ?? 0) > 0) ...[
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPaymentChip('Efectivo', Icons.money_rounded, _tipoPago == 'efectivo', () => setState(() => _tipoPago = 'efectivo')),
-                      const SizedBox(width: 12),
-                      _buildPaymentChip('Yappy', Icons.qr_code_rounded, _tipoPago == 'yappy', () => setState(() => _tipoPago = 'yappy')),
+                      Text('¿Tiene abono?', style: AppTextStyles.body(context)),
+                      Switch(
+                        value: _tieneAbono,
+                        onChanged: (v) => setState(() => _tieneAbono = v),
+                        activeThumbColor: AppColors.primary,
+                      ),
                     ],
                   ),
-                  
-                  if (_tipoPago == 'yappy') ...[
-                    const SizedBox(height: 20),
-                    YappyComprobantePicker(
-                      comprobanteYappyBase64: _comprobanteYappyBase64,
-                      existingUrl: widget.persona?.comprobanteYappy,
-                      onPickImage: _pickImage,
-                      onRemoveImage: () => setState(() => _comprobanteYappyBase64 = null),
+                  if (_tieneAbono) ...[
+                    const SizedBox(height: 16),
+                    _buildField('Monto de Abono', _montoAbonoController, Icons.attach_money_rounded, keyboardType: TextInputType.number),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        _buildPaymentChip('Efectivo', Icons.money_rounded, _tipoPago == 'efectivo', () => setState(() => _tipoPago = 'efectivo')),
+                        const SizedBox(width: 12),
+                        _buildPaymentChip('Yappy', Icons.qr_code_rounded, _tipoPago == 'yappy', () => setState(() => _tipoPago = 'yappy')),
+                      ],
                     ),
+                    if (_tipoPago == 'yappy') ...[
+                      const SizedBox(height: 20),
+                      YappyComprobantePicker(
+                        comprobanteYappyBase64: _comprobanteYappyBase64,
+                        existingUrl: widget.persona?.comprobanteYappy,
+                        onPickImage: _pickImage,
+                        onRemoveImage: () => setState(() => _comprobanteYappyBase64 = null),
+                      ),
+                    ],
                   ],
                 ],
                 
@@ -189,6 +206,13 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                     setState(() => _isSaving = true);
                     
                     final store = context.read<EventosStore>();
+                    
+                    // Lógica de equipo aleatorio si hay equipos definidos y el campo está vacío
+                    String equipoFinal = _equipoController.text.trim();
+                    if (widget.persona == null && currentEvento.equipos.isNotEmpty && equipoFinal.isEmpty) {
+                      equipoFinal = currentEvento.equipos[Random().nextInt(currentEvento.equipos.length)];
+                    }
+
                     final data = {
                       'nombre': _nombreController.text,
                       'apellido': _apellidoController.text.isEmpty ? '.' : _apellidoController.text,
@@ -198,9 +222,9 @@ class _PersonaRegistrationModalState extends State<PersonaRegistrationModal> {
                       'montoAbono': _tieneAbono ? (double.tryParse(_montoAbonoController.text) ?? 0.0) : 0.0,
                       'tipoPago': _tipoPago,
                       'comprobanteYappy': _comprobanteYappyBase64,
-                      'equipo': _equipoController.text,
-                      'diasAlojamiento': int.tryParse(_diasAlojamientoController.text),
-                      'soloCulto': _soloCulto,
+                      'equipo': equipoFinal,
+                      'diasAlojamiento': _modalidadAsistencia == 'completa' ? null : 0,
+                      'soloCulto': _modalidadAsistencia == 'solo_culto',
                       'color': Colors.primaries[Random().nextInt(Colors.primaries.length)].value.toRadixString(16).substring(2),
                     };
 

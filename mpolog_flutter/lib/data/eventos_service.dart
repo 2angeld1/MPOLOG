@@ -19,6 +19,16 @@ class EventosService {
     return true;
   }
 
+  Future<bool> actualizarEvento(String id, Map<String, dynamic> data) async {
+    await _apiService.put('/eventos/$id', data);
+    return true;
+  }
+
+  Future<bool> eliminarEvento(String id) async {
+    await _apiService.delete('/eventos/$id');
+    return true;
+  }
+
   Future<List<PersonaModel>> getPersonas(String eventoId) async {
     final List<dynamic> data = await _apiService.get('/eventos/$eventoId/personas');
     return data.map((e) => PersonaModel.fromJson(e)).toList();

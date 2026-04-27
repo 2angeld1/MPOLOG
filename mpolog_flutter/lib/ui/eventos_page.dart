@@ -9,6 +9,7 @@ import '../styles/app_text_styles.dart';
 import '../widgets/glass_text_field.dart';
 import '../widgets/glass_container.dart';
 import 'detalle_evento_page.dart';
+import '../models/evento_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class EventosPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _EventosPageState extends State<EventosPage> {
   String _tipoEvento = 'campamento';
   LatLng? _selectedLocation;
   final _duracionController = TextEditingController();
+  final _equiposController = TextEditingController();
   bool _requiereAlojamiento = false;
 
   @override
@@ -61,13 +63,32 @@ class _EventosPageState extends State<EventosPage> {
     }
   }
 
-  void _showAddEventoDialog() {
-    _nameController.clear();
-    _descController.clear();
-    _precioController.clear();
-    _lugarController.clear();
-    _duracionController.clear();
-    _requiereAlojamiento = false;
+  void _showAddEventoDialog({EventoModel? evento}) {
+    if (evento != null) {
+      _nameController.text = evento.nombre;
+      _descController.text = evento.descripcion ?? '';
+      _precioController.text = evento.precioTotal.toString();
+      _lugarController.text = evento.ubicacion?.nombreLugar ?? '';
+      _duracionController.text = (evento.duracionDias ?? '').toString();
+      _equiposController.text = evento.equipos.join(', ');
+      _fechaInicio = evento.fechaInicio ?? DateTime.now();
+      _fechaFin = evento.fechaFin ?? DateTime.now();
+      _tipoEvento = evento.tipo ?? 'campamento';
+      _selectedLocation = evento.ubicacion?.lat != null ? LatLng(evento.ubicacion!.lat!, evento.ubicacion!.lng!) : null;
+      _requiereAlojamiento = evento.requiereAlojamiento ?? false;
+    } else {
+      _nameController.clear();
+      _descController.clear();
+      _precioController.clear();
+      _lugarController.clear();
+      _duracionController.clear();
+      _equiposController.clear();
+      _fechaInicio = DateTime.now();
+      _fechaFin = DateTime.now().add(const Duration(days: 3));
+      _tipoEvento = 'campamento';
+      _selectedLocation = null;
+      _requiereAlojamiento = false;
+    }
 
     showModalBottomSheet(
       context: context,
@@ -184,6 +205,12 @@ class _EventosPageState extends State<EventosPage> {
                     const SizedBox(height: 16),
                   ],
                   GlassTextField(label: 'Descripción (opcional)', controller: _descController),
+                  const SizedBox(height: 16),
+                  GlassTextField(
+                    label: 'Equipos / Colores (Separados por comas)', 
+                    controller: _equiposController,
+                    hintText: 'Ej: Rojo, Azul, Verde, Amarillo',
+                  ),
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
@@ -194,7 +221,7 @@ class _EventosPageState extends State<EventosPage> {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('El nombre del evento es obligatorio')));
                           return;
                         }
-                        final success = await context.read<EventosStore>().crearEvento({
+                        final body = {
                           'nombre': _nameController.text,
                           'descripcion': _descController.text,
                           'fechaInicio': _fechaInicio.toIso8601String(),
@@ -210,18 +237,29 @@ class _EventosPageState extends State<EventosPage> {
                                 'lat': _selectedLocation?.latitude ?? 0.0,
                                 'lng': _selectedLocation?.longitude ?? 0.0
                               }
-                            : null
-                        });
+                            : null,
+                          'equipos': _equiposController.text.isNotEmpty 
+                            ? _equiposController.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList()
+                            : []
+                        };
+
+                        final bool success;
+                        if (evento == null) {
+                          success = await context.read<EventosStore>().crearEvento(body);
+                        } else {
+                          success = await context.read<EventosStore>().actualizarEvento(evento.id, body);
+                        }
+
                         if (mounted) Navigator.pop(context);
                         if (success) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Evento creado correctamente')));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(evento == null ? 'Evento creado correctamente' : 'Evento actualizado correctamente')));
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      child: const Text('CREAR EVENTO', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                      child: Text(evento == null ? 'CREAR EVENTO' : 'GUARDAR CAMBIOS', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -324,19 +362,60 @@ class _EventosPageState extends State<EventosPage> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          evento.nombre.toUpperCase(),
-                                          style: AppTextStyles.h3(context).copyWith(fontSize: 16, fontWeight: FontWeight.bold),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              evento.nombre.toUpperCase(),
+                                              style: AppTextStyles.h3(context).copyWith(fontSize: 16, fontWeight: FontWeight.bold),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                (evento.tipo ?? 'otro').toUpperCase(),
+                                                style: const TextStyle(fontSize: 9, color: Colors.white38, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primary.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-                                        ),
-                                        child: Text('\$$precio', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                                            ),
+                                            child: Text('\$$precio', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () => _showAddEventoDialog(evento: evento),
+                                                icon: const Icon(Icons.edit_rounded, size: 18, color: Colors.white24),
+                                                padding: EdgeInsets.zero,
+                                                constraints: const BoxConstraints(),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              IconButton(
+                                                onPressed: () => _confirmDeleteEvento(context, evento),
+                                                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                                                padding: EdgeInsets.zero,
+                                                constraints: const BoxConstraints(),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -466,5 +545,31 @@ class _EventosPageState extends State<EventosPage> {
   String _formatDate(DateTime? date) {
     if (date == null) return '--/--/--';
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _confirmDeleteEvento(BuildContext context, EventoModel evento) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('¿Eliminar evento?'),
+        content: Text('Esta acción eliminará "${evento.nombre}" y todos sus registros asociados. Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCELAR')),
+          TextButton(
+            onPressed: () async {
+              final success = await context.read<EventosStore>().eliminarEvento(evento.id);
+              if (context.mounted) {
+                Navigator.pop(context);
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Evento eliminado correctamente')));
+                }
+              }
+            }, 
+            child: const Text('ELIMINAR', style: TextStyle(color: Colors.redAccent))
+          ),
+        ],
+      ),
+    );
   }
 }

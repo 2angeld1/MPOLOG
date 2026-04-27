@@ -10,7 +10,7 @@ import { getIO } from '../utils/socket';
 // Crear un nuevo evento
 export const crearEvento = async (req: Request, res: Response) => {
     try {
-        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, descripcion, ubicacion, departamento, color } = req.body;
+        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, descripcion, ubicacion, departamento, color, duracionDias, requiereAlojamiento, equipos } = req.body;
         const userId = (req as any).userId;
 
         // Validar solapamiento
@@ -42,7 +42,10 @@ export const crearEvento = async (req: Request, res: Response) => {
             departamento: departamento || 'General',
             color: color || '#673AB7',
             usuario: userId,
-            activo: true
+            activo: true,
+            duracionDias,
+            requiereAlojamiento,
+            equipos
         });
 
         await evento.save();
@@ -107,7 +110,7 @@ export const obtenerEventoPorId = async (req: Request, res: Response) => {
 export const actualizarEvento = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion, departamento, color } = req.body;
+        const { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion, departamento, color, duracionDias, requiereAlojamiento, equipos } = req.body;
 
         // Validar solapamiento al actualizar (excluyendo el evento actual)
         if (fechaInicio && fechaFin) {
@@ -132,7 +135,7 @@ export const actualizarEvento = async (req: Request, res: Response) => {
 
         const evento = await Evento.findByIdAndUpdate(
             id,
-            { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion, departamento, color },
+            { nombre, tipo, fechaInicio, fechaFin, precioTotal, activo, descripcion, ubicacion, departamento, color, duracionDias, requiereAlojamiento, equipos },
             { new: true, runValidators: true }
         );
 
@@ -178,7 +181,7 @@ export const eliminarEvento = async (req: Request, res: Response) => {
 export const registrarPersona = async (req: Request, res: Response) => {
     try {
         const { eventoId } = req.params;
-        const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo } = req.body;
+        const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo, soloCulto, diasAlojamiento, color } = req.body;
         const userId = (req as any).userId;
 
         // Verificar que el evento existe y está activo
@@ -208,7 +211,10 @@ export const registrarPersona = async (req: Request, res: Response) => {
             comprobanteYappy: comprobanteUrl,
             comprobantes: comprobanteUrl ? [comprobanteUrl] : [],
             equipo,
-            usuario: userId
+            usuario: userId,
+            soloCulto,
+            diasAlojamiento,
+            color
         });
 
         await persona.save();
@@ -262,7 +268,7 @@ export const obtenerPersonasEvento = async (req: Request, res: Response) => {
 export const actualizarPersona = async (req: Request, res: Response) => {
     try {
         const { eventoId, personaId } = req.params;
-        const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo } = req.body;
+        const { nombre, apellido, edad, telefono, abono, montoAbono, tipoPago, comprobanteYappy, equipo, soloCulto, diasAlojamiento, color } = req.body;
 
         // Subir comprobante a Cloudinary si es nuevo (base64)
         let comprobanteUrl = comprobanteYappy;
@@ -280,7 +286,10 @@ export const actualizarPersona = async (req: Request, res: Response) => {
                 montoAbono: abono ? (montoAbono || 0) : 0,
                 tipoPago: tipoPago || 'efectivo',
                 comprobanteYappy: comprobanteUrl,
-                equipo
+                equipo,
+                soloCulto,
+                diasAlojamiento,
+                color
             }
         };
 
