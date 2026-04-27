@@ -9,6 +9,8 @@ class GlassContainer extends StatelessWidget {
   final Gradient? gradient;
   final VoidCallback? onTap;
   final List<BoxShadow>? boxShadow;
+  final Color? color;
+  final BoxBorder? border;
 
   const GlassContainer({
     super.key,
@@ -19,6 +21,8 @@ class GlassContainer extends StatelessWidget {
     this.gradient,
     this.onTap,
     this.boxShadow,
+    this.color,
+    this.border,
   });
 
   @override
@@ -35,12 +39,12 @@ class GlassContainer extends StatelessWidget {
             borderRadius: br,
             gradient: gradient,
             boxShadow: boxShadow,
-            color: gradient == null 
+            color: color ?? (gradient == null 
                 ? (Theme.of(context).brightness == Brightness.dark
                     ? Colors.white.withValues(alpha: 0.05)
                     : Colors.white.withValues(alpha: 0.08))
-                : null,
-            border: Border.all(
+                : null),
+            border: border ?? Border.all(
               color: Colors.white.withValues(alpha: 0.1),
               width: 1,
             ),

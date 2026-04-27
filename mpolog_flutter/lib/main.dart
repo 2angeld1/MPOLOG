@@ -9,6 +9,7 @@ import 'package:mpolog_flutter/logic/config_store.dart';
 import 'package:mpolog_flutter/logic/eventos_store.dart';
 import 'package:mpolog_flutter/logic/reportes_store.dart';
 import 'package:mpolog_flutter/logic/notification_store.dart';
+import 'package:mpolog_flutter/logic/registro_detallado_store.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -33,6 +34,7 @@ void main() async {
           ChangeNotifierProvider(create: (_) => EventosStore()),
           ChangeNotifierProvider(create: (_) => ReportesStore()),
           ChangeNotifierProvider(create: (_) => NotificationStore()),
+          ChangeNotifierProvider(create: (_) => RegistroDetalladoStore()),
         ],
         child: const MyApp(),
       ),

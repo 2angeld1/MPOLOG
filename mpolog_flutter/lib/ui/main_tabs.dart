@@ -10,6 +10,7 @@ import 'settings_page.dart';
 import 'add_conteo_page.dart';
 import 'eventos_page.dart';
 import 'calendario_page.dart';
+import 'registro_detallado_page.dart';
 
 class MainTabs extends StatefulWidget {
   const MainTabs({super.key});
@@ -40,6 +41,7 @@ class _MainTabsState extends State<MainTabs> {
     _sameAdminScreens = [
       const HomePage(title: 'Inicio', key: ValueKey('home_same')),
       const CalendarioPage(key: ValueKey('calendar_same')),
+      const RegistroDetalladoPage(key: ValueKey('registro_same')),
       const AddConteoPage(key: ValueKey('add_same')),
       const EventosPage(key: ValueKey('events_same')),
       const SettingsPage(key: ValueKey('settings_same')),
@@ -66,6 +68,7 @@ class _MainTabsState extends State<MainTabs> {
     
     final isSuperAdmin = authStore.isSuperAdmin;
     final isSameAdmin = userRol == 'sameadmin';
+    final isJefTeen = userRol == 'jef teen';
     final isLogistic = authStore.isLogisticAdmin;
 
     List<Widget> screens;
@@ -74,7 +77,7 @@ class _MainTabsState extends State<MainTabs> {
     if (isSuperAdmin) {
       screens = _superAdminScreens;
       items = _buildSuperAdminItems();
-    } else if (isSameAdmin) {
+    } else if (isSameAdmin || isJefTeen) {
       screens = _sameAdminScreens;
       items = _buildSameAdminItems();
     } else if (isLogistic) {
@@ -179,6 +182,10 @@ class _MainTabsState extends State<MainTabs> {
       BottomNavigationBarItem(
         icon: Icon(Icons.calendar_month_rounded),
         label: 'Calendario',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.assignment_ind_rounded),
+        label: 'Registro',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.add_circle_outline_rounded),

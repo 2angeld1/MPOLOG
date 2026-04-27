@@ -11,6 +11,7 @@ import eventoRoutes from './routes/evento';
 import userRoutes from './routes/users';
 import roleRoutes from './routes/roles';
 import notificationRoutes from './routes/notificaciones';
+import registroDetalladoRoutes from './routes/registroDetallado';
 import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
@@ -65,6 +66,7 @@ app.use('/api/eventos', eventoRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/notificaciones', notificationRoutes);
+app.use('/api/registro-detallado', registroDetalladoRoutes);
 
 
 // Ruta de prueba
