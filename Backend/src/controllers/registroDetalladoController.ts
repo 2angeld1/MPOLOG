@@ -3,13 +3,18 @@ import PersonaDetallada from '../models/PersonaDetallada';
 
 export const crearPersonaDetallada = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, departamento } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo } = req.body;
         const userId = (req as any).userId;
 
         const persona = new PersonaDetallada({
             nombre,
             apellido,
             telefono,
+            edad,
+            escuela,
+            tipoSangre,
+            nombrePadres,
+            correo,
             departamento: departamento || 'Teen',
             usuario: userId
         });
@@ -18,6 +23,29 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
         res.status(201).json(persona);
     } catch (error: any) {
         res.status(500).json({ message: 'Error al crear el registro', error: error.message });
+    }
+};
+
+export const crearPersonaPublico = async (req: Request, res: Response) => {
+    try {
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo } = req.body;
+
+        const persona = new PersonaDetallada({
+            nombre,
+            apellido,
+            telefono,
+            edad,
+            escuela,
+            tipoSangre,
+            nombrePadres,
+            correo,
+            departamento: departamento || 'Teen'
+        });
+
+        await persona.save();
+        res.status(201).json(persona);
+    } catch (error: any) {
+        res.status(500).json({ message: 'Error al crear el registro público', error: error.message });
     }
 };
 
@@ -37,11 +65,11 @@ export const obtenerPersonasDetalladas = async (req: Request, res: Response) => 
 export const actualizarPersonaDetallada = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, telefono, departamento } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo } = req.body;
 
         const persona = await PersonaDetallada.findByIdAndUpdate(
             id,
-            { nombre, apellido, telefono, departamento },
+            { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo },
             { new: true }
         );
 

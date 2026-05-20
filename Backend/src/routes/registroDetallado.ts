@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { 
     crearPersonaDetallada, 
+    crearPersonaPublico,
     obtenerPersonasDetalladas, 
     actualizarPersonaDetallada, 
     eliminarPersonaDetallada, 
@@ -9,6 +10,9 @@ import {
 import { auth } from '../middleware/auth';
 
 const router = Router();
+
+// Ruta pública para captación de datos (sin autenticación)
+router.post('/publico', crearPersonaPublico);
 
 router.use(auth);
 

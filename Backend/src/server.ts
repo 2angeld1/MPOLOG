@@ -16,6 +16,7 @@ import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
+import { getTeenFormHtml } from './utils/htmlForm';
 
 const app = express();
 const httpServer = createServer(app);
@@ -68,6 +69,11 @@ app.use('/api/roles', roleRoutes);
 app.use('/api/notificaciones', notificationRoutes);
 app.use('/api/registro-detallado', registroDetalladoRoutes);
 
+
+// Ruta de registro público JEF Teen
+app.get('/registro-teen', (req, res) => {
+    res.send(getTeenFormHtml());
+});
 
 // Ruta de prueba
 app.get('/', (req, res) => {

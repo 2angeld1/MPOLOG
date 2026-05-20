@@ -3,6 +3,11 @@ class PersonaDetalladaModel {
   final String nombre;
   final String apellido;
   final String telefono;
+  final int? edad;
+  final String? escuela;
+  final String? tipoSangre;
+  final String? nombrePadres;
+  final String? correo;
   final List<DateTime> asistencias;
   final String departamento;
 
@@ -11,6 +16,11 @@ class PersonaDetalladaModel {
     required this.nombre,
     required this.apellido,
     required this.telefono,
+    this.edad,
+    this.escuela,
+    this.tipoSangre,
+    this.nombrePadres,
+    this.correo,
     this.asistencias = const [],
     this.departamento = 'Teen',
   });
@@ -21,6 +31,11 @@ class PersonaDetalladaModel {
       nombre: json['nombre'] ?? '',
       apellido: json['apellido'] ?? '',
       telefono: json['telefono'] ?? '',
+      edad: json['edad'] is int ? json['edad'] : (json['edad'] != null ? int.tryParse(json['edad'].toString()) : null),
+      escuela: json['escuela'],
+      tipoSangre: json['tipoSangre'],
+      nombrePadres: json['nombrePadres'],
+      correo: json['correo'],
       asistencias: (json['asistencias'] as List?)
               ?.map((e) => DateTime.parse(e))
               .toList() ??
@@ -34,6 +49,11 @@ class PersonaDetalladaModel {
       'nombre': nombre,
       'apellido': apellido,
       'telefono': telefono,
+      'edad': edad,
+      'escuela': escuela,
+      'tipoSangre': tipoSangre,
+      'nombrePadres': nombrePadres,
+      'correo': correo,
       'departamento': departamento,
     };
   }

@@ -4,9 +4,14 @@ export interface IPersonaDetallada extends Document {
     nombre: string;
     apellido: string;
     telefono: string;
+    edad?: number;
+    escuela?: string;
+    tipoSangre?: string;
+    nombrePadres?: string;
+    correo?: string;
     asistencias: Date[];
     departamento: string;
-    usuario: mongoose.Types.ObjectId;
+    usuario?: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -27,6 +32,30 @@ const PersonaDetalladaSchema: Schema = new Schema({
         required: true,
         trim: true
     },
+    edad: {
+        type: Number,
+        required: false
+    },
+    escuela: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    tipoSangre: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    nombrePadres: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    correo: {
+        type: String,
+        required: false,
+        trim: true
+    },
     asistencias: {
         type: [Date],
         default: []
@@ -38,7 +67,7 @@ const PersonaDetalladaSchema: Schema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     }
 }, {
     timestamps: true
