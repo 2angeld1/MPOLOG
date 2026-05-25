@@ -55,12 +55,12 @@ const Tabs: React.FC = () => {
                     {(!isEventsAdmin && !isSuperAdmin) || (isSameAdmin && !isSuperAdmin) ? <Home /> : <Redirect to={getDefaultRedirect()} />}
                 </Route>
                 <Route exact path="/tabs/add">
-                    {/* Only Logistic Admin or Same Admin can add records. Superadmin excluded. */}
-                    {(isLogisticAdmin || isSameAdmin) ? <AddRecord /> : <Redirect to={getDefaultRedirect()} />}
+                    {/* Only Logistic Admin can add records. Superadmin excluded. */}
+                    {isLogisticAdmin ? <AddRecord /> : <Redirect to={getDefaultRedirect()} />}
                 </Route>
                 <Route exact path="/tabs/eventos">
-                    {/* Only Events Admin or Same Admin can manage events. Superadmin excluded. */}
-                    {(isEventsAdmin || isSameAdmin) ? <EventoRegistro /> : <Redirect to={getDefaultRedirect()} />}
+                    {/* Only Events Admin can manage events. Superadmin excluded. */}
+                    {isEventsAdmin ? <EventoRegistro /> : <Redirect to={getDefaultRedirect()} />}
                 </Route>
                 <Route exact path="/tabs/reports">
                     {/* Only Logistic Admin or Same Admin can see reports. Superadmin excluded. */}
@@ -93,7 +93,7 @@ const Tabs: React.FC = () => {
                     </IonTabButton>
                 )}
                 {/* Logistic Admin View (Excluded Superadmin) */}
-                {(isLogisticAdmin || isSameAdmin) && (
+                {isLogisticAdmin && (
                     <IonTabButton tab="add" href="/tabs/add">
                         <IonIcon icon={addCircle} />
                         <IonLabel>Agregar</IonLabel>
@@ -102,7 +102,7 @@ const Tabs: React.FC = () => {
 
                 {/* Events View */}
                 {/* Events Admin View (Excluded Superadmin) */}
-                {(isEventsAdmin || isSameAdmin) && (
+                {isEventsAdmin && (
                     <IonTabButton tab="eventos" href="/tabs/eventos">
                         <IonIcon icon={people} />
                         <IonLabel>Eventos</IonLabel>

@@ -13,7 +13,7 @@ import { checkRole } from '../middleware/checkRole';
 const router = Router();
 
 // Roles con acceso al registro detallado
-const ROLES_REGISTRO = ['superadmin', 'sameadmin', 'jef teen', 'mentor club'];
+const ROLES_REGISTRO = ['superadmin', 'jef teen', 'mentor club'];
 
 // Ruta pública para captación de datos (formulario QR, sin autenticación)
 router.post('/publico', crearPersonaPublico);

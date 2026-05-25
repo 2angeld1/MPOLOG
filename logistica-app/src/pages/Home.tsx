@@ -400,7 +400,7 @@ const Home: React.FC = () => {
                                 <FontAwesomeIcon icon={faUsers} size="3x" />
                                 <h3>No hay datos disponibles</h3>
                                 <p>Comienza agregando registros de conteo de personas o materiales</p>
-                                    {(isLogisticAdmin || isSuperAdmin || isSameAdmin) && (
+                                    {(isLogisticAdmin || isSuperAdmin) && (
                                         <motion.div
                                             variants={buttonHoverVariants}
                                             whileHover="whileHover"

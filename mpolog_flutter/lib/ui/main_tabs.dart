@@ -8,7 +8,6 @@ import 'user_maintenance_page.dart';
 import 'role_maintenance_page.dart';
 import 'settings_page.dart';
 import 'add_conteo_page.dart';
-import 'eventos_page.dart';
 import 'calendario_page.dart';
 import 'registro_detallado_page.dart';
 
@@ -80,8 +79,8 @@ class _MainTabsState extends State<MainTabs> {
         label: 'Calendario',
       ));
 
-      // 3. Registro Detallado (sameadmin, jef teen, mentor club)
-      final showRegistro = hasSameAdmin || hasJefTeen || hasMentorClub;
+      // 3. Registro Detallado (jef teen, mentor club)
+      final showRegistro = hasJefTeen || hasMentorClub;
       if (showRegistro) {
         screens.add(const RegistroDetalladoPage(key: ValueKey('registro_dynamic')));
         items.add(const BottomNavigationBarItem(
@@ -100,15 +99,7 @@ class _MainTabsState extends State<MainTabs> {
         ));
       }
 
-      // 5. Eventos (sameadmin)
-      final showEventos = hasSameAdmin;
-      if (showEventos) {
-        screens.add(const EventosPage(key: ValueKey('events_dynamic')));
-        items.add(const BottomNavigationBarItem(
-          icon: Icon(Icons.confirmation_number_rounded),
-          label: 'Eventos',
-        ));
-      }
+
 
       // 6. Configuración / Settings (Todos tienen acceso)
       screens.add(const SettingsPage(key: ValueKey('settings_dynamic')));
