@@ -21,7 +21,7 @@ class UsuarioModel {
         : [rolClass];
 
     return UsuarioModel(
-      id: json['_id'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
       nombre: json['nombre'] ?? 'Sin nombre',
       email: json['email'] ?? 'Sin email',
       rol: rolClass,
