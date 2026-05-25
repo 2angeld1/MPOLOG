@@ -40,7 +40,8 @@ export const login = async (req: Request, res: Response) => {
                 id: user._id,
                 email: user.email, // Cambia username a email
                 nombre: user.nombre,
-                rol: user.rol
+                rol: user.rol,
+                roles: user.roles || [user.rol]
             }
         });
     } catch (error) {
@@ -51,10 +52,10 @@ export const login = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
     try {
-        const { email, password, nombre, rol } = req.body; // Quita username
+        const { email, password, nombre, roles } = req.body;
 
         // Validar datos
-        if (!email || !password || !nombre) { // Quita username
+        if (!email || !password || !nombre) {
             return res.status(400).json({ message: 'Por favor completa todos los campos' });
         }
 
@@ -64,12 +65,26 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'El email ya existe' });
         }
 
+        // Definir roles permitidos en el registro público
+        const rolesPermitidosRegistro = ['jef teen', 'jef', 'logisticadmin', 'mentor club', 'servidores', 'usuario'];
+
+        let rolesAsignados: string[] = ['usuario'];
+        if (roles && Array.isArray(roles) && roles.length > 0) {
+            // Filtrar para que solo puedan registrarse con roles permitidos (insensible a mayúsculas y espacios extras)
+            rolesAsignados = roles.filter((r: string) => 
+                rolesPermitidosRegistro.includes(r.toLowerCase().trim())
+            );
+            if (rolesAsignados.length === 0) {
+                rolesAsignados = ['usuario'];
+            }
+        }
+
         // Crear nuevo usuario
         const user = new User({
-            email, // Quita username
+            email,
             password,
             nombre,
-            rol: 'usuario' // Siempre asignar rol 'usuario' por defecto en el registro
+            roles: rolesAsignados
         });
 
         await user.save();
@@ -88,9 +103,10 @@ export const register = async (req: Request, res: Response) => {
             token,
             user: {
                 id: user._id,
-                email: user.email, // Cambia username a email
+                email: user.email,
                 nombre: user.nombre,
-                rol: user.rol
+                rol: user.rol,
+                roles: user.roles
             }
         });
     } catch (error) {

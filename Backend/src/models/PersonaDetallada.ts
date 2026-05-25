@@ -9,9 +9,15 @@ export interface IPersonaDetallada extends Document {
     tipoSangre?: string;
     nombrePadres?: string;
     correo?: string;
+    tallaSueter?: string;
+    grupo?: string;
+    adultoResponsable?: string;
+    direccion?: string;
+    alergiasMedicamentos?: string;
     asistencias: Date[];
     departamento: string;
     usuario?: mongoose.Types.ObjectId;
+    foto?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -56,6 +62,31 @@ const PersonaDetalladaSchema: Schema = new Schema({
         required: false,
         trim: true
     },
+    tallaSueter: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    grupo: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    adultoResponsable: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    direccion: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    alergiasMedicamentos: {
+        type: String,
+        required: false,
+        trim: true
+    },
     asistencias: {
         type: [Date],
         default: []
@@ -67,6 +98,10 @@ const PersonaDetalladaSchema: Schema = new Schema({
     usuario: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: false
+    },
+    foto: {
+        type: String,
         required: false
     }
 }, {

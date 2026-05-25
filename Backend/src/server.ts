@@ -17,6 +17,8 @@ import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
 import { getTeenFormHtml } from './utils/htmlForm';
+import { getCarnetHtml } from './utils/carnetHtml';
+import PersonaDetallada from './models/PersonaDetallada';
 
 const app = express();
 const httpServer = createServer(app);
@@ -73,6 +75,27 @@ app.use('/api/registro-detallado', registroDetalladoRoutes);
 // Ruta de registro público JEF Teen
 app.get('/registro-teen', (req, res) => {
     res.send(getTeenFormHtml());
+});
+
+// Ruta pública de Carnet Digital para niños de Mentor Club (Kids)
+app.get('/carnet/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const persona = await PersonaDetallada.findById(id);
+        if (!persona) {
+            return res.status(404).send('<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Carnet no encontrado</h1>');
+        }
+        const host = req.get('host') || 'localhost:5000';
+        const protocol = req.protocol;
+        
+        // Manejar protocolo seguro detrás de proxies inversos (como Railway o Vercel)
+        const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
+        const carnetUrl = `${activeProtocol}://${host}/carnet/${id}`;
+        
+        res.send(getCarnetHtml(persona, carnetUrl));
+    } catch (error: any) {
+        res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
+    }
 });
 
 // Ruta de prueba

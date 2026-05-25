@@ -7,7 +7,11 @@ export const seedRoles = async () => {
             { name: 'eventsadmin', description: 'Gestión completa de eventos', permissions: ['eventos', 'reportes'] },
             { name: 'sameadmin', description: 'Administrador de servicios SAME', permissions: ['same', 'reportes'] },
             { name: 'logisticadmin', description: 'Gestión de logística y conteos', permissions: ['conteo', 'reportes'] },
-            { name: 'usuario', description: 'Usuario estándar con acceso limitado', permissions: ['view'] }
+            { name: 'usuario', description: 'Usuario estándar con acceso limitado', permissions: ['view'] },
+            { name: 'jef teen', description: 'Acceso a registro de adolescentes y calendario', permissions: ['registro', 'calendario'] },
+            { name: 'jef', description: 'Acceso a calendario', permissions: ['calendario'] },
+            { name: 'mentor club', description: 'Acceso a registro de niños y calendario', permissions: ['registro', 'calendario'] },
+            { name: 'servidores', description: 'Acceso a calendario', permissions: ['calendario'] }
         ];
 
         console.log('Verificando roles en la base de datos...');

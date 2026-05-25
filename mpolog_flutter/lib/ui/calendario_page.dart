@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 // import 'dart:io' as io; // ELIMINADO: dart:io no es compatible con WEB y causa crasheos.
-import 'package:path_provider/path_provider.dart';
+// import 'package:path_provider/path_provider.dart'; // No utilizado actualmente (descarga en web requiere dart:js)
 import '../logic/eventos_store.dart';
 import '../styles/app_colors.dart';
 import '../widgets/charts/event_calendar.dart';

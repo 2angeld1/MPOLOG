@@ -80,6 +80,44 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.all(24),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  _buildSectionTitle('DATOS PERSONALES'),
+                  const SizedBox(height: 16),
+                  GlassContainer(
+                    padding: const EdgeInsets.all(16),
+                    borderRadius: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildProfileItem(
+                          context,
+                          Icons.person_rounded,
+                          'Nombre',
+                          authStore.user?.nombre ?? 'Sin nombre',
+                        ),
+                        const Divider(color: Colors.white12, height: 24),
+                        _buildProfileItem(
+                          context,
+                          Icons.email_rounded,
+                          'Email',
+                          authStore.user?.email ?? 'Sin email',
+                        ),
+                        const Divider(color: Colors.white12, height: 24),
+                        _buildProfileItem(
+                          context,
+                          Icons.admin_panel_settings_rounded,
+                          'Rol Actual',
+                          _capitalize(authStore.user?.rol ?? 'Sin rol'),
+                          onTap: () => _showChangeRoleModal(context, authStore),
+                          trailing: const Icon(
+                            Icons.edit_rounded,
+                            color: AppColors.primary,
+                            size: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                   _buildSectionTitle('SEDE PRINCIPAL'),
                   const SizedBox(height: 16),
                   GlassContainer(
@@ -213,4 +251,212 @@ class _SettingsPageState extends State<SettingsPage> {
       color: Colors.white.withValues(alpha: 0.4)
     ));
   }
+
+  Widget _buildProfileItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    VoidCallback? onTap,
+    Widget? trailing,
+  }) {
+    final item = Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTextStyles.label(context).copyWith(
+                  fontSize: 11,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: AppTextStyles.body(context).copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (trailing != null) trailing,
+      ],
+    );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: item,
+        ),
+      );
+    }
+
+    return item;
+  }
+
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
+  static const _rolesDisponibles = [
+    _RolOption('usuario',       'Usuario',     Icons.person_outline_rounded),
+    _RolOption('jef teen',     'Jef Teen',    Icons.group_rounded),
+    _RolOption('jef',          'Jef',         Icons.star_rounded),
+    _RolOption('mentor club',  'Mentor Club', Icons.child_care_rounded),
+    _RolOption('servidores',   'Servidores',  Icons.volunteer_activism_rounded),
+    _RolOption('logisticadmin','Logística',   Icons.inventory_2_rounded),
+    _RolOption('eventsadmin',  'Eventos',     Icons.event_note_rounded),
+    _RolOption('sameadmin',    'SAME',        Icons.medical_services_rounded),
+    _RolOption('superadmin',   'Superadmin',  Icons.security_rounded),
+  ];
+
+  void _showChangeRoleModal(BuildContext context, AuthStore authStore) {
+    String selectedRole = authStore.user?.rol ?? 'usuario';
+    bool isSaving = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Cambiar Rol', style: AppTextStyles.h3(context)),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Selecciona tu nuevo rol en el sistema:',
+                    style: AppTextStyles.body(context).copyWith(fontSize: 12, color: Colors.white38),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _rolesDisponibles.map((rol) {
+                      final selected = selectedRole.toLowerCase().trim() == rol.value.toLowerCase().trim();
+                      return GestureDetector(
+                        onTap: isSaving ? null : () => setState(() => selectedRole = rol.value),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? const Color(0xFF9D4EDD).withValues(alpha: 0.25)
+                                : Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: selected ? const Color(0xFF9D4EDD) : Colors.white24,
+                              width: selected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                rol.icon,
+                                size: 16,
+                                color: selected ? const Color(0xFF9D4EDD) : Colors.white54,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                rol.label,
+                                style: TextStyle(
+                                  color: selected ? Colors.white : Colors.white60,
+                                  fontSize: 12,
+                                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSaving ? null : () => Navigator.pop(context),
+                  child: Text('CANCELAR', style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
+                ),
+                ElevatedButton(
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          setState(() => isSaving = true);
+                          final success = await authStore.updateMyRole(selectedRole);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Rol actualizado correctamente'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(authStore.errorMessage ?? 'Error al actualizar el rol'),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  ),
+                  child: isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('GUARDAR', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _RolOption {
+  final String value;
+  final String label;
+  final IconData icon;
+  const _RolOption(this.value, this.label, this.icon);
 }

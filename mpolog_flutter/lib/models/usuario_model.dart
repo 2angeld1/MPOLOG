@@ -3,20 +3,29 @@ class UsuarioModel {
   final String nombre;
   final String email;
   final String rol;
+  final List<String> roles;
 
   UsuarioModel({
     required this.id,
     required this.nombre,
     required this.email,
     required this.rol,
+    required this.roles,
   });
 
   factory UsuarioModel.fromJson(Map<String, dynamic> json) {
+    final rolClass = json['rol'] ?? 'user';
+    final List<dynamic>? rolesJson = json['roles'];
+    final List<String> rolesList = rolesJson != null 
+        ? rolesJson.map((e) => e.toString()).toList() 
+        : [rolClass];
+
     return UsuarioModel(
       id: json['_id'] ?? '',
       nombre: json['nombre'] ?? 'Sin nombre',
       email: json['email'] ?? 'Sin email',
-      rol: json['rol'] ?? 'user',
+      rol: rolClass,
+      roles: rolesList,
     );
   }
 
@@ -26,9 +35,16 @@ class UsuarioModel {
       'nombre': nombre,
       'email': email,
       'rol': rol,
+      'roles': roles,
     };
   }
 
-  bool get isSuperAdmin => rol.toLowerCase() == 'superadmin';
-  bool get isAdmin => rol.toLowerCase().contains('admin');
+  bool get isSuperAdmin => rol.toLowerCase() == 'superadmin' || roles.any((r) => r.toLowerCase().trim() == 'superadmin');
+  bool get isAdmin => rol.toLowerCase().contains('admin') || roles.any((r) => r.toLowerCase().contains('admin'));
+
+  bool hasRole(String roleName) {
+    final cleanRole = roleName.toLowerCase().trim();
+    return rol.toLowerCase().trim() == cleanRole || 
+           roles.any((r) => r.toLowerCase().trim() == cleanRole);
+  }
 }

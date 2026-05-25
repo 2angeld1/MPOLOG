@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/auth_service.dart';
+import '../data/user_service.dart';
 import '../models/usuario_model.dart';
 
 class AuthStore extends ChangeNotifier {
@@ -14,8 +15,8 @@ class AuthStore extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   UsuarioModel? get user => _user;
   
-  bool get isSuperAdmin => _user?.rol == 'superadmin';
-  bool get isLogisticAdmin => _user?.rol == 'logisticadmin' || _user?.rol == 'sameadmin';
+  bool get isSuperAdmin => _user?.hasRole('superadmin') ?? false;
+  bool get isLogisticAdmin => (_user?.hasRole('logisticadmin') ?? false) || (_user?.hasRole('sameadmin') ?? false);
   bool get canManageCounts => isSuperAdmin || isLogisticAdmin;
 
   AuthStore() {
@@ -71,6 +72,7 @@ class AuthStore extends ChangeNotifier {
     required String nombre,
     required String email,
     required String password,
+    List<String> roles = const [],
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -81,6 +83,7 @@ class AuthStore extends ChangeNotifier {
         nombre: nombre,
         email: email,
         password: password,
+        roles: roles,
       );
 
       _isLoading = false;
@@ -109,5 +112,38 @@ class AuthStore extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  Future<bool> updateMyRole(String newRole) async {
+    if (_user == null) return false;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final userService = UserService();
+      final success = await userService.updateUserRole(_user!.id, newRole);
+      if (success) {
+        final updatedRoles = [newRole];
+        _user = UsuarioModel(
+          id: _user!.id,
+          nombre: _user!.nombre,
+          email: _user!.email,
+          rol: newRole,
+          roles: updatedRoles,
+        );
+        await _authService.saveUser(_user!.toJson());
+        notifyListeners();
+        return true;
+      }
+      _errorMessage = 'No se pudo actualizar el rol en el servidor';
+      return false;
+    } catch (e) {
+      _errorMessage = 'Error al actualizar el rol';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

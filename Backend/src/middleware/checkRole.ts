@@ -11,7 +11,10 @@ export const checkRole = (roles: string[]) => {
                 return res.status(404).json({ message: 'Usuario no encontrado' });
             }
 
-            if (!roles.includes(user.rol)) {
+            const userRoles = user.roles && user.roles.length > 0 ? user.roles : [user.rol];
+            const tienePermiso = userRoles.some(r => roles.includes(r));
+
+            if (!tienePermiso) {
                 return res.status(403).json({ message: 'Acceso denegado: No tienes permisos suficientes' });
             }
 

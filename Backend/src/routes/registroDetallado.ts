@@ -8,13 +8,19 @@ import {
     marcarAsistencia 
 } from '../controllers/registroDetalladoController';
 import { auth } from '../middleware/auth';
+import { checkRole } from '../middleware/checkRole';
 
 const router = Router();
 
-// Ruta pública para captación de datos (sin autenticación)
+// Roles con acceso al registro detallado
+const ROLES_REGISTRO = ['superadmin', 'sameadmin', 'jef teen', 'mentor club'];
+
+// Ruta pública para captación de datos (formulario QR, sin autenticación)
 router.post('/publico', crearPersonaPublico);
 
+// Todas las rutas siguientes requieren autenticación + rol
 router.use(auth);
+router.use(checkRole(ROLES_REGISTRO));
 
 router.post('/', crearPersonaDetallada);
 router.get('/', obtenerPersonasDetalladas);

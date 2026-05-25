@@ -16,7 +16,18 @@ export const updateUserRole = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { rol } = req.body;
 
-        const validRoles = ['superadmin', 'logisticadmin', 'eventsadmin', 'sameadmin', 'admin', 'usuario'];
+        const validRoles = [
+            'superadmin',
+            'logisticadmin',
+            'eventsadmin',
+            'sameadmin',
+            'admin',
+            'usuario',
+            'jef teen',
+            'jef',
+            'mentor club',
+            'servidores'
+        ];
         
         if (!validRoles.includes(rol)) {
             return res.status(400).json({ message: 'Rol inválido' });
@@ -24,7 +35,7 @@ export const updateUserRole = async (req: Request, res: Response) => {
 
         const user = await User.findByIdAndUpdate(
             id,
-            { rol },
+            { rol, roles: [rol] },
             { new: true, select: '-password' }
         );
 

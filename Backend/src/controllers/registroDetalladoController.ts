@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
 import PersonaDetallada from '../models/PersonaDetallada';
+import { uploadImage } from '../utils/imageUpload';
 
 export const crearPersonaDetallada = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto } = req.body;
         const userId = (req as any).userId;
+
+        // Subir foto a Cloudinary si existe
+        const fotoUrl = await uploadImage(foto, 'kids_profiles');
 
         const persona = new PersonaDetallada({
             nombre,
@@ -15,8 +19,14 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
             tipoSangre,
             nombrePadres,
             correo,
+            tallaSueter,
+            grupo,
+            adultoResponsable,
+            direccion,
+            alergiasMedicamentos,
             departamento: departamento || 'Teen',
-            usuario: userId
+            usuario: userId,
+            foto: fotoUrl
         });
 
         await persona.save();
@@ -28,7 +38,10 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
 
 export const crearPersonaPublico = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto } = req.body;
+
+        // Subir foto a Cloudinary si existe
+        const fotoUrl = await uploadImage(foto, 'kids_profiles');
 
         const persona = new PersonaDetallada({
             nombre,
@@ -39,7 +52,13 @@ export const crearPersonaPublico = async (req: Request, res: Response) => {
             tipoSangre,
             nombrePadres,
             correo,
-            departamento: departamento || 'Teen'
+            tallaSueter,
+            grupo,
+            adultoResponsable,
+            direccion,
+            alergiasMedicamentos,
+            departamento: departamento || 'Teen',
+            foto: fotoUrl
         });
 
         await persona.save();
@@ -65,11 +84,14 @@ export const obtenerPersonasDetalladas = async (req: Request, res: Response) => 
 export const actualizarPersonaDetallada = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto } = req.body;
+
+        // Subir foto a Cloudinary si existe (base64)
+        const fotoUrl = await uploadImage(foto, 'kids_profiles');
 
         const persona = await PersonaDetallada.findByIdAndUpdate(
             id,
-            { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo },
+            { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl },
             { new: true }
         );
 

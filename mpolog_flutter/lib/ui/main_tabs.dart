@@ -23,9 +23,6 @@ class _MainTabsState extends State<MainTabs> {
   int _currentIndex = 0;
 
   late List<Widget> _superAdminScreens;
-  late List<Widget> _sameAdminScreens;
-  late List<Widget> _logisticScreens;
-  late List<Widget> _userScreens;
 
   @override
   void initState() {
@@ -37,55 +34,88 @@ class _MainTabsState extends State<MainTabs> {
       const RoleMaintenancePage(key: ValueKey('roles')),
       const SettingsPage(key: ValueKey('settings_super')),
     ];
-
-    _sameAdminScreens = [
-      const HomePage(title: 'Inicio', key: ValueKey('home_same')),
-      const CalendarioPage(key: ValueKey('calendar_same')),
-      const RegistroDetalladoPage(key: ValueKey('registro_same')),
-      const AddConteoPage(key: ValueKey('add_same')),
-      const EventosPage(key: ValueKey('events_same')),
-      const SettingsPage(key: ValueKey('settings_same')),
-    ];
-
-    _logisticScreens = [
-      const HomePage(title: 'Inicio', key: ValueKey('home_log')),
-      const CalendarioPage(key: ValueKey('calendar_log')),
-      const AddConteoPage(key: ValueKey('add_log')),
-      const SettingsPage(key: ValueKey('settings_log')),
-    ];
-
-    _userScreens = [
-      const HomePage(title: 'Inicio', key: ValueKey('home_user')),
-      const CalendarioPage(key: ValueKey('calendar_user')),
-      const SettingsPage(key: ValueKey('settings_user')),
-    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final authStore = context.watch<AuthStore>();
-    final userRol = authStore.user?.rol.toLowerCase();
+    final user = authStore.user;
     
-    final isSuperAdmin = authStore.isSuperAdmin;
-    final isSameAdmin = userRol == 'sameadmin';
-    final isJefTeen = userRol == 'jef teen';
-    final isLogistic = authStore.isLogisticAdmin;
+    if (user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
-    List<Widget> screens;
-    List<BottomNavigationBarItem> items;
+    final isSuperAdmin = user.isSuperAdmin;
+
+    List<Widget> screens = [];
+    List<BottomNavigationBarItem> items = [];
 
     if (isSuperAdmin) {
       screens = _superAdminScreens;
       items = _buildSuperAdminItems();
-    } else if (isSameAdmin || isJefTeen) {
-      screens = _sameAdminScreens;
-      items = _buildSameAdminItems();
-    } else if (isLogistic) {
-      screens = _logisticScreens;
-      items = _buildLogisticItems();
     } else {
-      screens = _userScreens;
-      items = _buildUserItems();
+      // Evaluar permisos dinámicamente según los roles del usuario
+      final hasSameAdmin = user.hasRole('sameadmin');
+      final hasLogistic = user.hasRole('logisticadmin') || hasSameAdmin;
+      final hasJefTeen = user.hasRole('jef teen');
+      final hasMentorClub = user.hasRole('mentor club');
+      final hasServidores = user.hasRole('servidores');
+      final hasJef = user.hasRole('jef');
+
+      // 1. Inicio (Solo para sameadmin y logisticadmin o usuarios estándar por defecto)
+      // Jef Teen, Mentor Club, Servidores y Jef NO tienen acceso a Inicio.
+      final showHome = hasLogistic || (!hasJefTeen && !hasMentorClub && !hasServidores && !hasJef);
+      if (showHome) {
+        screens.add(const HomePage(title: 'Inicio', key: ValueKey('home_dynamic')));
+        items.add(const BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: 'Inicio',
+        ));
+      }
+
+      // 2. Calendario (Todos los roles tienen acceso a Calendario)
+      screens.add(const CalendarioPage(key: ValueKey('calendar_dynamic')));
+      items.add(const BottomNavigationBarItem(
+        icon: Icon(Icons.calendar_month_rounded),
+        label: 'Calendario',
+      ));
+
+      // 3. Registro Detallado (sameadmin, jef teen, mentor club)
+      final showRegistro = hasSameAdmin || hasJefTeen || hasMentorClub;
+      if (showRegistro) {
+        screens.add(const RegistroDetalladoPage(key: ValueKey('registro_dynamic')));
+        items.add(const BottomNavigationBarItem(
+          icon: Icon(Icons.assignment_ind_rounded),
+          label: 'Registro',
+        ));
+      }
+
+      // 4. Agregar Conteo / Contar (sameadmin, logisticadmin)
+      final showAddConteo = hasLogistic;
+      if (showAddConteo) {
+        screens.add(const AddConteoPage(key: ValueKey('add_dynamic')));
+        items.add(const BottomNavigationBarItem(
+          icon: Icon(Icons.add_circle_outline_rounded),
+          label: 'Contar',
+        ));
+      }
+
+      // 5. Eventos (sameadmin)
+      final showEventos = hasSameAdmin;
+      if (showEventos) {
+        screens.add(const EventosPage(key: ValueKey('events_dynamic')));
+        items.add(const BottomNavigationBarItem(
+          icon: Icon(Icons.confirmation_number_rounded),
+          label: 'Eventos',
+        ));
+      }
+
+      // 6. Configuración / Settings (Todos tienen acceso)
+      screens.add(const SettingsPage(key: ValueKey('settings_dynamic')));
+      items.add(const BottomNavigationBarItem(
+        icon: Icon(Icons.settings_rounded),
+        label: 'Config',
+      ));
     }
 
     if (_currentIndex >= screens.length) {
@@ -165,73 +195,6 @@ class _MainTabsState extends State<MainTabs> {
       BottomNavigationBarItem(
         icon: Icon(Icons.admin_panel_settings_rounded),
         label: 'Roles',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
-        label: 'Config',
-      ),
-    ];
-  }
-
-  List<BottomNavigationBarItem> _buildSameAdminItems() {
-    return const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: 'Inicio',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.calendar_month_rounded),
-        label: 'Calendario',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.assignment_ind_rounded),
-        label: 'Registro',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.add_circle_outline_rounded),
-        label: 'Contar',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.confirmation_number_rounded),
-        label: 'Eventos',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
-        label: 'Config',
-      ),
-    ];
-  }
-
-  List<BottomNavigationBarItem> _buildLogisticItems() {
-    return const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: 'Inicio',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.calendar_month_rounded),
-        label: 'Calendario',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.add_circle_outline_rounded),
-        label: 'Contar',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
-        label: 'Config',
-      ),
-    ];
-  }
-
-  List<BottomNavigationBarItem> _buildUserItems() {
-    return const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: 'Inicio',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.calendar_month_rounded),
-        label: 'Calendario',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.settings_rounded),

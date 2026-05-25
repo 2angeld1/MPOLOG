@@ -34,13 +34,17 @@ class AuthService {
     required String nombre,
     required String email,
     required String password,
+    List<String> roles = const [],
   }) async {
     try {
-      final data = await _apiService.post(ApiConstants.register, {
+      final body = <String, dynamic>{
         'nombre': nombre,
         'email': email,
         'password': password,
-      });
+      };
+      if (roles.isNotEmpty) body['roles'] = roles;
+
+      final data = await _apiService.post(ApiConstants.register, body);
       return {'success': true, 'data': data};
     } on NetworkException catch (e) {
       return {'success': false, 'message': e.message};
@@ -67,5 +71,10 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('token');
+  }
+
+  Future<void> saveUser(Map<String, dynamic> userJson) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(userJson));
   }
 }

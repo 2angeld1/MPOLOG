@@ -5,7 +5,8 @@ export interface IUser extends Document {
     email: string; // Cambia username por email
     password: string;
     nombre: string;
-    rol: 'superadmin' | 'logisticadmin' | 'eventsadmin' | 'sameadmin' | 'admin' | 'usuario';
+    rol: string;
+    roles: string[];
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -27,15 +28,25 @@ const userSchema = new mongoose.Schema({
     },
     rol: {
         type: String,
-        enum: ['superadmin', 'logisticadmin', 'eventsadmin', 'sameadmin', 'admin', 'usuario'],
         default: 'usuario'
+    },
+    roles: {
+        type: [String],
+        default: ['usuario']
     }
 }, {
     timestamps: true
 });
 
-// Hash password antes de guardar
+// Hash password y sincronizar roles antes de guardar
 userSchema.pre('save', async function(next) {
+    // Sincronizar campo rol clásico con el primer elemento del array roles
+    if (this.roles && this.roles.length > 0) {
+        this.rol = this.roles[0];
+    } else {
+        this.roles = [this.rol || 'usuario'];
+    }
+
     if (!this.isModified('password')) return next();
     
     const salt = await bcrypt.genSalt(10);

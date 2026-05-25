@@ -8,8 +8,14 @@ class PersonaDetalladaModel {
   final String? tipoSangre;
   final String? nombrePadres;
   final String? correo;
+  final String? tallaSueter;
+  final String? grupo;
+  final String? adultoResponsable;
+  final String? direccion;
+  final String? alergiasMedicamentos;
   final List<DateTime> asistencias;
   final String departamento;
+  final String? foto;
 
   PersonaDetalladaModel({
     required this.id,
@@ -21,8 +27,14 @@ class PersonaDetalladaModel {
     this.tipoSangre,
     this.nombrePadres,
     this.correo,
+    this.tallaSueter,
+    this.grupo,
+    this.adultoResponsable,
+    this.direccion,
+    this.alergiasMedicamentos,
     this.asistencias = const [],
     this.departamento = 'Teen',
+    this.foto,
   });
 
   factory PersonaDetalladaModel.fromJson(Map<String, dynamic> json) {
@@ -36,11 +48,17 @@ class PersonaDetalladaModel {
       tipoSangre: json['tipoSangre'],
       nombrePadres: json['nombrePadres'],
       correo: json['correo'],
+      tallaSueter: json['tallaSueter'],
+      grupo: json['grupo'],
+      adultoResponsable: json['adultoResponsable'],
+      direccion: json['direccion'],
+      alergiasMedicamentos: json['alergiasMedicamentos'],
       asistencias: (json['asistencias'] as List?)
               ?.map((e) => DateTime.parse(e))
               .toList() ??
           [],
       departamento: json['departamento'] ?? 'Teen',
+      foto: json['foto'],
     );
   }
 
@@ -54,7 +72,13 @@ class PersonaDetalladaModel {
       'tipoSangre': tipoSangre,
       'nombrePadres': nombrePadres,
       'correo': correo,
+      'tallaSueter': tallaSueter,
+      'grupo': grupo,
+      'adultoResponsable': adultoResponsable,
+      'direccion': direccion,
+      'alergiasMedicamentos': alergiasMedicamentos,
       'departamento': departamento,
+      if (foto != null) 'foto': foto,
     };
   }
 

@@ -10,6 +10,7 @@ class GlassTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final String? hintText;
   final String? Function(String?)? validator;
+  final int? maxLines;
 
   const GlassTextField({
     super.key,
@@ -22,6 +23,7 @@ class GlassTextField extends StatelessWidget {
     this.prefixIcon,
     this.hintText,
     this.validator,
+    this.maxLines = 1,
   });
 
   @override
@@ -35,6 +37,7 @@ class GlassTextField extends StatelessWidget {
       keyboardType: keyboardType,
       enabled: enabled,
       validator: validator,
+      maxLines: obscureText ? 1 : maxLines,
       style: TextStyle(
         color: colorScheme.onSurface,
         fontSize: 16,
