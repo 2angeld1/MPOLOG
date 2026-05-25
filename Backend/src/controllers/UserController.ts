@@ -14,7 +14,19 @@ export const getUsers = async (req: Request, res: Response) => {
 export const updateUserRole = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { rol } = req.body;
+        let { rol, roles } = req.body;
+
+        // Si se envía 'roles' como array, lo usamos. Si no, construimos uno a partir de 'rol'.
+        if (roles && Array.isArray(roles)) {
+            if (roles.length === 0) {
+                roles = ['usuario'];
+            }
+            rol = roles[0];
+        } else if (rol) {
+            roles = [rol];
+        } else {
+            return res.status(400).json({ message: 'Se requiere rol o roles en la petición' });
+        }
 
         const validRoles = [
             'superadmin',
@@ -28,20 +40,38 @@ export const updateUserRole = async (req: Request, res: Response) => {
             'mentor club',
             'servidores'
         ];
-        
-        if (!validRoles.includes(rol)) {
-            return res.status(400).json({ message: 'Rol inválido' });
+
+        // Validar que todos los roles sean válidos
+        for (const r of roles) {
+            if (!validRoles.includes(r)) {
+                return res.status(400).json({ message: `Rol inválido: ${r}` });
+            }
+        }
+
+        // Obtener el usuario antes de actualizar
+        const existingUser = await User.findById(id);
+        if (!existingUser) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const currentRoles = existingUser.roles || [existingUser.rol];
+        const isCurrentlySuperAdmin = currentRoles.includes('superadmin') || existingUser.rol === 'superadmin';
+
+        // 1. "El super admin es superadmin y ya" -> Prohibido quitarle o alterarle el rol
+        if (isCurrentlySuperAdmin) {
+            return res.status(400).json({ message: 'El rol de Superadmin es permanente y no puede ser modificado' });
+        }
+
+        // 2. "Nadie puede ser superadmin" -> Prohibido asignarse superadmin
+        if (roles.includes('superadmin') || rol === 'superadmin') {
+            return res.status(400).json({ message: 'No tienes permitido asignar el rol de Superadmin' });
         }
 
         const user = await User.findByIdAndUpdate(
             id,
-            { rol, roles: [rol] },
+            { rol, roles },
             { new: true, select: '-password' }
         );
-
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
 
         res.json(user);
     } catch (error) {

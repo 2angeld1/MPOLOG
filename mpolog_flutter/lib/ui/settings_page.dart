@@ -105,8 +105,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         _buildProfileItem(
                           context,
                           Icons.admin_panel_settings_rounded,
-                          'Rol Actual',
-                          _capitalize(authStore.user?.rol ?? 'Sin rol'),
+                          'Roles Activos',
+                          authStore.user?.roles.map((r) => _capitalize(r)).join(' / ') ?? _capitalize(authStore.user?.rol ?? 'Sin rol'),
                           onTap: () => _showChangeRoleModal(context, authStore),
                           trailing: const Icon(
                             Icons.edit_rounded,
@@ -328,11 +328,10 @@ class _SettingsPageState extends State<SettingsPage> {
     _RolOption('logisticadmin','Logística',   Icons.inventory_2_rounded),
     _RolOption('eventsadmin',  'Eventos',     Icons.event_note_rounded),
     _RolOption('sameadmin',    'SAME',        Icons.medical_services_rounded),
-    _RolOption('superadmin',   'Superadmin',  Icons.security_rounded),
   ];
 
   void _showChangeRoleModal(BuildContext context, AuthStore authStore) {
-    String selectedRole = authStore.user?.rol ?? 'usuario';
+    List<String> selectedRoles = List<String>.from(authStore.user?.roles ?? [authStore.user?.rol ?? 'usuario']);
     bool isSaving = false;
 
     showDialog(
@@ -346,10 +345,10 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Cambiar Rol', style: AppTextStyles.h3(context)),
+                  Text('Cambiar Roles', style: AppTextStyles.h3(context)),
                   const SizedBox(height: 6),
                   Text(
-                    'Selecciona tu nuevo rol en el sistema:',
+                    'Selecciona uno o más roles en el sistema:',
                     style: AppTextStyles.body(context).copyWith(fontSize: 12, color: Colors.white38),
                   ),
                 ],
@@ -361,9 +360,26 @@ class _SettingsPageState extends State<SettingsPage> {
                     spacing: 8,
                     runSpacing: 8,
                     children: _rolesDisponibles.map((rol) {
-                      final selected = selectedRole.toLowerCase().trim() == rol.value.toLowerCase().trim();
+                      final selected = selectedRoles.contains(rol.value);
                       return GestureDetector(
-                        onTap: isSaving ? null : () => setState(() => selectedRole = rol.value),
+                        onTap: isSaving ? null : () {
+                          setState(() {
+                            if (selected) {
+                              if (selectedRoles.length > 1) {
+                                selectedRoles.remove(rol.value);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Debes tener al menos un rol asignado'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            } else {
+                              selectedRoles.add(rol.value);
+                            }
+                          });
+                        },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -412,20 +428,20 @@ class _SettingsPageState extends State<SettingsPage> {
                       ? null
                       : () async {
                           setState(() => isSaving = true);
-                          final success = await authStore.updateMyRole(selectedRole);
+                          final success = await authStore.updateMyRoles(selectedRoles);
                           if (context.mounted) {
                             Navigator.pop(context);
                             if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Rol actualizado correctamente'),
+                                  content: Text('Roles actualizados correctamente'),
                                   backgroundColor: Colors.green,
                                 ),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(authStore.errorMessage ?? 'Error al actualizar el rol'),
+                                  content: Text(authStore.errorMessage ?? 'Error al actualizar los roles'),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );

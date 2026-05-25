@@ -15,17 +15,21 @@ class UserService {
     }
   }
 
-  Future<bool> updateUserRole(String id, String newRole) async {
+  Future<bool> updateUserRoles(String id, List<String> newRoles) async {
     try {
       await _apiService.put(
         '${ApiConstants.usuarios}/$id/role',
-        {'rol': newRole},
+        {'roles': newRoles},
       );
       return true;
     } catch (e) {
-      debugPrint('Error updating role: $e');
+      debugPrint('Error updating roles: $e');
       return false;
     }
+  }
+
+  Future<bool> updateUserRole(String id, String newRole) async {
+    return updateUserRoles(id, [newRole]);
   }
 
   Future<bool> deleteUser(String id) async {

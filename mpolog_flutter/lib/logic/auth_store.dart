@@ -114,23 +114,24 @@ class AuthStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> updateMyRole(String newRole) async {
+  Future<bool> updateMyRoles(List<String> newRoles) async {
     if (_user == null) return false;
+    if (newRoles.isEmpty) return false;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       final userService = UserService();
-      final success = await userService.updateUserRole(_user!.id, newRole);
+      final success = await userService.updateUserRoles(_user!.id, newRoles);
       if (success) {
-        final updatedRoles = [newRole];
+        final primaryRol = newRoles.first;
         _user = UsuarioModel(
           id: _user!.id,
           nombre: _user!.nombre,
           email: _user!.email,
-          rol: newRole,
-          roles: updatedRoles,
+          rol: primaryRol,
+          roles: newRoles,
         );
         await _authService.saveUser(_user!.toJson());
         notifyListeners();
@@ -145,5 +146,9 @@ class AuthStore extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> updateMyRole(String newRole) async {
+    return updateMyRoles([newRole]);
   }
 }
