@@ -37,8 +37,9 @@ export const login = async (req: Request, res: Response) => {
             success: true,
             token,
             user: {
+                _id: user._id,
                 id: user._id,
-                email: user.email, // Cambia username a email
+                email: user.email,
                 nombre: user.nombre,
                 rol: user.rol,
                 roles: user.roles || [user.rol]

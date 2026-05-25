@@ -30,6 +30,16 @@ class AuthStore extends ChangeNotifier {
         final userData = await _authService.getUser();
         if (userData != null) {
           _user = UsuarioModel.fromJson(userData);
+          debugPrint('AuthStore: Usuario cargado con ID="${_user!.id}", rol="${_user!.rol}", roles=${_user!.roles}');
+          // Auto-reparar sesión cacheada: re-guardar con formato normalizado (_id)
+          if (_user!.id.isNotEmpty) {
+            await _authService.saveUser(_user!.toJson());
+          } else {
+            debugPrint('AuthStore: ⚠️ ID de usuario vacío. Forzando logout para re-autenticar.');
+            await _authService.logout();
+            _isLoggedIn = false;
+            _user = null;
+          }
         }
       }
     } catch (e) {
@@ -52,6 +62,9 @@ class AuthStore extends ChangeNotifier {
         _isLoggedIn = true;
         _isLoading = false;
         _user = UsuarioModel.fromJson(result['data']['user']);
+        debugPrint('AuthStore login: ID="${_user!.id}", rol="${_user!.rol}"');
+        // Guardar con formato normalizado (_id) para consistencia
+        await _authService.saveUser(_user!.toJson());
         notifyListeners();
         return true;
       }
