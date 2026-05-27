@@ -10,12 +10,13 @@ import 'package:mpolog_flutter/logic/eventos_store.dart';
 import 'package:mpolog_flutter/logic/reportes_store.dart';
 import 'package:mpolog_flutter/logic/notification_store.dart';
 import 'package:mpolog_flutter/logic/registro_detallado_store.dart';
+import 'package:mpolog_flutter/logic/registro_kids_store.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Opcional: Cargar .env si existe, pero no crashar si falta en producción
     try {
       await dotenv.load(fileName: ".env");
@@ -35,6 +36,7 @@ void main() async {
           ChangeNotifierProvider(create: (_) => ReportesStore()),
           ChangeNotifierProvider(create: (_) => NotificationStore()),
           ChangeNotifierProvider(create: (_) => RegistroDetalladoStore()),
+          ChangeNotifierProvider(create: (_) => RegistroKidsStore()),
         ],
         child: const MyApp(),
       ),
@@ -45,9 +47,7 @@ void main() async {
     runApp(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: Text("Error al iniciar la aplicación: $e"),
-          ),
+          body: Center(child: Text("Error al iniciar la aplicación: $e")),
         ),
       ),
     );

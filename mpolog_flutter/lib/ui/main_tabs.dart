@@ -10,6 +10,7 @@ import 'settings_page.dart';
 import 'add_conteo_page.dart';
 import 'calendario_page.dart';
 import 'registro_detallado_page.dart';
+import 'registro_kids_page.dart';
 
 class MainTabs extends StatefulWidget {
   const MainTabs({super.key});
@@ -39,7 +40,7 @@ class _MainTabsState extends State<MainTabs> {
   Widget build(BuildContext context) {
     final authStore = context.watch<AuthStore>();
     final user = authStore.user;
-    
+
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -63,50 +64,74 @@ class _MainTabsState extends State<MainTabs> {
 
       // 1. Inicio (Solo para sameadmin y logisticadmin o usuarios estándar por defecto)
       // Jef Teen, Mentor Club, Servidores y Jef NO tienen acceso a Inicio.
-      final showHome = hasLogistic || (!hasJefTeen && !hasMentorClub && !hasServidores && !hasJef);
+      final showHome =
+          hasLogistic ||
+          (!hasJefTeen && !hasMentorClub && !hasServidores && !hasJef);
       if (showHome) {
-        screens.add(const HomePage(title: 'Inicio', key: ValueKey('home_dynamic')));
-        items.add(const BottomNavigationBarItem(
-          icon: Icon(Icons.home_rounded),
-          label: 'Inicio',
-        ));
+        screens.add(
+          const HomePage(title: 'Inicio', key: ValueKey('home_dynamic')),
+        );
+        items.add(
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: 'Inicio',
+          ),
+        );
       }
 
       // 2. Calendario (Todos los roles tienen acceso a Calendario)
       screens.add(const CalendarioPage(key: ValueKey('calendar_dynamic')));
-      items.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.calendar_month_rounded),
-        label: 'Calendario',
-      ));
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.calendar_month_rounded),
+          label: 'Calendario',
+        ),
+      );
 
-      // 3. Registro Detallado (jef teen, mentor club)
-      final showRegistro = hasJefTeen || hasMentorClub;
-      if (showRegistro) {
-        screens.add(const RegistroDetalladoPage(key: ValueKey('registro_dynamic')));
-        items.add(const BottomNavigationBarItem(
-          icon: Icon(Icons.assignment_ind_rounded),
-          label: 'Registro',
-        ));
+      // 3. Registro Teens (jef teen)
+      if (hasJefTeen) {
+        screens.add(
+          const RegistroDetalladoPage(key: ValueKey('registro_teen')),
+        );
+        items.add(
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.assignment_ind_rounded),
+            label: 'Teens',
+          ),
+        );
       }
 
-      // 4. Agregar Conteo / Contar (sameadmin, logisticadmin)
+      // 4. Registro Kids / Mentor Club (mentor club)
+      if (hasMentorClub) {
+        screens.add(const RegistroKidsPage(key: ValueKey('registro_kids')));
+        items.add(
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.child_care_rounded),
+            label: 'Kids',
+          ),
+        );
+      }
+
+      // 5. Agregar Conteo / Contar (sameadmin, logisticadmin)
       final showAddConteo = hasLogistic;
       if (showAddConteo) {
         screens.add(const AddConteoPage(key: ValueKey('add_dynamic')));
-        items.add(const BottomNavigationBarItem(
-          icon: Icon(Icons.add_circle_outline_rounded),
-          label: 'Contar',
-        ));
+        items.add(
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle_outline_rounded),
+            label: 'Contar',
+          ),
+        );
       }
-
-
 
       // 6. Configuración / Settings (Todos tienen acceso)
       screens.add(const SettingsPage(key: ValueKey('settings_dynamic')));
-      items.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.settings_rounded),
-        label: 'Config',
-      ));
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.settings_rounded),
+          label: 'Config',
+        ),
+      );
     }
 
     if (_currentIndex >= screens.length) {
@@ -117,10 +142,7 @@ class _MainTabsState extends State<MainTabs> {
 
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.surface,
@@ -148,19 +170,21 @@ class _MainTabsState extends State<MainTabs> {
               onTap: (index) => setState(() => _currentIndex = index),
               backgroundColor: Colors.transparent,
               elevation: 0,
-              selectedItemColor: isDark ? Colors.white : Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              selectedItemColor: isDark
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.4),
               showSelectedLabels: true,
               showUnselectedLabels: true,
               type: BottomNavigationBarType.fixed,
               selectedLabelStyle: const TextStyle(
-                fontSize: 12, 
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.3,
               ),
-              unselectedLabelStyle: const TextStyle(
-                fontSize: 11,
-              ),
+              unselectedLabelStyle: const TextStyle(fontSize: 11),
               items: items,
             ),
           ),

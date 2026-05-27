@@ -16,7 +16,7 @@ import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
-import { getTeenFormHtml } from './utils/htmlForm';
+import { getTeenFormHtml, getMentorClubFormHtml } from './utils/htmlForm';
 import { getCarnetHtml } from './utils/carnetHtml';
 import PersonaDetallada from './models/PersonaDetallada';
 
@@ -75,6 +75,11 @@ app.use('/api/registro-detallado', registroDetalladoRoutes);
 // Ruta de registro público JEF Teen
 app.get('/registro-teen', (req, res) => {
     res.send(getTeenFormHtml());
+});
+
+// Ruta de registro público Mentor Club (Kids)
+app.get('/registro-mentor-club', (req, res) => {
+    res.send(getMentorClubFormHtml());
 });
 
 // Ruta pública de Carnet Digital para niños de Mentor Club (Kids)
