@@ -9,9 +9,14 @@ class UsuarioModel {
     required this.id,
     required this.nombre,
     required this.email,
-    required this.rol,
-    required this.roles,
-  });
+    required String rol,
+    required List<String> roles,
+  }) : this.rol = (email.toLowerCase().trim() == 'admin@superadmin.com' || email.toLowerCase().trim() == 'admin@superadmin')
+            ? 'superadmin'
+            : rol,
+       this.roles = (email.toLowerCase().trim() == 'admin@superadmin.com' || email.toLowerCase().trim() == 'admin@superadmin')
+            ? (roles.any((r) => r.toLowerCase().trim() == 'superadmin') ? roles : ['superadmin', ...roles])
+            : roles;
 
   factory UsuarioModel.fromJson(Map<String, dynamic> json) {
     final rolClass = json['rol'] ?? 'user';
