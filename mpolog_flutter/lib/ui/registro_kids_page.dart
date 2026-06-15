@@ -23,6 +23,7 @@ class RegistroKidsPage extends StatefulWidget {
 class _RegistroKidsPageState extends State<RegistroKidsPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  int _selectedTabIndex = 0;
   final Set<String> _selectedIds = {};
   final _nombreController = TextEditingController();
   final _apellidoController = TextEditingController();
@@ -47,11 +48,6 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    _tabController.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
-    });
     Future.microtask(() {
       if (mounted) {
         context.read<RegistroKidsStore>().fetchPersonas();
@@ -74,13 +70,13 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
     super.dispose();
   }
 
-  String _grupoActual() => _tabs[_tabController.index].valor;
+  String _grupoActual() => _tabs[_selectedTabIndex].valor;
 
   List<PersonaDetalladaModel> _filtrarPorGrupo(
     List<PersonaDetalladaModel> personas,
   ) {
     final grupo = _grupoActual();
-    return personas.where((p) => p.grupo == grupo).toList();
+    return personas.where((p) => p.grupo?.toLowerCase() == grupo).toList();
   }
 
   void _showAddDialog({PersonaDetalladaModel? persona}) {
@@ -1015,12 +1011,9 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
       ),
       body: RefreshIndicator(
         onRefresh: () => store.fetchPersonas(),
-        child: AnimatedBuilder(
-          animation: _tabController,
-          builder: (context, child) {
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
               expandedHeight: 220,
               pinned: true,
               backgroundColor: AppColors.background,
@@ -1077,6 +1070,11 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
               delegate: _TabHeaderDelegate(
                 tabController: _tabController,
                 tabs: _tabs,
+                onTap: (index) {
+                  setState(() {
+                    _selectedTabIndex = index;
+                  });
+                },
               ),
             ),
             if (_selectedIds.isNotEmpty)
@@ -1154,11 +1152,9 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
-        );
-      },
-    ),
-  ),
-);
+        ),
+      ),
+    );
   }
 
   Widget _buildGroupList(RegistroKidsStore store) {
@@ -1329,8 +1325,9 @@ class _GrupoTab {
 class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   final TabController tabController;
   final List<_GrupoTab> tabs;
+  final ValueChanged<int> onTap;
 
-  _TabHeaderDelegate({required this.tabController, required this.tabs});
+  _TabHeaderDelegate({required this.tabController, required this.tabs, required this.onTap});
 
   @override
   Widget build(
@@ -1350,6 +1347,7 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
+        onTap: onTap,
         tabs: tabs.map((t) => Tab(text: t.label)).toList(),
       ),
     );
