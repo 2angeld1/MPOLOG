@@ -1015,9 +1015,12 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
       ),
       body: RefreshIndicator(
         onRefresh: () => store.fetchPersonas(),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
+        child: AnimatedBuilder(
+          animation: _tabController,
+          builder: (context, child) {
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
               expandedHeight: 220,
               pinned: true,
               backgroundColor: AppColors.background,
@@ -1151,9 +1154,11 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
-        ),
-      ),
-    );
+        );
+      },
+    ),
+  ),
+);
   }
 
   Widget _buildGroupList(RegistroKidsStore store) {
