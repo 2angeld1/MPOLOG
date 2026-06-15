@@ -47,6 +47,11 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     Future.microtask(() {
       if (mounted) {
         context.read<RegistroKidsStore>().fetchPersonas();
