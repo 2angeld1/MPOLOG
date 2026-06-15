@@ -17,7 +17,7 @@ export const initSocket = (httpServer: HttpServer) => {
         }
     });
 
-    io.on('connection', (socket) => {
+    io.on('connection', (socket: any) => {
         console.log('Cliente conectado:', socket.id);
 
         socket.on('disconnect', () => {

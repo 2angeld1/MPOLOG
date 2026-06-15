@@ -185,7 +185,7 @@ export const getTeenFormHtml = () => {
         .select-wrapper { position: relative; width: 100%; }
 
         .select-wrapper::after {
-            content: "\25BC";
+            content: "\\25BC";
             font-size: 10px;
             color: var(--text-muted);
             position: absolute;
@@ -696,7 +696,7 @@ export const getMentorClubFormHtml = () => {
         .select-wrapper { position: relative; width: 100%; }
 
         .select-wrapper::after {
-            content: "\25BC";
+            content: "\\25BC";
             font-size: 10px;
             color: var(--text-muted);
             position: absolute;

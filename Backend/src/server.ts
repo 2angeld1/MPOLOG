@@ -18,6 +18,7 @@ import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
 import { getTeenFormHtml, getMentorClubFormHtml } from './utils/htmlForm';
 import { getCarnetHtml } from './utils/carnetHtml';
+import { getTablaNinosHtml } from './utils/tablaHtml';
 import PersonaDetallada from './models/PersonaDetallada';
 
 const app = express();
@@ -80,6 +81,21 @@ app.get('/registro-teen', (req, res) => {
 // Ruta de registro público Mentor Club (Kids)
 app.get('/registro-mentor-club', (req, res) => {
     res.send(getMentorClubFormHtml());
+});
+
+// Directorio HTML de Mentor Club (Kids) con QR
+app.get('/directorio-mentor-club', async (req, res) => {
+    try {
+        const personas = await PersonaDetallada.find({ departamento: 'Kids' }).sort({ nombre: 1 });
+        const host = req.get('host') || 'localhost:5000';
+        const protocol = req.protocol;
+        const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
+        const baseUrl = `${activeProtocol}://${host}`;
+        
+        res.send(getTablaNinosHtml(personas, baseUrl));
+    } catch (error: any) {
+        res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
+    }
 });
 
 // Ruta pública de Carnet Digital para niños de Mentor Club (Kids)

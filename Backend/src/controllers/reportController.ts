@@ -226,7 +226,7 @@ export const generarReporteExcel = async (req: AuthRequest, res: Response) => {
         // Encabezados de tabla
         worksheet.addRow([]);
         const headerRow = worksheet.addRow(['Fecha', 'Iglesia', 'Tipo', 'Área', 'Sub-Área', 'Cantidad', 'Usuario']); // Agrega iglesia, tipo, subArea
-        headerRow.eachCell((cell) => {
+        headerRow.eachCell((cell: any) => {
             cell.style = headerStyle;
         });
 
