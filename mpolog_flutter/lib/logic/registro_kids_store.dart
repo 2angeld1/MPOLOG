@@ -38,6 +38,27 @@ class RegistroKidsStore extends ChangeNotifier {
     }
   }
 
+  Future<int> importarListaPersonas(List<Map<String, dynamic>> lista) async {
+    _isLoading = true;
+    notifyListeners();
+    int importados = 0;
+    try {
+      for (final data in lista) {
+        final success = await _service.crearPersona(data);
+        if (success) importados++;
+      }
+      if (importados > 0) {
+        await fetchPersonas();
+      }
+      return importados;
+    } catch (e) {
+      return importados;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> actualizarPersona(String id, Map<String, dynamic> data) async {
     try {
       final success = await _service.actualizarPersona(id, data);

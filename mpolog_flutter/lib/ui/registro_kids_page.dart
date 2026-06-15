@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:csv/csv.dart';
 import '../logic/registro_kids_store.dart';
 import '../logic/auth_store.dart';
 import '../models/persona_detallada_model.dart';
@@ -379,6 +381,104 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
         );
       },
     );
+  }
+
+  Future<void> _importarCSV() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final fileBytes = result.files.first.bytes;
+      if (fileBytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se pudo leer el archivo.')),
+          );
+        }
+        return;
+      }
+
+      final csvString = utf8.decode(fileBytes, allowMalformed: true);
+      final List<List<dynamic>> rows = const CsvToListConverter(eol: '\n', fieldDelimiter: ',').convert(csvString);
+
+      if (rows.length <= 1) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('El archivo CSV está vacío o sin datos.')),
+          );
+        }
+        return;
+      }
+
+      List<Map<String, dynamic>> listaPersonas = [];
+
+      for (int i = 1; i < rows.length; i++) {
+        final row = rows[i];
+        if (row.length < 10) continue; 
+
+        String nombreCompleto = row[1].toString().trim();
+        List<String> partes = nombreCompleto.split(' ');
+        String nombre = partes.isNotEmpty ? partes.first : '';
+        String apellido = partes.length > 1 ? partes.sublist(1).join(' ') : '';
+        
+        int? edad = int.tryParse(row[2].toString().trim());
+        String tallaSueter = row[3].toString().trim();
+        
+        String grupoStr = row[4].toString().toLowerCase().trim();
+        String grupoSeleccionado = 'exploradores';
+        if (grupoStr.contains('pionero')) grupoSeleccionado = 'pioneros';
+        else if (grupoStr.contains('navegante')) grupoSeleccionado = 'navegantes';
+        else if (grupoStr.contains('seguidor')) grupoSeleccionado = 'seguidores de la senda';
+
+        String tipoSangre = row[5].toString().trim();
+        String adultoResponsable = row[6].toString().trim();
+        String telefono = row[7].toString().trim();
+        String direccion = row[8].toString().trim();
+        String alergias = row[9].toString().trim();
+
+        listaPersonas.add({
+          'nombre': nombre,
+          'apellido': apellido,
+          'telefono': telefono,
+          'edad': edad,
+          'tipoSangre': tipoSangre,
+          'departamento': 'Kids',
+          'tallaSueter': tallaSueter,
+          'grupo': grupoSeleccionado,
+          'adultoResponsable': adultoResponsable,
+          'direccion': direccion,
+          'alergiasMedicamentos': alergias,
+        });
+      }
+
+      if (listaPersonas.isEmpty) return;
+
+      if (!mounted) return;
+      final store = context.read<RegistroKidsStore>();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Importando \${listaPersonas.length} registros, por favor espera...')),
+      );
+
+      final importados = await store.importarListaPersonas(listaPersonas);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Se importaron $importados registros correctamente.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al importar: $e')),
+        );
+      }
+    }
   }
 
   void _showQRDialog(BuildContext context) {
@@ -917,6 +1017,11 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
               pinned: true,
               backgroundColor: AppColors.background,
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.upload_file_rounded, size: 28),
+                  tooltip: 'Importar CSV',
+                  onPressed: _importarCSV,
+                ),
                 IconButton(
                   icon: const Icon(Icons.qr_code_2_rounded, size: 28),
                   tooltip: 'Mostrar QR de Registro Kids',
