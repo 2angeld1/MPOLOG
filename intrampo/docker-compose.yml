@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  intrampo-db:
+    image: postgres:16-alpine
+    container_name: intrampo-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: intrampo
+      POSTGRES_USER: intrampo_user
+      POSTGRES_PASSWORD: intrampo_2024_iglesia
+    volumes:
+      - intrampo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intrampo_user -d intrampo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  intrampo_pgdata:
+    driver: local

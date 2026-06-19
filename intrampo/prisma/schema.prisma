@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Comunicado {
+  id          String   @id @default(cuid())
+  titulo      String
+  contenido   String
+  categoria   String   @default("general") // "pastoral", "administrativo", "evento", "urgente", "general"
+  autorId     String   // MongoDB ObjectId del usuario
+  autorNombre String
+  fijado      Boolean  @default(false)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([createdAt])
+}
+
+model Ministerio {
+  id          String   @id @default(cuid())
+  nombre      String   @unique
+  descripcion String?
+  liderIds    String[] // MongoDB ObjectIds
+  color       String   @default("#673AB7")
+  icono       String   @default("church")
+  miembrosIds String[] // MongoDB ObjectIds
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Solicitud {
+  id            String   @id @default(cuid())
+  tipo          String   // "salon", "equipo", "consejeria", "otro"
+  titulo        String
+  descripcion   String
+  solicitanteId String   // MongoDB ObjectId
+  solicitanteNombre String
+  estado        String   @default("pendiente") // "pendiente", "aprobada", "rechazada"
+  respuesta     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([estado])
+  @@index([solicitanteId])
+}
+
+model ContenidoDinamico {
+  llave       String   @id
+  tipo        String   // "texto", "imagen", "html"
+  valor       String
+  actualizado DateTime @updatedAt
+}
