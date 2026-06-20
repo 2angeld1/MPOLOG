@@ -22,7 +22,7 @@ export async function connectMongo(): Promise<typeof mongoose> {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI).then((m) => {
+    cached.promise = mongoose.connect(MONGODB_URI, { family: 4 }).then((m) => {
       console.log('✅ INTRAMPO: MongoDB conectado (MPOLOG)');
       return m;
     });
@@ -113,6 +113,8 @@ const eventoPersonaSchema = new mongoose.Schema({
   color: String,
   usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
+
+
 
 // Use existing models if already registered (hot reload safety)
 export const User = mongoose.models.User || mongoose.model('User', userSchema);

@@ -11,7 +11,9 @@ model Comunicado {
   id          String   @id @default(cuid())
   titulo      String
   contenido   String
-  categoria   String   @default("general") // "pastoral", "administrativo", "evento", "urgente", "general"
+  categoria   String   @default("general") // "pastoral", "admin", "lideres", "servidores", "general"
+  imagenUrl   String?
+  archivoUrl  String?
   autorId     String   // MongoDB ObjectId del usuario
   autorNombre String
   fijado      Boolean  @default(false)
@@ -57,4 +59,62 @@ model ContenidoDinamico {
   tipo        String   // "texto", "imagen", "html"
   valor       String
   actualizado DateTime @updatedAt
+}
+
+model RolUsuario {
+  userId    String   @id // MongoDB ObjectId
+  rol       String   // "pastor", "lideres", "servidores", "general"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Archivo {
+  id          String   @id @default(cuid())
+  nombre      String
+  url         String
+  public_id   String
+  formato     String
+  tamano      Int
+  subidoPorId String   // MongoDB ObjectId
+  subidoPorNombre String? // Opcional, cachear nombre para no hacer join a Mongo
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SolicitudRecurso {
+  id                    String   @id @default(cuid())
+  liderId               String   // MongoDB ObjectId
+  liderNombre           String?
+  descripcionEquipo     String
+  fotoEstadoActual      String?
+  fechaSalida           DateTime
+  fechaEstimadaRegreso  DateTime
+  estado                String   @default("Solicitado") // "Solicitado", "Retirado", "Disponible"
+  observacionesRetorno  String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model MiembroDirectorio {
+  id              String   @id @default(cuid())
+  nombre          String
+  edad            Int
+  telefono        String
+  tiempoIglesia   String   // ej. "Menos de 1 año", "1-3 años", "Más de 5 años"
+  esServidor      Boolean  @default(false)
+  dondeSirve      String?
+  parentesco      String?
+  fotoUrl         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model UsuarioSistema {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String   @unique
+  password  String
+  rol       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

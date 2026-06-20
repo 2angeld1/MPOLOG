@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { titulo, contenido, categoria } = await request.json();
+    const { titulo, contenido, categoria, imagenUrl, archivoUrl } = await request.json();
 
     if (!titulo || !contenido) {
       return NextResponse.json(
@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
         titulo,
         contenido,
         categoria: categoria || 'general',
+        imagenUrl: imagenUrl || null,
+        archivoUrl: archivoUrl || null,
         autorId: session.userId,
         autorNombre: session.nombre,
       },
@@ -81,7 +83,7 @@ function getDemoComunicados() {
       id: 'demo-2',
       titulo: 'Próximo Culto Especial de Oración',
       contenido: 'Este viernes a las 7:00 PM tendremos un culto especial de oración e intercesión. Todos los ministerios están invitados a participar. Será un tiempo poderoso de búsqueda en la presencia de Dios.',
-      categoria: 'evento',
+      categoria: 'lideres',
       autorId: 'system',
       autorNombre: 'Equipo de Liderazgo',
       fijado: false,
@@ -93,7 +95,7 @@ function getDemoComunicados() {
       id: 'demo-3',
       titulo: 'Actualización de Horarios de Ensayo',
       contenido: 'Se informa a todos los miembros del ministerio de alabanza que los ensayos se han reprogramado para los días miércoles a las 6:30 PM. Por favor confirmar asistencia con su líder de área.',
-      categoria: 'administrativo',
+      categoria: 'servidores',
       autorId: 'system',
       autorNombre: 'Administración',
       fijado: false,
@@ -105,7 +107,7 @@ function getDemoComunicados() {
       id: 'demo-4',
       titulo: 'Campaña de Donación - Proyecto Dar',
       contenido: 'Estamos recolectando donaciones para el Proyecto Dar. Necesitamos ropa, alimentos no perecederos y útiles escolares. Los puntos de recolección estarán habilitados los domingos después del culto.',
-      categoria: 'urgente',
+      categoria: 'general',
       autorId: 'system',
       autorNombre: 'Ministerio Social',
       fijado: false,

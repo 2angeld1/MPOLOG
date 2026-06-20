@@ -6,6 +6,7 @@ import StatsCard from '@/components/StatsCard';
 import AttendanceChart from '@/components/AttendanceChart';
 import EditableText from '@/components/cms/EditableText';
 import type { IEvento } from '@/types';
+import { FadeIn, StaggerContainer, StaggerItem } from '@/animations';
 
 interface DashboardData {
   stats: {
@@ -160,18 +161,18 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="animate-fade-in-up">
-        <EditableText id="dashboard.title" fallback="Dashboard" as="h1" className="page-title" />
+      <FadeIn>
+        <EditableText id="dashboard.title" fallback="Dashboard" as="h1" className="font-display text-3xl font-bold text-gray-100 mb-2 tracking-tight" />
         <EditableText 
           id="dashboard.subtitle" 
           fallback="Bienvenido de vuelta. Aquí tienes un resumen de la iglesia." 
           as="p" 
-          className="page-subtitle" 
+          className="text-gray-400 text-[0.95rem] mb-8" 
           multiline 
         />
 
         {/* Stats Cards */}
-        <div className="stats-grid stagger-children">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             icon="👥"
             label="Total Miembros"
@@ -201,12 +202,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Main content grid */}
-        <div className="grid-2" style={{ alignItems: 'start' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Left: Attendance Chart */}
-          <div className="chart-container">
-            <div className="section-header">
-              <EditableText id="dashboard.chart.title" fallback="Asistencia Semanal" as="h2" className="section-title" />
-              <a href="/asistencia" className="section-action">Ver todo →</a>
+          <div className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <EditableText id="dashboard.chart.title" fallback="Asistencia Semanal" as="h2" className="font-display text-lg font-semibold text-gray-100" />
+              <a href="/asistencia" className="text-[0.82rem] text-amber-500 font-medium hover:text-amber-400 transition-colors">Ver todo →</a>
             </div>
             <AttendanceChart
               type="line"
@@ -216,27 +217,27 @@ export default function DashboardPage() {
           </div>
 
           {/* Right: Upcoming Events */}
-          <div className="card">
-            <div className="section-header">
-              <EditableText id="dashboard.events.title" fallback="Próximos Eventos" as="h2" className="section-title" />
-              <a href="/calendario" className="section-action">Ver calendario →</a>
+          <div className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <EditableText id="dashboard.events.title" fallback="Próximos Eventos" as="h2" className="font-display text-lg font-semibold text-gray-100" />
+              <a href="/calendario" className="text-[0.82rem] text-amber-500 font-medium hover:text-amber-400 transition-colors">Ver calendario →</a>
             </div>
-            <div className="event-list">
+            <StaggerContainer className="flex flex-col gap-3">
               {data.proximosEventos.map((evento) => {
                 const { day, month } = formatDate(evento.fechaInicio);
                 return (
-                  <div key={evento._id} className="event-card">
+                  <StaggerItem key={evento._id} className="flex items-center gap-4 p-4 bg-[#14161f] border border-white/10 rounded-xl hover:bg-white/5 hover:border-white/20 transition-all cursor-pointer">
                     <div
-                      className="event-color-bar"
+                      className="w-1 h-10 rounded-full shrink-0"
                       style={{ backgroundColor: evento.color || eventTypeColors[evento.tipo] || '#673AB7' }}
                     />
-                    <div className="event-date-box">
-                      <div className="event-date-day">{day}</div>
-                      <div className="event-date-month">{month}</div>
+                    <div className="text-center min-w-[48px] shrink-0">
+                      <div className="font-display text-xl font-bold text-gray-100 leading-none">{day}</div>
+                      <div className="text-[0.7rem] text-gray-400 uppercase tracking-wider">{month}</div>
                     </div>
-                    <div className="event-info">
-                      <div className="event-name">{evento.nombre}</div>
-                      <div className="event-meta">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-100 truncate">{evento.nombre}</div>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-1 truncate">
                         <span>{evento.departamento}</span>
                         {evento.ubicacion?.nombreLugar && (
                           <>
@@ -247,7 +248,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <span
-                      className="event-badge"
+                      className="px-2 py-1 text-[0.7rem] font-bold rounded-md whitespace-nowrap"
                       style={{
                         backgroundColor: `${evento.color || eventTypeColors[evento.tipo] || '#673AB7'}20`,
                         color: evento.color || eventTypeColors[evento.tipo] || '#673AB7',
@@ -255,43 +256,47 @@ export default function DashboardPage() {
                     >
                       {formatEventType(evento.tipo)}
                     </span>
-                  </div>
+                  </StaggerItem>
                 );
               })}
               {data.proximosEventos.length === 0 && (
-                <div className="empty-state">
-                  <div className="empty-state-icon">📅</div>
-                  <div className="empty-state-title">Sin eventos próximos</div>
+                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                  <div className="text-3xl mb-2">📅</div>
+                  <div className="text-sm">Sin eventos próximos</div>
                 </div>
               )}
-            </div>
+            </StaggerContainer>
           </div>
         </div>
 
         {/* Announcements row */}
-        <div style={{ marginTop: 'var(--space-6)' }}>
-          <div className="section-header">
-            <EditableText id="dashboard.comunicados.title" fallback="Comunicados Recientes" as="h2" className="section-title" />
-            <a href="/comunicados" className="section-action">Ver todos →</a>
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-6">
+            <EditableText id="dashboard.comunicados.title" fallback="Comunicados Recientes" as="h2" className="font-display text-lg font-semibold text-gray-100" />
+            <a href="/comunicados" className="text-[0.82rem] text-amber-500 font-medium hover:text-amber-400 transition-colors">Ver todos →</a>
           </div>
-          <div className="grid-3">
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {comunicadosRecientes.map((c) => (
-              <div key={c.id} className="announcement-card">
-                <span className={`announcement-category cat-${c.categoria}`}>
+              <StaggerItem key={c.id} className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 transition-all hover:border-white/20 hover:shadow-lg hover:-translate-y-1">
+                <span className={`inline-block px-2 py-1 text-[0.7rem] font-bold uppercase tracking-wider rounded-md mb-3 ${
+                  c.categoria === 'pastoral' ? 'bg-amber-500/10 text-amber-500' :
+                  c.categoria === 'evento' ? 'bg-purple-500/10 text-purple-500' :
+                  'bg-blue-500/10 text-blue-500'
+                }`}>
                   {c.categoria}
                 </span>
-                <div className="announcement-title">{c.titulo}</div>
-                <div className="announcement-footer">
-                  <span className="announcement-author">{c.autorNombre}</span>
-                  <span className="announcement-date">
+                <div className="font-display text-lg font-bold text-gray-100 mb-4 line-clamp-2">{c.titulo}</div>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-xs text-gray-400 font-medium">{c.autorNombre}</span>
+                  <span className="text-[0.7rem] text-gray-500">
                     {new Date(c.createdAt).toLocaleDateString('es-PA', { day: 'numeric', month: 'short' })}
                   </span>
                 </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
-      </div>
+      </FadeIn>
     </AppShell>
   );
 }

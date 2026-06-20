@@ -8,22 +8,48 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tu_secret_key_aqui';
 const COOKIE_NAME = 'intrampo_session';
 
 export async function authenticateUser(email: string, password: string): Promise<SessionData | null> {
+  const normalizedEmail = email.toLowerCase().trim();
+  
+  // 1. Intentar con PostgreSQL (Nuevos usuarios)
+  const { prisma } = await import('./prisma');
+  let userPg = null;
+  if (prisma.usuarioSistema) {
+    userPg = await prisma.usuarioSistema.findUnique({
+      where: { email: normalizedEmail }
+    });
+  }
+
+  if (userPg) {
+    const isMatch = await bcrypt.compare(password, userPg.password);
+    if (!isMatch) return null;
+    return {
+      userId: userPg.id,
+      email: userPg.email,
+      nombre: userPg.nombre,
+      roles: [userPg.rol],
+    };
+  }
+
+  // 2. Fallback a MongoDB (Usuarios Legacy)
   await connectMongo();
+  const userMongo = await User.findOne({ email: normalizedEmail });
+  if (userMongo) {
+    const isMatch = await bcrypt.compare(password, userMongo.password);
+    if (!isMatch) return null;
 
-  const user = await User.findOne({ email: email.toLowerCase().trim() });
-  if (!user) return null;
+    const rolesFromMongo = (userMongo.roles && userMongo.roles.length > 0)
+      ? userMongo.roles 
+      : [userMongo.rol || 'usuario'];
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return null;
+    return {
+      userId: userMongo._id.toString(),
+      email: normalizedEmail,
+      nombre: userMongo.nombre || 'Usuario',
+      roles: rolesFromMongo,
+    };
+  }
 
-  const roles = user.roles && user.roles.length > 0 ? user.roles : [user.rol || 'usuario'];
-
-  return {
-    userId: user._id.toString(),
-    email: user.email,
-    nombre: user.nombre,
-    roles,
-  };
+  return null;
 }
 
 export function createToken(session: SessionData): string {
@@ -62,11 +88,19 @@ export async function clearSession(): Promise<void> {
 
 export function hasRole(session: SessionData, requiredRoles: string[]): boolean {
   if (!session || !session.roles) return false;
-  // Admin and logisticadmin have access to everything
-  if (session.roles.includes('admin') || session.roles.includes('logisticadmin')) return true;
-  return session.roles.some(r => requiredRoles.includes(r));
+  
+  // Roles de máximo privilegio que siempre pueden acceder
+  const adminRoles = ['admin', 'superadmin', 'logisticadmin', 'pastor'];
+  
+  if (session.roles.some(r => adminRoles.includes(r.toLowerCase()))) {
+    return true;
+  }
+
+  // Verifica si el usuario tiene alguno de los roles requeridos
+  return session.roles.some(r => requiredRoles.includes(r.toLowerCase()));
 }
 
 export function isAdmin(session: SessionData): boolean {
-  return hasRole(session, ['admin', 'logisticadmin']);
+  return hasRole(session, ['admin', 'superadmin', 'logisticadmin', 'pastor']);
 }
+

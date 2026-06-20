@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AppShell from '@/components/AppShell';
 import AttendanceChart from '@/components/AttendanceChart';
 import StatsCard from '@/components/StatsCard';
+import { FadeIn, StaggerContainer, StaggerItem } from '@/animations';
 
 interface AsistenciaData {
   conteos: Array<{
@@ -146,22 +147,22 @@ export default function AsistenciaPage() {
 
   return (
     <AppShell>
-      <div className="animate-fade-in-up">
-        <h1 className="page-title">Reportes de Asistencia</h1>
-        <p className="page-subtitle">Análisis y estadísticas de asistencia por iglesia, área y periodo.</p>
+      <FadeIn>
+        <h1 className="font-display text-3xl font-bold text-gray-100 mb-2 tracking-tight">Reportes de Asistencia</h1>
+        <p className="text-gray-400 text-[0.95rem] mb-8">Análisis y estadísticas de asistencia por iglesia, área y periodo.</p>
 
         {/* Stats */}
-        <div className="stats-grid">
-          <StatsCard icon="📊" label="Total Contabilizado" value={totalAsistencia} color="gold" />
-          <StatsCard icon="⛪" label="Promedio por Iglesia" value={promedioIglesia} color="purple" />
-          <StatsCard icon="📈" label="Registros" value={data.conteos.length} color="green" />
-          <StatsCard icon="🏠" label="Iglesias" value={data.iglesias.length || churchLabels.length} color="blue" />
-        </div>
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StaggerItem><StatsCard icon="📊" label="Total Contabilizado" value={totalAsistencia} color="gold" /></StaggerItem>
+          <StaggerItem><StatsCard icon="⛪" label="Promedio por Iglesia" value={promedioIglesia} color="purple" /></StaggerItem>
+          <StaggerItem><StatsCard icon="📈" label="Registros" value={data.conteos.length} color="green" /></StaggerItem>
+          <StaggerItem><StatsCard icon="🏠" label="Iglesias" value={data.iglesias.length || churchLabels.length} color="blue" /></StaggerItem>
+        </StaggerContainer>
 
         {/* Filters */}
-        <div className="filters-bar">
+        <div className="flex flex-wrap items-center gap-3 mb-8 p-4 bg-[#1a1c25] rounded-xl border border-white/10 shadow-sm">
           <button
-            className={`filter-chip ${filtroIglesia === 'todas' ? 'active' : ''}`}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${filtroIglesia === 'todas' ? 'bg-amber-500 text-gray-900' : 'bg-[#14161f] text-gray-400 hover:text-white border border-white/10 hover:bg-white/5'}`}
             onClick={() => setFiltroIglesia('todas')}
           >
             Todas
@@ -169,7 +170,7 @@ export default function AsistenciaPage() {
           {(data.iglesias.length > 0 ? data.iglesias : churchLabels).map((ig) => (
             <button
               key={ig}
-              className={`filter-chip ${filtroIglesia === ig ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${filtroIglesia === ig ? 'bg-amber-500 text-gray-900' : 'bg-[#14161f] text-gray-400 hover:text-white border border-white/10 hover:bg-white/5'}`}
               onClick={() => setFiltroIglesia(ig)}
             >
               {ig}
@@ -178,50 +179,52 @@ export default function AsistenciaPage() {
         </div>
 
         {loading ? (
-          <div className="loader"><div className="spinner" /></div>
+          <div className="flex justify-center p-12">
+            <div className="w-8 h-8 border-4 border-white/20 border-t-amber-500 rounded-full animate-spin" />
+          </div>
         ) : (
           <>
             {/* Charts */}
-            <div className="grid-2 mb-8">
-              <div className="chart-container">
-                <h3 className="section-title mb-4">Tendencia Semanal</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-lg">
+                <h3 className="font-display text-lg font-semibold text-gray-100 mb-6">Tendencia Semanal</h3>
                 <AttendanceChart type="line" data={lineChartData} height={280} />
               </div>
-              <div className="chart-container">
-                <h3 className="section-title mb-4">Asistencia por Iglesia</h3>
+              <div className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-lg">
+                <h3 className="font-display text-lg font-semibold text-gray-100 mb-6">Asistencia por Iglesia</h3>
                 <AttendanceChart type="bar" data={barChartData} height={280} />
               </div>
             </div>
 
-            <div className="chart-container mb-8">
-              <h3 className="section-title mb-4">Asistencia por Área</h3>
+            <div className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-lg mb-8">
+              <h3 className="font-display text-lg font-semibold text-gray-100 mb-6">Asistencia por Área</h3>
               <AttendanceChart type="bar" data={areaChartData} height={250} />
             </div>
 
             {/* Data Table */}
-            <div className="section-header">
-              <h2 className="section-title">Registros Detallados</h2>
-              <span className="badge badge-gold">{data.conteos.length} registros</span>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-xl font-bold text-gray-100">Registros Detallados</h2>
+              <span className="bg-amber-500/20 text-amber-500 px-3 py-1 rounded-full text-xs font-bold tracking-wider">{data.conteos.length} registros</span>
             </div>
-            <div className="data-table-wrap">
-              <table className="data-table">
+            <div className="overflow-x-auto bg-[#1a1c25]/80 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+              <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Iglesia</th>
-                    <th>Área</th>
-                    <th>Cantidad</th>
-                    <th>Observaciones</th>
+                  <tr className="border-b border-white/10 text-gray-400 text-sm">
+                    <th className="p-4 font-semibold uppercase tracking-wider">Fecha</th>
+                    <th className="p-4 font-semibold uppercase tracking-wider">Iglesia</th>
+                    <th className="p-4 font-semibold uppercase tracking-wider">Área</th>
+                    <th className="p-4 font-semibold uppercase tracking-wider">Cantidad</th>
+                    <th className="p-4 font-semibold uppercase tracking-wider">Observaciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.conteos.slice(0, 20).map((c) => (
-                    <tr key={c._id}>
-                      <td>{new Date(c.fecha).toLocaleDateString('es-PA', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                      <td><span className="badge badge-purple">{c.iglesia}</span></td>
-                      <td>{c.area}</td>
-                      <td style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{c.cantidad}</td>
-                      <td style={{ color: 'var(--text-tertiary)' }}>{c.observaciones || '—'}</td>
+                    <tr key={c._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-4 font-medium text-gray-200">{new Date(c.fecha).toLocaleDateString('es-PA', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                      <td className="p-4"><span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-md text-xs font-bold tracking-wider uppercase">{c.iglesia}</span></td>
+                      <td className="p-4 text-gray-300">{c.area}</td>
+                      <td className="p-4 font-bold text-amber-500">{c.cantidad}</td>
+                      <td className="p-4 text-gray-500 text-sm">{c.observaciones || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -229,7 +232,7 @@ export default function AsistenciaPage() {
             </div>
           </>
         )}
-      </div>
+      </FadeIn>
     </AppShell>
   );
 }

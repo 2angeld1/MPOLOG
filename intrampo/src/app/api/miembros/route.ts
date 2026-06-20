@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { connectMongo, User, PersonaDetallada } from '@/lib/mongodb';
+import { connectMongo, User } from '@/lib/mongodb';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   const session = await getSession();
@@ -9,48 +10,43 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await connectMongo();
-
     const searchParams = request.nextUrl.searchParams;
-    const departamento = searchParams.get('departamento');
     const buscar = searchParams.get('buscar');
 
-    // Get personas detalladas (main member registry)
-    const personaFilter: Record<string, unknown> = {};
-    if (departamento && departamento !== 'todos') {
-      personaFilter.departamento = departamento;
-    }
+    // 1. Obtener miembros del NUEVO Directorio (PostgreSQL)
+    let whereClause = {};
     if (buscar) {
-      personaFilter.$or = [
-        { nombre: { $regex: buscar, $options: 'i' } },
-        { apellido: { $regex: buscar, $options: 'i' } },
-      ];
+      whereClause = {
+        nombre: {
+          contains: buscar,
+          mode: 'insensitive'
+        }
+      };
     }
 
-    const personas = await PersonaDetallada.find(personaFilter)
-      .sort({ nombre: 1 })
-      .lean();
+    const personas = await prisma.miembroDirectorio.findMany({
+      where: whereClause,
+      orderBy: { nombre: 'asc' },
+    });
 
-    // Get system users
+    // 2. Obtener usuarios del sistema desde MongoDB (Lectura legacy)
+    await connectMongo();
     const users = await User.find({}, { password: 0 })
       .sort({ nombre: 1 })
       .lean();
 
-    // Get unique departments
-    const departamentos = await PersonaDetallada.distinct('departamento');
-
     return NextResponse.json({
-      personas: personas.map((p: Record<string, unknown>) => ({
-        _id: String(p._id),
+      personas: personas.map((p: any) => ({
+        _id: p.id,
         nombre: p.nombre,
-        apellido: p.apellido,
-        telefono: p.telefono,
         edad: p.edad,
-        correo: p.correo,
-        grupo: p.grupo,
-        departamento: p.departamento,
-        foto: p.foto,
-        asistencias: Array.isArray(p.asistencias) ? p.asistencias.length : 0,
+        telefono: p.telefono,
+        tiempoIglesia: p.tiempoIglesia,
+        esServidor: p.esServidor,
+        dondeSirve: p.dondeSirve,
+        parentesco: p.parentesco,
+        fotoUrl: p.fotoUrl,
+        createdAt: p.createdAt
       })),
       users: users.map((u: Record<string, unknown>) => ({
         _id: String(u._id),
@@ -59,7 +55,7 @@ export async function GET(request: NextRequest) {
         rol: u.rol,
         roles: u.roles,
       })),
-      departamentos,
+      departamentos: [], // Ya no usamos departamentos de mongo aquí
     });
   } catch (error) {
     console.error('Miembros error:', error);
@@ -67,5 +63,39 @@ export async function GET(request: NextRequest) {
       { error: 'Error al cargar miembros' },
       { status: 500 }
     );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+  }
+
+  try {
+    const body = await request.json();
+    const { nombre, edad, telefono, tiempoIglesia, esServidor, dondeSirve, parentesco, fotoUrl } = body;
+
+    if (!nombre || !edad || !telefono || !tiempoIglesia) {
+      return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 });
+    }
+
+    const nuevoMiembro = await prisma.miembroDirectorio.create({
+      data: {
+        nombre,
+        edad: parseInt(edad, 10),
+        telefono,
+        tiempoIglesia,
+        esServidor: Boolean(esServidor),
+        dondeSirve: dondeSirve || null,
+        parentesco: parentesco || null,
+        fotoUrl: fotoUrl || null
+      }
+    });
+
+    return NextResponse.json({ miembro: nuevoMiembro }, { status: 201 });
+  } catch (error) {
+    console.error('Error al crear miembro:', error);
+    return NextResponse.json({ error: 'Error al crear miembro' }, { status: 500 });
   }
 }

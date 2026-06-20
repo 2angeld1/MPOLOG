@@ -37,7 +37,7 @@ app.use(cors({
             'https://maranatha.up.railway.app',
             'https://mpolog.up.railway.app'
         ];
-        
+
         if (!origin || origin.startsWith('http://localhost') || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -91,7 +91,7 @@ app.get('/directorio-mentor-club', async (req, res) => {
         const protocol = req.protocol;
         const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
         const baseUrl = `${activeProtocol}://${host}`;
-        
+
         res.send(getTablaNinosHtml(personas, baseUrl));
     } catch (error: any) {
         res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
@@ -108,11 +108,11 @@ app.get('/carnet/:id', async (req, res) => {
         }
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol;
-        
+
         // Manejar protocolo seguro detrás de proxies inversos (como Railway o Vercel)
         const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
         const carnetUrl = `${activeProtocol}://${host}/carnet/${id}`;
-        
+
         res.send(getCarnetHtml(persona, carnetUrl));
     } catch (error: any) {
         res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
