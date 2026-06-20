@@ -17,17 +17,13 @@ class ActivityBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final List<int> counts = List.filled(7, 0);
-    final List<String> weekdays = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
-    final List<String> currentWeekLabels = [];
+    final List<int> counts = List.filled(12, 0);
+    final List<String> monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    for (var i = 0; i < 7; i++) {
-        final date = now.subtract(Duration(days: 6 - i));
-        currentWeekLabels.add(weekdays[date.weekday - 1]);
-        
+    for (var i = 0; i < 12; i++) {
         counts[i] = conteos.where((c) {
             final d = c.fecha;
-            return d.day == date.day && d.month == date.month && d.year == date.year 
+            return d.month == (i + 1) && d.year == now.year 
                 && c.tipo.toLowerCase() == selectedType.toLowerCase();
         }).fold(0, (sum, c) => sum + c.cantidad);
     }
@@ -71,15 +67,15 @@ class ActivityBarChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   getTitlesWidget: (value, meta) {
-                    if (value.toInt() >= 0 && value.toInt() < currentWeekLabels.length) {
+                    if (value.toInt() >= 0 && value.toInt() < 12) {
                       return Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: Text(
-                          currentWeekLabels[value.toInt()],
+                          monthLabels[value.toInt()],
                           style: TextStyle(
-                            color: value.toInt() == 6 ? AppColors.primary : Colors.white38, 
+                            color: value.toInt() == now.month - 1 ? AppColors.primary : Colors.white38, 
                             fontSize: 10,
-                            fontWeight: value.toInt() == 6 ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: value.toInt() == now.month - 1 ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
                       );
@@ -90,7 +86,7 @@ class ActivityBarChart extends StatelessWidget {
               ),
             ),
             borderData: FlBorderData(show: false),
-            barGroups: List.generate(7, (i) => BarChartGroupData(
+            barGroups: List.generate(12, (i) => BarChartGroupData(
               x: i,
               barRods: [
                 BarChartRodData(
@@ -103,7 +99,7 @@ class ActivityBarChart extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                   ),
-                  width: 14,
+                  width: 10,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,

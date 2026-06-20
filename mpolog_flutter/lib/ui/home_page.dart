@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
 
                     Column(
                       children: [
-                        const SectionHeader(title: 'ACTIVIDAD ÚLTIMA SEMANA', showArrow: true),
+                        const SectionHeader(title: 'ACTIVIDAD MENSUAL DEL AÑO', showArrow: true),
                         ActivityBarChart(
                           conteos: filteredConteos, 
                           selectedType: _selectedType

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../glass_container.dart';
 import '../../styles/app_colors.dart';
 import 'package:mpolog_flutter/models/conteo_model.dart';
+import '../modals/conteo_form_modal.dart';
 
 class RecentActivityItem extends StatelessWidget {
   final ConteoModel conteo;
@@ -19,44 +20,49 @@ class RecentActivityItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: GlassContainer(
-        padding: const EdgeInsets.all(16),
-        borderRadius: 20,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: (isPersonas ? AppColors.primary : AppColors.accent).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+      child: GestureDetector(
+        onTap: () => showConteoFormModal(context, initialConteo: conteo),
+        child: GlassContainer(
+          padding: const EdgeInsets.all(16),
+          borderRadius: 20,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: (isPersonas ? AppColors.primary : AppColors.accent).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  isPersonas ? Icons.people_rounded : Icons.inventory_2_rounded,
+                  color: isPersonas ? AppColors.primary : AppColors.accent,
+                  size: 20,
+                ),
               ),
-              child: Icon(
-                isPersonas ? Icons.people_rounded : Icons.inventory_2_rounded,
-                color: isPersonas ? AppColors.primary : AppColors.accent,
-                size: 20,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      conteo.area, 
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)
+                    ),
+                    Text(
+                      isToday ? 'Hoy' : '${date.day}/${date.month}/${date.year}', 
+                      style: const TextStyle(fontSize: 10, color: Colors.white38)
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    conteo.area, 
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)
-                  ),
-                  Text(
-                    isToday ? 'Hoy' : '${date.day}/${date.month}/${date.year}', 
-                    style: const TextStyle(fontSize: 10, color: Colors.white38)
-                  ),
-                ],
+              Text(
+                '+${conteo.cantidad}', 
+                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)
               ),
-            ),
-            Text(
-              '+${conteo.cantidad}', 
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)
-            ),
-          ],
+              const SizedBox(width: 8),
+              const Icon(Icons.edit_rounded, color: Colors.white38, size: 14),
+            ],
+          ),
         ),
       ),
     );
