@@ -1,3 +1,11 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Leemos el logo local y lo convertimos a base64 para evitar problemas de carga en producción
+const logoPath = path.join(__dirname, '../assets/mentor_club_logo.png');
+const logoBase64 = fs.readFileSync(logoPath).toString('base64');
+const logoUrl = `data:image/png;base64,${logoBase64}`;
+
 export const getCarnetHtml = (persona: any, carnetUrl: string) => {
     // Obtenemos los nombres (si vienen vacíos ponemos un texto por defecto)
     const nombre = persona.nombre ? persona.nombre.toUpperCase() : 'NOMBRE';
@@ -5,10 +13,6 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
     
     // API de QR Server para generar la imagen del QR (en blanco y negro como en la Imagen 2)
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(carnetUrl)}&color=000000&bgcolor=ffffff`;
-
-    // Logo del Mentor Club subido a Cloudinary desde tus descargas
-    const logoUrl = "https://res.cloudinary.com/dnwk212uf/image/upload/v1782184598/logos/ssyd8xkhnjybxmkkrrsh.png";
-
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
