@@ -1,10 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { mentorClubLogoBase64 } from './mentorClubLogoBase64';
 
-// Leemos el logo local y lo convertimos a base64 para evitar problemas de carga en producción
-const logoPath = path.join(__dirname, '../assets/mentor_club_logo.png');
-const logoBase64 = fs.readFileSync(logoPath).toString('base64');
-const logoUrl = `data:image/png;base64,${logoBase64}`;
+// Usamos el base64 directamente desde el archivo exportado para evitar problemas con la ruta al compilar en producción (dist)
+const logoUrl = `data:image/png;base64,${mentorClubLogoBase64}`;
 
 export const getCarnetHtml = (persona: any, carnetUrl: string) => {
     // Obtenemos los nombres (si vienen vacíos ponemos un texto por defecto)
