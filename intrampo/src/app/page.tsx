@@ -154,7 +154,7 @@ export default function DashboardPage() {
 
   // Demo comunicados for the dashboard
   const comunicadosRecientes = [
-    { id: '1', titulo: 'Bienvenidos a INTRAMPO', categoria: 'pastoral', autorNombre: 'Pastor Principal', createdAt: new Date().toISOString() },
+    { id: '1', titulo: 'Bienvenidos a INTRA - MPO', categoria: 'pastoral', autorNombre: 'Pastor Principal', createdAt: new Date().toISOString() },
     { id: '2', titulo: 'Próximo Culto Especial de Oración', categoria: 'evento', autorNombre: 'Liderazgo', createdAt: new Date(Date.now() - 86400000).toISOString() },
     { id: '3', titulo: 'Actualización de Horarios', categoria: 'administrativo', autorNombre: 'Administración', createdAt: new Date(Date.now() - 172800000).toISOString() },
   ];
@@ -163,12 +163,12 @@ export default function DashboardPage() {
     <AppShell>
       <FadeIn>
         <EditableText id="dashboard.title" fallback="Dashboard" as="h1" className="font-display text-3xl font-bold text-gray-100 mb-2 tracking-tight" />
-        <EditableText 
-          id="dashboard.subtitle" 
-          fallback="Bienvenido de vuelta. Aquí tienes un resumen de la iglesia." 
-          as="p" 
-          className="text-gray-400 text-[0.95rem] mb-8" 
-          multiline 
+        <EditableText
+          id="dashboard.subtitle"
+          fallback="Bienvenido de vuelta. Aquí tienes un resumen de la iglesia."
+          as="p"
+          className="text-gray-400 text-[0.95rem] mb-8"
+          multiline
         />
 
         {/* Stats Cards */}
@@ -278,11 +278,10 @@ export default function DashboardPage() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {comunicadosRecientes.map((c) => (
               <StaggerItem key={c.id} className="bg-[#1a1c25] border border-white/10 rounded-2xl p-6 transition-all hover:border-white/20 hover:shadow-lg hover:-translate-y-1">
-                <span className={`inline-block px-2 py-1 text-[0.7rem] font-bold uppercase tracking-wider rounded-md mb-3 ${
-                  c.categoria === 'pastoral' ? 'bg-amber-500/10 text-amber-500' :
-                  c.categoria === 'evento' ? 'bg-purple-500/10 text-purple-500' :
-                  'bg-blue-500/10 text-blue-500'
-                }`}>
+                <span className={`inline-block px-2 py-1 text-[0.7rem] font-bold uppercase tracking-wider rounded-md mb-3 ${c.categoria === 'pastoral' ? 'bg-amber-500/10 text-amber-500' :
+                    c.categoria === 'evento' ? 'bg-purple-500/10 text-purple-500' :
+                      'bg-blue-500/10 text-blue-500'
+                  }`}>
                   {c.categoria}
                 </span>
                 <div className="font-display text-lg font-bold text-gray-100 mb-4 line-clamp-2">{c.titulo}</div>

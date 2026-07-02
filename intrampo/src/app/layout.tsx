@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'INTRAMPO | Iglesia Maranatha',
+  title: 'INTRA - MPO | Iglesia Maranatha',
   description: 'Intranet de la Iglesia Maranatha - Gestión integral de ministerios, eventos, asistencia y comunicados.',
 };
 

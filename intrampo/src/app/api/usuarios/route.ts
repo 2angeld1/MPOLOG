@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     // Generar contraseña aleatoria de 8 caracteres
     const rawPassword = Math.random().toString(36).slice(-8);
-    
+
     // Hashear contraseña
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
@@ -106,14 +106,14 @@ export async function POST(request: NextRequest) {
 
     // Enviar correo con Brevo
     const brevoApiKey = process.env.BREVO_API_KEY;
-    const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'no-reply@intrampo.com';
+    const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'no-reply@INTRA - MPO.com';
 
     if (brevoApiKey) {
       const emailContent = `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-          <h2 style="color: #673AB7; text-align: center;">¡Bienvenido a Intrampo!</h2>
+          <h2 style="color: #673AB7; text-align: center;">¡Bienvenido a INTRA - MPO!</h2>
           <p>Hola <strong>${nombre}</strong>,</p>
-          <p>Se ha creado una cuenta para ti en la plataforma Intrampo con el rol de <strong>${rol}</strong>.</p>
+          <p>Se ha creado una cuenta para ti en la plataforma INTRA - MPO con el rol de <strong>${rol}</strong>.</p>
           <p>Tus credenciales de acceso son las siguientes:</p>
           <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>Correo:</strong> ${email}</p>
@@ -135,9 +135,9 @@ export async function POST(request: NextRequest) {
             'content-type': 'application/json'
           },
           body: JSON.stringify({
-            sender: { name: 'Intrampo', email: brevoSenderEmail },
+            sender: { name: 'INTRA - MPO', email: brevoSenderEmail },
             to: [{ email, name: nombre }],
-            subject: 'Tus Credenciales de Acceso a Intrampo',
+            subject: 'Tus Credenciales de Acceso a INTRA - MPO',
             htmlContent: emailContent
           })
         });
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       mensaje: 'Usuario creado exitosamente en PostgreSQL. Se ha enviado un correo con las credenciales.',
       user: { id: newUser.id, nombre: newUser.nombre, email: newUser.email, rol: newUser.rol },
       _tempPassMsg: !brevoApiKey ? `(Contraseña autogenerada: ${rawPassword})` : undefined

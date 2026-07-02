@@ -69,7 +69,7 @@ function getDemoComunicados() {
   return [
     {
       id: 'demo-1',
-      titulo: 'Bienvenidos a INTRAMPO',
+      titulo: 'Bienvenidos a INTRA - MPO',
       contenido: 'Esta es la nueva plataforma de comunicación interna de la Iglesia Maranatha. Aquí podrás encontrar toda la información relevante sobre eventos, ministerios y más. ¡Estamos emocionados de tenerlos aquí!',
       categoria: 'pastoral',
       autorId: 'system',

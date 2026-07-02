@@ -4,10 +4,10 @@ import { getSession, isAdmin } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
-  
+
   // Opcional: Permitir rol "editor" también
   const isEditorOrAdmin = session && (isAdmin(session) || session.roles.includes('editor'));
-  
+
   if (!session || !isEditorOrAdmin) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
   }
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const folder = (formData.get('folder') as string) || 'intrampo';
+    const folder = (formData.get('folder') as string) || 'INTRA - MPO';
 
     if (!file) {
       return NextResponse.json({ error: 'Archivo no proporcionado' }, { status: 400 });

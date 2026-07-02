@@ -43,9 +43,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-root)] p-4 relative z-10 before:content-[''] before:fixed before:inset-0 before:bg-[radial-gradient(ellipse_80%_60%_at_20%_10%,hsla(265,50%,30%,0.08),transparent),radial-gradient(ellipse_60%_50%_at_80%_80%,hsla(42,65%,55%,0.04),transparent)] before:-z-10">
       <FadeIn className="w-full max-w-[420px] bg-[#1a1c25]/60 backdrop-blur-[20px] border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
-        
+
         <div className="text-center mb-8">
-          <div className="font-display text-3xl font-extrabold tracking-widest bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">INTRAMPO</div>
+          <div className="font-display text-3xl font-extrabold tracking-widest bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">INTRA - MPO</div>
           <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Iglesia Maranatha — Intranet</div>
         </div>
 

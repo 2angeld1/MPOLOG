@@ -42,7 +42,7 @@ export default function EditableImage({
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('folder', 'intrampo/cms');
+      formData.append('folder', 'INTRA - MPO/cms');
 
       const res = await fetch('/api/upload', {
         method: 'POST',
@@ -89,7 +89,7 @@ export default function EditableImage({
   return (
     <div className={`editable-image-wrapper ${className}`} style={{ position: 'relative', display: 'inline-block', width: fill ? '100%' : 'auto', height: fill ? '100%' : 'auto' }}>
       {content}
-      
+
       <div className="editable-image-overlay">
         <input
           type="file"

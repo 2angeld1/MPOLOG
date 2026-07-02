@@ -5,11 +5,11 @@ import { connectMongo, User } from './mongodb';
 import type { SessionData } from '@/types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secret_key_aqui';
-const COOKIE_NAME = 'intrampo_session';
+const COOKIE_NAME = 'INTRA - MPO_session';
 
 export async function authenticateUser(email: string, password: string): Promise<SessionData | null> {
   const normalizedEmail = email.toLowerCase().trim();
-  
+
   // 1. Intentar con PostgreSQL (Nuevos usuarios)
   const { prisma } = await import('./prisma');
   let userPg = null;
@@ -38,7 +38,7 @@ export async function authenticateUser(email: string, password: string): Promise
     if (!isMatch) return null;
 
     const rolesFromMongo = (userMongo.roles && userMongo.roles.length > 0)
-      ? userMongo.roles 
+      ? userMongo.roles
       : [userMongo.rol || 'usuario'];
 
     return {
@@ -88,10 +88,10 @@ export async function clearSession(): Promise<void> {
 
 export function hasRole(session: SessionData, requiredRoles: string[]): boolean {
   if (!session || !session.roles) return false;
-  
+
   // Roles de máximo privilegio que siempre pueden acceder
   const adminRoles = ['admin', 'superadmin', 'logisticadmin', 'pastor'];
-  
+
   if (session.roles.some(r => adminRoles.includes(r.toLowerCase()))) {
     return true;
   }

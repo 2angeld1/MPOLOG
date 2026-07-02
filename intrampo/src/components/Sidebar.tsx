@@ -83,7 +83,7 @@ export default function Sidebar({ isOpen, onClose, userName = 'Usuario', userRol
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-transparent pointer-events-none" />
 
         <div className="p-6 pb-4 border-b border-white/10 relative">
-          <div className="font-display text-2xl font-extrabold tracking-wider bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">INTRAMPO</div>
+          <div className="font-display text-2xl font-extrabold tracking-wider bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">INTRA - MPO</div>
           <div className="text-[0.7rem] text-gray-400 uppercase tracking-widest mt-0.5">Iglesia Maranatha</div>
         </div>
 
@@ -98,7 +98,7 @@ export default function Sidebar({ isOpen, onClose, userName = 'Usuario', userRol
               <div key={section.section}>
                 <div className="text-[0.65rem] uppercase tracking-widest text-gray-500 font-semibold px-3 py-2 pt-4">{section.section}</div>
                 {section.items.map((item) => {
-                  const isActive = pathname === item.href || 
+                  const isActive = pathname === item.href ||
                     (item.href !== '/' && pathname.startsWith(item.href));
                   return (
                     <Link

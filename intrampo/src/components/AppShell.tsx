@@ -48,14 +48,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           return;
         }
         const data = await res.json();
-        
+
         // Si la sesión está corrupta (le falta el email o roles), forzamos el deslogueo
         if (!data.user?.email || !data.user?.roles) {
           await fetch('/api/auth/logout', { method: 'POST' });
           router.push('/login');
           return;
         }
-        
+
         setUser(data.user);
       } catch {
         router.push('/login');
@@ -77,7 +77,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-root)]">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-white/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 text-sm">Cargando INTRAMPO...</p>
+          <p className="text-gray-400 text-sm">Cargando INTRA - MPO...</p>
         </div>
       </div>
     );
@@ -85,7 +85,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  const pageTitle = pageTitles[pathname] || 'INTRAMPO';
+  const pageTitle = pageTitles[pathname] || 'INTRA - MPO';
 
   return (
     <AppContext.Provider value={{ user }}>

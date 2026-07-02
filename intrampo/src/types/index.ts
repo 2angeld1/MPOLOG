@@ -1,4 +1,4 @@
-// Types shared across INTRAMPO
+// Types shared across INTRA - MPO
 
 // ─── MongoDB Models (from MPOLOG) ───────────────────────────────
 

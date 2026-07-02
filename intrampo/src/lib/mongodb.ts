@@ -23,7 +23,7 @@ export async function connectMongo(): Promise<typeof mongoose> {
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI, { family: 4 }).then((m) => {
-      console.log('✅ INTRAMPO: MongoDB conectado (MPOLOG)');
+      console.log('✅ INTRA - MPO: MongoDB conectado (MPOLOG)');
       return m;
     });
   }
@@ -34,7 +34,7 @@ export async function connectMongo(): Promise<typeof mongoose> {
 
 // ─── Re-export MPOLOG Models ────────────────────────────────────
 // We re-define schemas here to avoid importing from the Backend directory
-// This keeps INTRAMPO self-contained while reading the same MongoDB collections
+// This keeps INTRA - MPO self-contained while reading the same MongoDB collections
 
 const userSchema = new mongoose.Schema({
   email: String,
