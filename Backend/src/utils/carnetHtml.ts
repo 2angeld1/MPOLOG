@@ -65,10 +65,14 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
             padding: 30px;
         }
 
-        .logo {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
+        .club-title {
+            color: #d1a738;
+            font-size: 36px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            line-height: 1.1;
         }
 
         /* Franja Dorada */
@@ -149,9 +153,9 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
 </head>
 <body>
     <div class="carnet-container">
-        <!-- Parte superior negra con el Logo -->
+        <!-- Parte superior negra con el Título -->
         <div class="top-section">
-            <img src="${logoUrl}" alt="Mentor Club" class="logo">
+            <div class="club-title">MENTOR<br>CLUB</div>
         </div>
         
         <!-- Franja dorada -->
