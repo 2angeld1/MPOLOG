@@ -7,6 +7,10 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
     // Obtenemos los nombres (si vienen vacíos ponemos un texto por defecto)
     const nombre = persona.nombre ? persona.nombre.toUpperCase() : 'NOMBRE';
     const apellido = persona.apellido ? persona.apellido.toUpperCase() : 'APELLIDO';
+    const edad = persona.edad ? persona.edad : 'No especificada';
+    const adulto = persona.adultoResponsable || persona.apoderado || 'No especificado';
+    const telefono = persona.telefono ? persona.telefono : 'No especificado';
+    const direccion = persona.direccion ? persona.direccion : 'No especificada';
     
     // API de QR Server para generar la imagen del QR (en blanco y negro como en la Imagen 2)
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(carnetUrl)}&color=000000&bgcolor=ffffff`;
@@ -37,8 +41,10 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
         }
 
         .carnet-container {
-            width: 360px;
-            height: 570px;
+            width: 100%;
+            max-width: 360px;
+            min-height: 570px;
+            height: auto;
             background-color: #ffffff;
             border-radius: 18px;
             overflow: hidden;
@@ -106,6 +112,25 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
             letter-spacing: -0.5px;
         }
 
+        /* Información extra */
+        .info-container {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+            width: 90%;
+        }
+
+        .info-item {
+            margin-bottom: 6px;
+        }
+
+        .info-item strong {
+            color: #d1a738;
+            font-weight: 800;
+        }
+
         /* Contenedor del QR */
         .qr-container {
             width: 165px;
@@ -137,6 +162,13 @@ export const getCarnetHtml = (persona: any, carnetUrl: string) => {
             <div class="name-container">
                 <div class="first-name">${nombre}</div>
                 <div class="last-name">${apellido}</div>
+            </div>
+            
+            <div class="info-container">
+                <div class="info-item"><strong>Edad:</strong> ${edad}</div>
+                <div class="info-item"><strong>Adulto Responsable:</strong> ${adulto}</div>
+                <div class="info-item"><strong>Teléfono:</strong> ${telefono}</div>
+                <div class="info-item"><strong>Dirección:</strong> ${direccion}</div>
             </div>
             
             <div class="qr-container">
