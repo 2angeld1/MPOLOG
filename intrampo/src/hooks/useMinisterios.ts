@@ -17,6 +17,7 @@ export function useMinisterios() {
     descripcion: '',
     color: '#673AB7',
     icono: 'church',
+    parentId: '',
   });
 
   // States Modal Miembros
@@ -58,7 +59,7 @@ export function useMinisterios() {
 
   const handleOpenCreate = () => {
     setEditMode(false);
-    setFormData({ id: '', nombre: '', descripcion: '', color: '#673AB7', icono: 'church' });
+    setFormData({ id: '', nombre: '', descripcion: '', color: '#673AB7', icono: 'church', parentId: '' });
     setShowForm(true);
   };
 
@@ -69,7 +70,8 @@ export function useMinisterios() {
       nombre: min.nombre,
       descripcion: min.descripcion || '',
       color: min.color || '#673AB7',
-      icono: min.icono || 'church'
+      icono: min.icono || 'church',
+      parentId: min.parentId || ''
     });
     setShowForm(true);
   };

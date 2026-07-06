@@ -8,13 +8,14 @@ interface MinisterioFormModalProps {
   onClose: () => void;
   editMode: boolean;
   submitting: boolean;
-  formData: { id: string; nombre: string; descripcion: string; color: string; icono: string };
+  formData: { id: string; nombre: string; descripcion: string; color: string; icono: string; parentId: string };
   setFormData: (data: any) => void;
   onSubmit: (e: React.FormEvent) => void;
+  ministerios: Array<{ id: string; nombre: string }>;
 }
 
 export default function MinisterioFormModal({
-  isOpen, onClose, editMode, submitting, formData, setFormData, onSubmit,
+  isOpen, onClose, editMode, submitting, formData, setFormData, onSubmit, ministerios
 }: MinisterioFormModalProps) {
   return (
     <Modal
@@ -51,6 +52,19 @@ export default function MinisterioFormModal({
             value={formData.nombre}
             onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
           />
+        </div>
+        <div className="mb-5">
+          <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Ministerio Padre (Opcional)</label>
+          <select
+            className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 appearance-none"
+            value={formData.parentId}
+            onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+          >
+            <option value="">-- Ninguno (Es ministerio principal) --</option>
+            {ministerios.filter(m => m.id !== formData.id).map(m => (
+              <option key={m.id} value={m.id}>{m.nombre}</option>
+            ))}
+          </select>
         </div>
         <div className="mb-5">
           <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Descripción</label>

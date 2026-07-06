@@ -3,14 +3,14 @@
 import AppShell from '@/components/AppShell';
 import { StaggerContainer, StaggerItem } from '@/animations';
 import { useDirectorio } from '@/hooks/useDirectorio';
-import { FiPlus, FiEdit2, FiSearch, FiPhone, FiUpload, FiUser, FiLock } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiSearch, FiPhone, FiUpload, FiUser, FiLock, FiUsers } from 'react-icons/fi';
 import { getAvatarColor, getInitials, isNuevo } from '@/lib/utils';
 import MiembroFormModal from './MiembroFormModal';
 import MiembroDetailModal from './MiembroDetailModal';
 
 export default function DirectorioPage() {
   const {
-    miembros, users, busqueda, setBusqueda, vista, setVista,
+    miembros, users, ministerios, busqueda, setBusqueda, vista, setVista,
     loading, showForm, setShowForm, editMode, selectedMiembro, setSelectedMiembro,
     submitting, csvInputRef, formData, setFormData, setFoto,
     handleOpenCreate, handleOpenEdit, handleDelete, handleSubmit, handleCsvImport,
@@ -114,11 +114,24 @@ export default function DirectorioPage() {
                     <h3 className="font-display font-semibold text-gray-100">{miembro.nombre}</h3>
                     {nuevo && <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full text-[0.6rem] font-bold tracking-wider">NUEVO</span>}
                   </div>
-                  <div className="mb-3">
-                    <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full text-[0.7rem] font-semibold">{miembro.tiempoIglesia} en la iglesia</span>
+                  <div className="mb-3 flex flex-wrap justify-center gap-1.5">
+                    {miembro.esServidor && miembro.dondeSirve ? (
+                      miembro.dondeSirve.split(',').map((area, i) => (
+                        <span key={i} className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold">{area.trim()}</span>
+                      ))
+                    ) : (
+                      <span className="bg-white/5 text-gray-500 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold">Sin ministerio</span>
+                    )}
                   </div>
-                  <div className="text-sm text-gray-400 mt-auto flex items-center gap-1.5">
-                    <FiPhone size={13} /> {miembro.telefono}
+                  <div className="mt-auto flex flex-col items-center gap-1.5 w-full">
+                    <div className="text-sm text-gray-400 flex items-center gap-1.5">
+                      <FiPhone size={13} /> {miembro.telefono}
+                    </div>
+                    {miembro.parentesco && (
+                      <div className="text-[0.7rem] text-gray-500 flex items-center gap-1.5 text-center px-2">
+                        <FiUsers size={12} className="shrink-0" /> {miembro.parentesco}
+                      </div>
+                    )}
                   </div>
                 </div>
               </StaggerItem>
@@ -181,6 +194,7 @@ export default function DirectorioPage() {
         setFormData={setFormData}
         setFoto={setFoto}
         onSubmit={handleSubmit}
+        ministerios={ministerios}
       />
 
       <MiembroDetailModal

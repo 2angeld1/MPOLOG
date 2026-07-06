@@ -14,10 +14,11 @@ interface MiembroFormModalProps {
   setFormData: (data: any) => void;
   setFoto: (file: File | null) => void;
   onSubmit: (e: React.FormEvent) => void;
+  ministerios: Array<{ id: string; nombre: string }>;
 }
 
 export default function MiembroFormModal({
-  isOpen, onClose, editMode, submitting, formData, setFormData, setFoto, onSubmit,
+  isOpen, onClose, editMode, submitting, formData, setFormData, setFoto, onSubmit, ministerios
 }: MiembroFormModalProps) {
   return (
     <Modal
@@ -62,8 +63,32 @@ export default function MiembroFormModal({
         </div>
         {formData.esServidor && (
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wider">¿En qué área sirve?</label>
-            <input className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50" value={formData.dondeSirve} onChange={e => setFormData({ ...formData, dondeSirve: e.target.value })} placeholder="Ej. Ujieres, Alabanza..." />
+            <label className="block text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wider">¿En qué áreas sirve?</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              {ministerios.map(m => {
+                const servesHere = formData.dondeSirve.split(',').map(s => s.trim()).includes(m.nombre);
+                
+                return (
+                  <label key={m.id} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer border transition-colors ${servesHere ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[#14161f] border-white/5 hover:border-white/10'}`}>
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 accent-amber-500 rounded bg-[#14161f] border-white/20"
+                      checked={servesHere}
+                      onChange={(e) => {
+                        let areas = formData.dondeSirve ? formData.dondeSirve.split(',').map(s => s.trim()).filter(s => s) : [];
+                        if (e.target.checked) {
+                          areas.push(m.nombre);
+                        } else {
+                          areas = areas.filter(a => a !== m.nombre);
+                        }
+                        setFormData({ ...formData, dondeSirve: areas.join(', ') });
+                      }}
+                    />
+                    <span className={`text-xs font-medium ${servesHere ? 'text-amber-500' : 'text-gray-300'}`}>{m.nombre}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         )}
         <div>

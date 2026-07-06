@@ -40,7 +40,13 @@ export default function MiembroDetailModal({ miembro, onClose, onEdit, onDelete 
             <h2 className="font-display text-2xl font-bold text-gray-100 mb-3">{miembro.nombre}</h2>
             <div className="flex flex-wrap justify-center gap-2 mb-6">
               <span className="bg-amber-500/20 text-amber-500 px-3 py-1 rounded-full text-xs font-bold tracking-wider">{miembro.edad} años</span>
-              <span className="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider">{miembro.tiempoIglesia}</span>
+              {miembro.esServidor && miembro.dondeSirve ? (
+                miembro.dondeSirve.split(',').map((area, i) => (
+                  <span key={i} className="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
+                    {area.trim()}
+                  </span>
+                ))
+              ) : null}
               {isNuevo(miembro.createdAt) && <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider">NUEVO</span>}
             </div>
           </div>
@@ -55,12 +61,22 @@ export default function MiembroDetailModal({ miembro, onClose, onEdit, onDelete 
               <div className="text-gray-200 font-medium">{miembro.parentesco || 'No especificado'}</div>
             </div>
             <div>
-              <div className="text-[0.7rem] text-gray-500 uppercase tracking-widest font-semibold mb-1">Servicio</div>
-              <div className="text-gray-200 font-medium flex items-center gap-2">
+              <div className="text-[0.7rem] text-gray-500 uppercase tracking-widest font-semibold mb-2">Servicio</div>
+              <div>
                 {miembro.esServidor ? (
-                  <><span className="text-green-500">●</span> Sirve en: {miembro.dondeSirve || 'Área no especificada'}</>
+                  <div className="flex flex-wrap gap-2">
+                    {miembro.dondeSirve ? miembro.dondeSirve.split(',').map((area, i) => (
+                      <span key={i} className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded-md text-xs font-semibold">
+                        {area.trim()}
+                      </span>
+                    )) : (
+                      <span className="text-gray-400 text-sm">Área no especificada</span>
+                    )}
+                  </div>
                 ) : (
-                  <><span className="text-gray-600">○</span> No es servidor</>
+                  <div className="text-gray-200 font-medium flex items-center gap-2">
+                    <span className="text-gray-600">○</span> No es servidor
+                  </div>
                 )}
               </div>
             </div>

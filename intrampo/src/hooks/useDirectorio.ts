@@ -25,6 +25,7 @@ export interface UserEntry {
 export function useDirectorio() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
   const [users, setUsers] = useState<UserEntry[]>([]);
+  const [ministerios, setMinisterios] = useState<any[]>([]);
   const [busqueda, setBusqueda] = useState('');
   const [vista, setVista] = useState<'personas' | 'usuarios'>('personas');
   const [loading, setLoading] = useState(true);
@@ -56,10 +57,14 @@ export function useDirectorio() {
       if (busqueda) params.set('buscar', busqueda);
 
       const res = await fetch(`/api/miembros?${params}`);
-      if (res.ok) {
+      const resMinisterios = await fetch('/api/ministerios');
+      
+      if (res.ok && resMinisterios.ok) {
         const data = await res.json();
+        const minData = await resMinisterios.json();
         setMiembros(data.personas || []);
         setUsers(data.users || []);
+        setMinisterios(minData.ministerios || []);
       }
     } catch (err) {
       console.error(err);
@@ -121,12 +126,30 @@ export function useDirectorio() {
     try {
       let fotoUrl = null;
       if (foto) {
-        const fData = new FormData();
-        fData.append('file', foto);
-        const res = await fetch('/api/archivos', { method: 'POST', body: fData });
+        // Convert file to base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(foto);
+        });
+        const base64Content = await base64Promise;
+
+        const payloadArchivo = {
+          nombre: foto.name,
+          base64Content
+        };
+
+        const res = await fetch('/api/archivos', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadArchivo) 
+        });
+
         if (res.ok) {
           const data = await res.json();
           fotoUrl = data.archivo.url;
+        } else {
+          toast.error('Error al subir la imagen');
         }
       }
 
@@ -207,6 +230,7 @@ export function useDirectorio() {
     setBusqueda,
     vista,
     setVista,
+    ministerios,
     loading,
     showForm,
     setShowForm,

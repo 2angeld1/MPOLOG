@@ -14,7 +14,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { nombre, descripcion, color, icono, miembrosIds, liderIds } = body;
+    const { nombre, descripcion, color, icono, miembrosIds, liderIds, parentId } = body;
 
     const updateData: any = {};
     if (nombre !== undefined) updateData.nombre = nombre;
@@ -23,6 +23,7 @@ export async function PUT(
     if (icono !== undefined) updateData.icono = icono;
     if (miembrosIds !== undefined) updateData.miembrosIds = miembrosIds;
     if (liderIds !== undefined) updateData.liderIds = liderIds;
+    if (parentId !== undefined) updateData.parentId = parentId === '' ? null : parentId;
 
     const ministerioActualizado = await prisma.ministerio.update({
       where: { id },

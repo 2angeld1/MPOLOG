@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { nombre, descripcion, color, icono } = await request.json();
+    const { nombre, descripcion, color, icono, parentId } = await request.json();
 
     if (!nombre) {
       return NextResponse.json(
@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
         descripcion,
         color: color || '#673AB7',
         icono: icono || 'church',
+        parentId: parentId || null,
       },
     });
 

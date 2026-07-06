@@ -104,6 +104,7 @@ export interface IMinisterio {
   liderIds: string[];
   color: string;
   icono: string;
+  parentId?: string;
   miembrosIds: string[];
   activo: boolean;
   createdAt: string;
