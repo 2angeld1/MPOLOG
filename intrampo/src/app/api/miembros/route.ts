@@ -13,13 +13,12 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const buscar = searchParams.get('buscar');
 
-    // 1. Obtener miembros del NUEVO Directorio (PostgreSQL)
+    // 1. Obtener miembros del Directorio (MongoDB via Prisma)
     let whereClause = {};
     if (buscar) {
       whereClause = {
         nombre: {
           contains: buscar,
-          mode: 'insensitive'
         }
       };
     }

@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Comunicado {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   titulo      String
   contenido   String
   categoria   String   @default("general") // "pastoral", "admin", "lideres", "servidores", "general"
@@ -20,13 +20,10 @@ model Comunicado {
   activo      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  @@index([categoria])
-  @@index([createdAt])
 }
 
 model Ministerio {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   nombre      String   @unique
   descripcion String?
   liderIds    String[] // MongoDB ObjectIds
@@ -39,50 +36,47 @@ model Ministerio {
 }
 
 model Solicitud {
-  id            String   @id @default(cuid())
-  tipo          String   // "salon", "equipo", "consejeria", "otro"
-  titulo        String
-  descripcion   String
-  solicitanteId String   // MongoDB ObjectId
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  tipo              String   // "salon", "equipo", "consejeria", "otro"
+  titulo            String
+  descripcion       String
+  solicitanteId     String   // MongoDB ObjectId
   solicitanteNombre String
-  estado        String   @default("pendiente") // "pendiente", "aprobada", "rechazada"
-  respuesta     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@index([estado])
-  @@index([solicitanteId])
+  estado            String   @default("pendiente") // "pendiente", "aprobada", "rechazada"
+  respuesta         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model ContenidoDinamico {
-  llave       String   @id
+  llave       String   @id @map("_id")
   tipo        String   // "texto", "imagen", "html"
   valor       String
   actualizado DateTime @updatedAt
 }
 
 model RolUsuario {
-  userId    String   @id // MongoDB ObjectId
+  userId    String   @id @map("_id") // MongoDB ObjectId
   rol       String   // "pastor", "lideres", "servidores", "general"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Archivo {
-  id          String   @id @default(cuid())
-  nombre      String
-  url         String
-  public_id   String
-  formato     String
-  tamano      Int
-  subidoPorId String   // MongoDB ObjectId
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  nombre          String
+  url             String
+  public_id       String
+  formato         String
+  tamano          Int
+  subidoPorId     String   // MongoDB ObjectId
   subidoPorNombre String? // Opcional, cachear nombre para no hacer join a Mongo
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model SolicitudRecurso {
-  id                    String   @id @default(cuid())
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
   liderId               String   // MongoDB ObjectId
   liderNombre           String?
   descripcionEquipo     String
@@ -96,7 +90,7 @@ model SolicitudRecurso {
 }
 
 model MiembroDirectorio {
-  id              String   @id @default(cuid())
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
   nombre          String
   edad            Int
   telefono        String
@@ -110,7 +104,7 @@ model MiembroDirectorio {
 }
 
 model UsuarioSistema {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   nombre    String
   email     String   @unique
   password  String

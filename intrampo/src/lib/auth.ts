@@ -10,7 +10,7 @@ const COOKIE_NAME = 'INTRA - MPO_session';
 export async function authenticateUser(email: string, password: string): Promise<SessionData | null> {
   const normalizedEmail = email.toLowerCase().trim();
 
-  // 1. Intentar con PostgreSQL (Nuevos usuarios)
+  // 1. Intentar con MongoDB/Prisma (Usuarios del sistema Intrampo)
   const { prisma } = await import('./prisma');
   let userPg = null;
   if (prisma.usuarioSistema) {

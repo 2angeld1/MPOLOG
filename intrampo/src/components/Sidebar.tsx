@@ -2,40 +2,53 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  FiHome,
+  FiUsers,
+  FiCalendar,
+  FiMessageSquare,
+  FiBarChart2,
+  FiFolder,
+  FiInbox,
+  FiShield,
+  FiLogOut,
+} from 'react-icons/fi';
+import { FaChurch } from 'react-icons/fa';
+import type { IconType } from 'react-icons';
 
-const navItems = [
+const navItems: { section: string; items: { label: string; href: string; icon: IconType }[] }[] = [
   {
     section: 'Principal',
     items: [
-      { label: 'Dashboard', href: '/', icon: '📊' },
-      { label: 'Directorio', href: '/directorio', icon: '👥' },
-      { label: 'Calendario', href: '/calendario', icon: '📅' },
+      { label: 'Dashboard', href: '/', icon: FiHome },
+      { label: 'Directorio', href: '/directorio', icon: FiUsers },
+      { label: 'Calendario', href: '/calendario', icon: FiCalendar },
     ],
   },
   {
     section: 'Comunicación',
     items: [
-      { label: 'Comunicados', href: '/comunicados', icon: '📢' },
+      { label: 'Comunicados', href: '/comunicados', icon: FiMessageSquare },
     ],
   },
   {
     section: 'Reportes',
     items: [
-      { label: 'Asistencia', href: '/asistencia', icon: '📈' },
-      { label: 'Ministerios', href: '/ministerios', icon: '⛪' },
+      { label: 'Asistencia', href: '/asistencia', icon: FiBarChart2 },
+      { label: 'Ministerios', href: '/ministerios', icon: FaChurch },
     ],
   },
   {
     section: 'Recursos',
     items: [
-      { label: 'Archivos', href: '/archivos', icon: '📁' },
-      { label: 'Solicitudes', href: '/solicitudes', icon: '📦' },
+      { label: 'Archivos', href: '/archivos', icon: FiFolder },
+      { label: 'Solicitudes', href: '/solicitudes', icon: FiInbox },
     ],
   },
   {
     section: 'Administración',
     items: [
-      { label: 'Usuarios y Roles', href: '/usuarios', icon: '🛡️' },
+      { label: 'Usuarios y Roles', href: '/usuarios', icon: FiShield },
     ],
   },
 ];
@@ -82,9 +95,14 @@ export default function Sidebar({ isOpen, onClose, userName = 'Usuario', userRol
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-transparent pointer-events-none" />
 
-        <div className="p-6 pb-4 border-b border-white/10 relative">
-          <div className="font-display text-2xl font-extrabold tracking-wider bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent">INTRA - MPO</div>
-          <div className="text-[0.7rem] text-gray-400 uppercase tracking-widest mt-0.5">Iglesia Maranatha</div>
+        {/* Logo - Fixed height matching Header (70px) */}
+        <div className="h-[70px] px-6 border-b border-white/10 relative flex items-center gap-3 shrink-0">
+          <div className="font-display text-xl font-extrabold tracking-wider bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 bg-clip-text text-transparent leading-tight">
+            INTRA - MPO
+          </div>
+          <div className="text-[0.6rem] text-gray-500 uppercase tracking-widest font-semibold border-l border-white/10 pl-3 leading-tight">
+            Iglesia<br/>Maranatha
+          </div>
         </div>
 
         <nav className="flex-1 p-4 px-3 flex flex-col gap-1 relative overflow-y-auto">
@@ -100,6 +118,7 @@ export default function Sidebar({ isOpen, onClose, userName = 'Usuario', userRol
                 {section.items.map((item) => {
                   const isActive = pathname === item.href ||
                     (item.href !== '/' && pathname.startsWith(item.href));
+                  const Icon = item.icon;
                   return (
                     <Link
                       key={item.href}
@@ -110,7 +129,7 @@ export default function Sidebar({ isOpen, onClose, userName = 'Usuario', userRol
                       {isActive && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[60%] bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full" />
                       )}
-                      <span className={`w-5 h-5 shrink-0 ${isActive ? 'opacity-100' : 'opacity-70'}`}>{item.icon}</span>
+                      <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'opacity-100' : 'opacity-70'}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -134,7 +153,7 @@ export default function Sidebar({ isOpen, onClose, userName = 'Usuario', userRol
             className="w-full mt-4 flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
             onClick={handleLogout}
           >
-            <span>🚪</span> Cerrar sesión
+            <FiLogOut className="w-4 h-4" /> Cerrar sesión
           </button>
         </div>
       </aside>

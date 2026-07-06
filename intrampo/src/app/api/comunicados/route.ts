@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ comunicados });
   } catch (error) {
     console.error('Comunicados error:', error);
-    // Return demo data if Prisma/PostgreSQL is not set up yet
+    // Return demo data if database is not set up yet
     return NextResponse.json({
       comunicados: getDemoComunicados(),
     });

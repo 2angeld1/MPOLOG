@@ -25,10 +25,10 @@ export async function GET() {
       source: 'mongo'
     }));
 
-    // 2. Leer usuarios de Postgres (Nuevos)
-    let usuariosPostgres: any[] = [];
+    // 2. Leer usuarios de Intrampo DB (Nuevos)
+    let usuariosIntrampo: any[] = [];
     if (prisma.usuarioSistema) {
-      usuariosPostgres = await prisma.usuarioSistema.findMany({
+      usuariosIntrampo = await prisma.usuarioSistema.findMany({
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
@@ -40,14 +40,14 @@ export async function GET() {
       });
     }
 
-    const newUsers = usuariosPostgres.map((u: any) => ({
+    const newUsers = usuariosIntrampo.map((u: any) => ({
       _id: u.id,
       nombre: u.nombre,
       email: u.email,
       rol: u.rol,
       roles: [u.rol],
       createdAt: u.createdAt,
-      source: 'postgres'
+      source: 'intrampo'
     }));
 
     // 3. Unir y devolver
@@ -75,10 +75,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nombre, email y rol son requeridos' }, { status: 400 });
     }
 
-    // Check si el correo ya existe en Postgres
-    const existingPg = await prisma.usuarioSistema.findUnique({ where: { email } });
-    if (existingPg) {
-      return NextResponse.json({ error: 'El correo ya está registrado en la nueva base de datos' }, { status: 400 });
+    // Check si el correo ya existe en Intrampo DB
+    const existingIntrampo = await prisma.usuarioSistema.findUnique({ where: { email } });
+    if (existingIntrampo) {
+      return NextResponse.json({ error: 'El correo ya está registrado en la base de datos' }, { status: 400 });
     }
 
     // Check si el correo ya existe en Mongo
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     // Hashear contraseña
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-    // Guardar en POSTGRESQL en vez de Mongo
+    // Guardar en Intrampo DB (MongoDB/Prisma)
     const newUser = await prisma.usuarioSistema.create({
       data: {
         nombre,
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      mensaje: 'Usuario creado exitosamente en PostgreSQL. Se ha enviado un correo con las credenciales.',
+      mensaje: 'Usuario creado exitosamente. Se ha enviado un correo con las credenciales.',
       user: { id: newUser.id, nombre: newUser.nombre, email: newUser.email, rol: newUser.rol },
       _tempPassMsg: !brevoApiKey ? `(Contraseña autogenerada: ${rawPassword})` : undefined
     }, { status: 201 });

@@ -1,24 +1,18 @@
 version: '3.8'
 
 services:
-  INTRA - MPO-db:
-    image: postgres:16-alpine
-    container_name: INTRA - MPO-postgres
+  intrampo-db:
+    image: mongo:7
+    container_name: intrampo-mongo
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
     restart: unless-stopped
     ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_DB: INTRA - MPO
-      POSTGRES_USER: INTRA - MPO_user
-      POSTGRES_PASSWORD: INTRA - MPO_2024_iglesia
+      - "27018:27018"
     volumes:
-      - INTRA - MPO_pgdata:/var/lib/postgresql/data
+      # Guardaremos los datos físicamente en una carpeta "mongo-data" 
+      # dentro de este mismo proyecto (en tu disco D:)
+      - ./mongo-data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U INTRA - MPO_user -d INTRA - MPO"]
+      test: test $$(echo "rs.initiate({_id:'rs0',members:[{_id:0,host:\"localhost:27018\"}]}).ok || rs.status().ok" | mongosh --port 27018 --quiet) -eq 1
       interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  INTRA - MPO_pgdata:
-    driver: local
+      start_period: 30s

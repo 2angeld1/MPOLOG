@@ -15,25 +15,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No hay datos válidos para importar' }, { status: 400 });
     }
 
-    // Insertar en bloque
-    // Asumimos que el payload de miembros viene limpio desde el frontend tras parsear el CSV
-    const result = await prisma.miembroDirectorio.createMany({
-      data: miembros.map((m: any) => ({
-        nombre: m.nombre,
-        edad: parseInt(m.edad, 10) || 0,
-        telefono: String(m.telefono || ''),
-        tiempoIglesia: m.tiempoIglesia || 'Menos de 1 año',
-        esServidor: m.esServidor === 'true' || m.esServidor === true,
-        dondeSirve: m.dondeSirve || null,
-        parentesco: m.parentesco || null,
-        fotoUrl: m.fotoUrl || null,
-      })),
-      skipDuplicates: false,
-    });
+    // Insertar en bloque (usando loop ya que MongoDB Prisma no soporta createMany con skipDuplicates)
+    const insertedMiembros = [];
+    for (const m of miembros) {
+      const created = await prisma.miembroDirectorio.create({
+        data: {
+          nombre: m.nombre,
+          edad: parseInt(m.edad, 10) || 0,
+          telefono: String(m.telefono || ''),
+          tiempoIglesia: m.tiempoIglesia || 'Menos de 1 año',
+          esServidor: m.esServidor === 'true' || m.esServidor === true,
+          dondeSirve: m.dondeSirve || null,
+          parentesco: m.parentesco || null,
+          fotoUrl: m.fotoUrl || null,
+        },
+      });
+      insertedMiembros.push(created);
+    }
 
     return NextResponse.json({ 
-      mensaje: `Se importaron ${result.count} miembros correctamente`,
-      count: result.count 
+      mensaje: `Se importaron ${insertedMiembros.length} miembros correctamente`,
+      count: insertedMiembros.length 
     }, { status: 201 });
   } catch (error) {
     console.error('Error importando miembros:', error);
