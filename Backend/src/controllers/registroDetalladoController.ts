@@ -125,6 +125,38 @@ export const eliminarPersonaDetallada = async (req: Request, res: Response) => {
     }
 };
 
+export const actualizarPersonaPublico = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, metodoPago, comprobantePago } = req.body;
+
+        // Subir foto y/o comprobante a Cloudinary si existe (base64)
+        const fotoUrl = await uploadImage(foto, 'kids_profiles');
+        const comprobanteUrl = await uploadImage(comprobantePago, 'comprobantes_pago');
+
+        const persona = await PersonaDetallada.findByIdAndUpdate(
+            id,
+            { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl, ministerio, asistenciaFamilia, miembrosFamilia, metodoPago, comprobantePago: comprobanteUrl },
+            { new: true }
+        );
+
+        if (!persona) return res.status(404).json({ message: 'Registro no encontrado' });
+        res.json(persona);
+    } catch (error: any) {
+        res.status(500).json({ message: 'Error al actualizar', error: error.message });
+    }
+};
+
+export const eliminarPersonaPublico = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        await PersonaDetallada.findByIdAndDelete(id);
+        res.json({ message: 'Registro eliminado' });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Error al eliminar', error: error.message });
+    }
+};
+
 export const marcarAsistencia = async (req: Request, res: Response) => {
     try {
         const { ids, fecha } = req.body; // ids es un array de IDs de personas, fecha es opcional

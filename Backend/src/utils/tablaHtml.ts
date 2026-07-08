@@ -235,6 +235,8 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             comprobanteBtn = `<a href="${p.comprobantePago}" target="_blank" class="btn-link">Ver Comprobante</a>`;
         }
         
+        const pJson = JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+        
         return `
             <tr>
                 <td><strong>${p.nombre} ${p.apellido}</strong></td>
@@ -249,6 +251,10 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                 <td>${p.metodoPago || '-'}</td>
                 <td style="text-align: center; vertical-align: middle;">
                     ${comprobanteBtn}
+                </td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <button class="action-btn edit-btn" onclick="openEditModal('${p._id}', '${pJson}')">✏️</button>
+                    <button class="action-btn delete-btn" onclick="deleteRecord('${p._id}')">🗑️</button>
                 </td>
             </tr>
         `;
@@ -423,6 +429,46 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             font-size: 16px;
         }
 
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            margin: 0 4px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .delete-btn:hover { background: rgba(255, 0, 0, 0.2); border-color: rgba(255, 0, 0, 0.4); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 30px; width: 90%; max-width: 500px;
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .modal h2 { margin-bottom: 20px; font-size: 24px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px 15px; border-radius: 10px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+            color: white; outline: none;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+        .btn { padding: 10px 20px; border-radius: 10px; cursor: pointer; border: none; font-weight: 600; }
+        .btn-cancel { background: transparent; border: 1px solid var(--border-color); color: white; }
+        .btn-save { background: var(--primary); color: white; }
+
     </style>
 </head>
 <body>
@@ -447,6 +493,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                         <th>Asistencia y Familia</th>
                         <th>Método Pago</th>
                         <th style="text-align: center;">Comprobante</th>
+                        <th style="text-align: center;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -456,6 +503,100 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             ${personas.length === 0 ? '<div class="empty-state">No hay personas registradas en el sistema todavía.</div>' : ''}
         </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModalOverlay">
+        <div class="modal">
+            <h2>Editar Registro</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" id="editApellido" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="editTelefono" required>
+                </div>
+                <div class="form-group">
+                    <label>Ministerio</label>
+                    <select id="editMinisterio">
+                        <option value="Ministerio de Logística">Ministerio de Logística</option>
+                        <option value="Ministerio de Media">Ministerio de Media</option>
+                        <option value="Ministerio de Exploradores">Ministerio de Exploradores</option>
+                        <option value="Otro">Otro Ministerio</option>
+                        <option value="Ninguno">Ninguno</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-save">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(id, dataStr) {
+            const data = JSON.parse(dataStr);
+            document.getElementById('editId').value = id;
+            document.getElementById('editNombre').value = data.nombre || '';
+            document.getElementById('editApellido').value = data.apellido || '';
+            document.getElementById('editTelefono').value = data.telefono || '';
+            document.getElementById('editMinisterio').value = data.ministerio || 'Ninguno';
+            document.getElementById('editModalOverlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('editModalOverlay').style.display = 'none';
+        }
+
+        async function deleteRecord(id) {
+            if(confirm('¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.')) {
+                try {
+                    const response = await fetch('/api/registro-detallado/publico/' + id, { method: 'DELETE' });
+                    if(response.ok) {
+                        alert('Eliminado exitosamente');
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar');
+                    }
+                } catch(e) {
+                    alert('Error de conexión');
+                }
+            }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const payload = {
+                nombre: document.getElementById('editNombre').value,
+                apellido: document.getElementById('editApellido').value,
+                telefono: document.getElementById('editTelefono').value,
+                ministerio: document.getElementById('editMinisterio').value
+            };
+            try {
+                const response = await fetch('/api/registro-detallado/publico/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if(response.ok) {
+                    alert('Actualizado exitosamente');
+                    location.reload();
+                } else {
+                    alert('Error al actualizar');
+                }
+            } catch(e) {
+                alert('Error de conexión');
+            }
+        });
+    </script>
 </body>
 </html>`;
 };

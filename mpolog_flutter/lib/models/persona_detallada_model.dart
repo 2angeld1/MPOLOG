@@ -16,6 +16,11 @@ class PersonaDetalladaModel {
   final List<DateTime> asistencias;
   final String departamento;
   final String? foto;
+  final String? ministerio;
+  final String? asistenciaFamilia;
+  final int? miembrosFamilia;
+  final String? metodoPago;
+  final String? comprobantePago;
 
   PersonaDetalladaModel({
     required this.id,
@@ -35,6 +40,11 @@ class PersonaDetalladaModel {
     this.asistencias = const [],
     this.departamento = 'Teen',
     this.foto,
+    this.ministerio,
+    this.asistenciaFamilia,
+    this.miembrosFamilia,
+    this.metodoPago,
+    this.comprobantePago,
   });
 
   factory PersonaDetalladaModel.fromJson(Map<String, dynamic> json) {
@@ -59,6 +69,11 @@ class PersonaDetalladaModel {
           [],
       departamento: json['departamento'] ?? 'Teen',
       foto: json['foto'],
+      ministerio: json['ministerio'],
+      asistenciaFamilia: json['asistenciaFamilia'],
+      miembrosFamilia: json['miembrosFamilia'],
+      metodoPago: json['metodoPago'],
+      comprobantePago: json['comprobantePago'],
     );
   }
 
@@ -79,6 +94,11 @@ class PersonaDetalladaModel {
       'alergiasMedicamentos': alergiasMedicamentos,
       'departamento': departamento,
       if (foto != null) 'foto': foto,
+      'ministerio': ministerio,
+      'asistenciaFamilia': asistenciaFamilia,
+      'miembrosFamilia': miembrosFamilia,
+      'metodoPago': metodoPago,
+      'comprobantePago': comprobantePago,
     };
   }
 

@@ -11,6 +11,7 @@ import '../styles/app_text_styles.dart';
 import '../widgets/glass_text_field.dart';
 import '../widgets/glass_container.dart';
 import 'detalle_evento_page.dart';
+import 'directorio_campamento_page.dart';
 import '../models/evento_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -323,11 +324,13 @@ class _EventosPageState extends State<EventosPage> {
                IconButton(
                  icon: const Icon(Icons.contact_page_rounded, color: Colors.white70),
                  tooltip: 'Ver Directorio Campamento',
-                 onPressed: () async {
-                   final url = Uri.parse('${ApiConstants.baseUrl.replaceAll('/api', '')}/directorio-campamento');
-                   if (await canLaunchUrl(url)) {
-                     await launchUrl(url, mode: LaunchMode.externalApplication);
-                   }
+                 onPressed: () {
+                   Navigator.push(
+                     context,
+                     MaterialPageRoute(
+                       builder: (context) => const DirectorioCampamentoPage(),
+                     ),
+                   );
                  },
                ),
                IconButton(onPressed: () => store.fetchEventos(), icon: const Icon(Icons.refresh_rounded, color: Colors.white70)),
