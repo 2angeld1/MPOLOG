@@ -1587,13 +1587,11 @@ export const getCampamentoFormHtml = () => {
                         </div>
                     </div>
 
-                    <div class="input-group full-width">
-                        <label for="montoPago">Monto pagado ($) *</label>
-                        <div class="input-wrapper">
-                            <input type="number" step="0.01" min="0" id="montoPago" name="montoPago" placeholder="Ej: 20.00" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-                            </div>
+                    <div class="input-group full-width" style="margin-bottom: 24px;">
+                        <label for="montoPago" style="color: var(--success); font-weight: 600; font-size: 16px; margin-bottom: 12px; display: block;">Monto pagado *</label>
+                        <div class="input-wrapper amount-wrapper" style="position: relative;">
+                            <span class="currency-symbol" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 24px; font-weight: 800; color: var(--success); z-index: 2;">$</span>
+                            <input type="number" step="0.01" min="0" id="montoPago" name="montoPago" placeholder="0.00" required style="font-size: 28px; font-weight: 800; padding-left: 50px; height: 70px; color: var(--success); background: rgba(0, 245, 212, 0.05); border: 2px solid rgba(0, 245, 212, 0.3); border-radius: 16px; transition: all 0.3s; width: 100%; box-sizing: border-box;" onfocus="this.style.borderColor='var(--success)'; this.style.boxShadow='0 0 15px rgba(0,245,212,0.3)';" onblur="this.style.borderColor='rgba(0, 245, 212, 0.3)'; this.style.boxShadow='none';">
                         </div>
                     </div>
 
