@@ -1438,6 +1438,11 @@ export const getCampamentoFormHtml = () => {
             color: var(--text-muted);
             margin-top: 4px;
         }
+        
+        select option {
+            background-color: var(--bg-dark);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -1499,9 +1504,13 @@ export const getCampamentoFormHtml = () => {
                         <div class="input-wrapper select-wrapper">
                             <select id="ministerio" name="ministerio" required>
                                 <option value="" disabled selected>Seleccione un ministerio</option>
-                                <option value="Ministerio de Logística">Ministerio de Log\u00edstica</option>
-                                <option value="Ministerio de Media">Ministerio de Media</option>
-                                <option value="Ministerio de Exploradores">Ministerio de Exploradores</option>
+                                <option value="Genesis">Genesis</option>
+                                <option value="JEF">JEF</option>
+                                <option value="Casa de Luz">Casa de Luz</option>
+                                <option value="Cafetería">Cafeter\u00eda</option>
+                                <option value="Música">M\u00fasica</option>
+                                <option value="Seguridad">Seguridad</option>
+                                <option value="Protocolo">Protocolo</option>
                                 <option value="Otro">Otro Ministerio</option>
                                 <option value="Ninguno">Ninguno</option>
                             </select>
@@ -1556,9 +1565,9 @@ export const getCampamentoFormHtml = () => {
                         <label>M\u00e9todo de pago utilizado *</label>
                         <div class="radio-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <label class="radio-option" style="margin: 0; padding: 10px;">
-                                <input type="radio" name="metodoPago" value="Yape" required>
+                                <input type="radio" name="metodoPago" value="Yappy" required>
                                 <div class="radio-circle" style="min-width: 20px;"></div>
-                                <span class="radio-label">Yape</span>
+                                <span class="radio-label">Yappy</span>
                             </label>
                             <label class="radio-option" style="margin: 0; padding: 10px;">
                                 <input type="radio" name="metodoPago" value="Transferencia">
@@ -1575,6 +1584,16 @@ export const getCampamentoFormHtml = () => {
                                 <div class="radio-circle" style="min-width: 20px;"></div>
                                 <span class="radio-label">Otro m\u00e9todo</span>
                             </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label for="montoPago">Monto pagado ($) *</label>
+                        <div class="input-wrapper">
+                            <input type="number" step="0.01" min="0" id="montoPago" name="montoPago" placeholder="Ej: 20.00" required>
+                            <div class="input-icon">
+                                <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                            </div>
                         </div>
                     </div>
 
@@ -1661,6 +1680,7 @@ export const getCampamentoFormHtml = () => {
                     asistenciaFamilia: document.querySelector('input[name="asistenciaFamilia"]:checked').value,
                     miembrosFamilia: document.getElementById('miembrosFamilia').value ? parseInt(document.getElementById('miembrosFamilia').value) : 0,
                     metodoPago: document.querySelector('input[name="metodoPago"]:checked').value,
+                    montoPago: parseFloat(document.getElementById('montoPago').value) || 0,
                     comprobantePago: comprobanteBase64,
                     departamento: 'Campamento'
                 };

@@ -20,6 +20,7 @@ class PersonaDetalladaModel {
   final String? asistenciaFamilia;
   final int? miembrosFamilia;
   final String? metodoPago;
+  final double? montoPago;
   final String? comprobantePago;
 
   PersonaDetalladaModel({
@@ -44,6 +45,7 @@ class PersonaDetalladaModel {
     this.asistenciaFamilia,
     this.miembrosFamilia,
     this.metodoPago,
+    this.montoPago,
     this.comprobantePago,
   });
 
@@ -73,6 +75,7 @@ class PersonaDetalladaModel {
       asistenciaFamilia: json['asistenciaFamilia'],
       miembrosFamilia: json['miembrosFamilia'],
       metodoPago: json['metodoPago'],
+      montoPago: json['montoPago'] != null ? (json['montoPago'] as num).toDouble() : null,
       comprobantePago: json['comprobantePago'],
     );
   }
@@ -98,6 +101,7 @@ class PersonaDetalladaModel {
       'asistenciaFamilia': asistenciaFamilia,
       'miembrosFamilia': miembrosFamilia,
       'metodoPago': metodoPago,
+      'montoPago': montoPago,
       'comprobantePago': comprobantePago,
     };
   }

@@ -25,6 +25,7 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
     final nombreCtrl = TextEditingController(text: persona.nombre);
     final apellidoCtrl = TextEditingController(text: persona.apellido);
     final telefonoCtrl = TextEditingController(text: persona.telefono);
+    final montoCtrl = TextEditingController(text: persona.montoPago?.toString() ?? '');
     String ministerio = persona.ministerio ?? 'Ninguno';
 
     showDialog(
@@ -59,15 +60,25 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(labelText: 'Ministerio', labelStyle: TextStyle(color: Colors.white54)),
                   items: const [
-                    DropdownMenuItem(value: 'Ministerio de Logística', child: Text('Ministerio de Logística')),
-                    DropdownMenuItem(value: 'Ministerio de Media', child: Text('Ministerio de Media')),
-                    DropdownMenuItem(value: 'Ministerio de Exploradores', child: Text('Ministerio de Exploradores')),
+                    DropdownMenuItem(value: 'Genesis', child: Text('Genesis')),
+                    DropdownMenuItem(value: 'JEF', child: Text('JEF')),
+                    DropdownMenuItem(value: 'Casa de Luz', child: Text('Casa de Luz')),
+                    DropdownMenuItem(value: 'Cafetería', child: Text('Cafetería')),
+                    DropdownMenuItem(value: 'Música', child: Text('Música')),
+                    DropdownMenuItem(value: 'Seguridad', child: Text('Seguridad')),
+                    DropdownMenuItem(value: 'Protocolo', child: Text('Protocolo')),
                     DropdownMenuItem(value: 'Otro', child: Text('Otro Ministerio')),
                     DropdownMenuItem(value: 'Ninguno', child: Text('Ninguno')),
                   ],
                   onChanged: (val) {
                     if (val != null) ministerio = val;
                   },
+                ),
+                TextField(
+                  controller: montoCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: 'Monto (\)', labelStyle: TextStyle(color: Colors.white54)),
                 ),
               ],
             ),
@@ -87,6 +98,7 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
                     'apellido': apellidoCtrl.text,
                     'telefono': telefonoCtrl.text,
                     'ministerio': ministerio,
+                    'montoPago': double.tryParse(montoCtrl.text) ?? 0.0,
                   },
                 );
                 if (mounted) {
@@ -196,7 +208,7 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Pago:', style: TextStyle(color: Colors.white54)),
-                        Text(p.metodoPago ?? '-', style: const TextStyle(color: Colors.white)),
+                        Text('${p.metodoPago ?? '-'} ${p.montoPago != null ? '($${p.montoPago})' : ''}', style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                     if (p.comprobantePago != null) ...[

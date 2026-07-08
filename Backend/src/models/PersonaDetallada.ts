@@ -22,6 +22,7 @@ export interface IPersonaDetallada extends Document {
     asistenciaFamilia?: string;
     miembrosFamilia?: number;
     metodoPago?: string;
+    montoPago?: number;
     comprobantePago?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -127,6 +128,10 @@ const PersonaDetalladaSchema: Schema = new Schema({
         type: String,
         required: false,
         trim: true
+    },
+    montoPago: {
+        type: Number,
+        required: false
     },
     comprobantePago: {
         type: String,

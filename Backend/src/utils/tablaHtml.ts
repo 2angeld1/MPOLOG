@@ -248,7 +248,10 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                     ${p.asistenciaFamilia === 'Solo' ? 'Solo(a)' : 'Con Familia'} 
                     ${p.miembrosFamilia > 0 ? `(+${p.miembrosFamilia})` : ''}
                 </td>
-                <td>${p.metodoPago || '-'}</td>
+                <td>
+                    ${p.metodoPago || '-'}
+                    ${p.montoPago ? `<br><small style="color:var(--success)">$${p.montoPago}</small>` : ''}
+                </td>
                 <td style="text-align: center; vertical-align: middle;">
                     ${comprobanteBtn}
                 </td>
@@ -525,12 +528,20 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                 <div class="form-group">
                     <label>Ministerio</label>
                     <select id="editMinisterio">
-                        <option value="Ministerio de Logística">Ministerio de Logística</option>
-                        <option value="Ministerio de Media">Ministerio de Media</option>
-                        <option value="Ministerio de Exploradores">Ministerio de Exploradores</option>
+                        <option value="Genesis">Genesis</option>
+                        <option value="JEF">JEF</option>
+                        <option value="Casa de Luz">Casa de Luz</option>
+                        <option value="Cafetería">Cafeter\u00eda</option>
+                        <option value="Música">M\u00fasica</option>
+                        <option value="Seguridad">Seguridad</option>
+                        <option value="Protocolo">Protocolo</option>
                         <option value="Otro">Otro Ministerio</option>
                         <option value="Ninguno">Ninguno</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Monto Pagado ($)</label>
+                    <input type="number" step="0.01" min="0" id="editMontoPago">
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -548,6 +559,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             document.getElementById('editApellido').value = data.apellido || '';
             document.getElementById('editTelefono').value = data.telefono || '';
             document.getElementById('editMinisterio').value = data.ministerio || 'Ninguno';
+            document.getElementById('editMontoPago').value = data.montoPago || '';
             document.getElementById('editModalOverlay').style.display = 'flex';
         }
 
@@ -578,7 +590,8 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                 nombre: document.getElementById('editNombre').value,
                 apellido: document.getElementById('editApellido').value,
                 telefono: document.getElementById('editTelefono').value,
-                ministerio: document.getElementById('editMinisterio').value
+                ministerio: document.getElementById('editMinisterio').value,
+                montoPago: parseFloat(document.getElementById('editMontoPago').value) || 0
             };
             try {
                 const response = await fetch('/api/registro-detallado/publico/' + id, {
