@@ -1443,6 +1443,15 @@ export const getCampamentoFormHtml = () => {
             background-color: var(--bg-dark);
             color: white;
         }
+        /* Remove arrows from number input */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
