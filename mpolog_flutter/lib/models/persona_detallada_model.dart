@@ -3,6 +3,7 @@ class PersonaDetalladaModel {
   final String nombre;
   final String apellido;
   final String telefono;
+  final String? sexo;
   final int? edad;
   final String? escuela;
   final String? tipoSangre;
@@ -19,6 +20,7 @@ class PersonaDetalladaModel {
   final String? ministerio;
   final String? asistenciaFamilia;
   final int? miembrosFamilia;
+  final String? necesitaTransporte;
   final String? metodoPago;
   final double? montoPago;
   final String? comprobantePago;
@@ -28,6 +30,7 @@ class PersonaDetalladaModel {
     required this.nombre,
     required this.apellido,
     required this.telefono,
+    this.sexo,
     this.edad,
     this.escuela,
     this.tipoSangre,
@@ -44,6 +47,7 @@ class PersonaDetalladaModel {
     this.ministerio,
     this.asistenciaFamilia,
     this.miembrosFamilia,
+    this.necesitaTransporte,
     this.metodoPago,
     this.montoPago,
     this.comprobantePago,
@@ -55,6 +59,7 @@ class PersonaDetalladaModel {
       nombre: json['nombre'] ?? '',
       apellido: json['apellido'] ?? '',
       telefono: json['telefono'] ?? '',
+      sexo: json['sexo'],
       edad: json['edad'] is int ? json['edad'] : (json['edad'] != null ? int.tryParse(json['edad'].toString()) : null),
       escuela: json['escuela'],
       tipoSangre: json['tipoSangre'],
@@ -74,6 +79,7 @@ class PersonaDetalladaModel {
       ministerio: json['ministerio'],
       asistenciaFamilia: json['asistenciaFamilia'],
       miembrosFamilia: json['miembrosFamilia'],
+      necesitaTransporte: json['necesitaTransporte'],
       metodoPago: json['metodoPago'],
       montoPago: json['montoPago'] != null ? (json['montoPago'] as num).toDouble() : null,
       comprobantePago: json['comprobantePago'],
@@ -85,6 +91,7 @@ class PersonaDetalladaModel {
       'nombre': nombre,
       'apellido': apellido,
       'telefono': telefono,
+      'sexo': sexo,
       'edad': edad,
       'escuela': escuela,
       'tipoSangre': tipoSangre,
@@ -100,6 +107,7 @@ class PersonaDetalladaModel {
       'ministerio': ministerio,
       'asistenciaFamilia': asistenciaFamilia,
       'miembrosFamilia': miembrosFamilia,
+      'necesitaTransporte': necesitaTransporte,
       'metodoPago': metodoPago,
       'montoPago': montoPago,
       'comprobantePago': comprobantePago,

@@ -25,8 +25,10 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
     final nombreCtrl = TextEditingController(text: persona.nombre);
     final apellidoCtrl = TextEditingController(text: persona.apellido);
     final telefonoCtrl = TextEditingController(text: persona.telefono);
+    final ministerioCtrl = TextEditingController(text: persona.ministerio ?? '');
     final montoCtrl = TextEditingController(text: persona.montoPago?.toString() ?? '');
-    String ministerio = persona.ministerio ?? 'Ninguno';
+    String sexo = persona.sexo ?? 'Masculino';
+    String transporte = persona.necesitaTransporte ?? 'No';
 
     showDialog(
       context: context,
@@ -55,23 +57,34 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: ministerio.isEmpty ? 'Ninguno' : ministerio,
+                  value: sexo.isEmpty ? 'Masculino' : sexo,
                   dropdownColor: AppColors.cardBackground,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(labelText: 'Ministerio', labelStyle: TextStyle(color: Colors.white54)),
+                  decoration: const InputDecoration(labelText: 'Sexo', labelStyle: TextStyle(color: Colors.white54)),
                   items: const [
-                    DropdownMenuItem(value: 'Genesis', child: Text('Genesis')),
-                    DropdownMenuItem(value: 'JEF', child: Text('JEF')),
-                    DropdownMenuItem(value: 'Casa de Luz', child: Text('Casa de Luz')),
-                    DropdownMenuItem(value: 'Cafetería', child: Text('Cafetería')),
-                    DropdownMenuItem(value: 'Música', child: Text('Música')),
-                    DropdownMenuItem(value: 'Seguridad', child: Text('Seguridad')),
-                    DropdownMenuItem(value: 'Protocolo', child: Text('Protocolo')),
-                    DropdownMenuItem(value: 'Otro', child: Text('Otro Ministerio')),
-                    DropdownMenuItem(value: 'Ninguno', child: Text('Ninguno')),
+                    DropdownMenuItem(value: 'Masculino', child: Text('Masculino')),
+                    DropdownMenuItem(value: 'Femenino', child: Text('Femenino')),
                   ],
                   onChanged: (val) {
-                    if (val != null) ministerio = val;
+                    if (val != null) sexo = val;
+                  },
+                ),
+                TextField(
+                  controller: ministerioCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: 'Ministerios (separados por coma)', labelStyle: TextStyle(color: Colors.white54)),
+                ),
+                DropdownButtonFormField<String>(
+                  value: transporte.isEmpty ? 'No' : transporte,
+                  dropdownColor: AppColors.cardBackground,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(labelText: 'Transporte', labelStyle: TextStyle(color: Colors.white54)),
+                  items: const [
+                    DropdownMenuItem(value: 'Sí', child: Text('Sí')),
+                    DropdownMenuItem(value: 'No', child: Text('No')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) transporte = val;
                   },
                 ),
                 TextField(
@@ -97,7 +110,9 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
                     'nombre': nombreCtrl.text,
                     'apellido': apellidoCtrl.text,
                     'telefono': telefonoCtrl.text,
-                    'ministerio': ministerio,
+                    'sexo': sexo,
+                    'ministerio': ministerioCtrl.text,
+                    'necesitaTransporte': transporte,
                     'montoPago': double.tryParse(montoCtrl.text) ?? 0.0,
                   },
                 );
@@ -201,6 +216,22 @@ class _DirectorioCampamentoPageState extends State<DirectorioCampamentoPage> {
                       children: [
                         const Text('Asistencia:', style: TextStyle(color: Colors.white54)),
                         Text('${p.asistenciaFamilia ?? 'Solo'} ${p.miembrosFamilia != null && p.miembrosFamilia! > 0 ? '(+${p.miembrosFamilia})' : ''}', style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Sexo:', style: TextStyle(color: Colors.white54)),
+                        Text(p.sexo ?? '-', style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Transporte:', style: TextStyle(color: Colors.white54)),
+                        Text(p.necesitaTransporte ?? '-', style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                     const SizedBox(height: 8),

@@ -4,6 +4,7 @@ export interface IPersonaDetallada extends Document {
     nombre: string;
     apellido: string;
     telefono: string;
+    sexo?: string;
     edad?: number;
     escuela?: string;
     tipoSangre?: string;
@@ -21,6 +22,7 @@ export interface IPersonaDetallada extends Document {
     ministerio?: string;
     asistenciaFamilia?: string;
     miembrosFamilia?: number;
+    necesitaTransporte?: string;
     metodoPago?: string;
     montoPago?: number;
     comprobantePago?: string;
@@ -42,6 +44,11 @@ const PersonaDetalladaSchema: Schema = new Schema({
     telefono: {
         type: String,
         required: true,
+        trim: true
+    },
+    sexo: {
+        type: String,
+        required: false,
         trim: true
     },
     edad: {
@@ -123,6 +130,11 @@ const PersonaDetalladaSchema: Schema = new Schema({
     miembrosFamilia: {
         type: Number,
         required: false
+    },
+    necesitaTransporte: {
+        type: String,
+        required: false,
+        trim: true
     },
     metodoPago: {
         type: String,
