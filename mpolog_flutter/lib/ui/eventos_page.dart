@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../logic/eventos_store.dart';
+import '../data/api_constants.dart';
 import '../styles/app_colors.dart';
 import '../styles/app_text_styles.dart';
 import '../widgets/glass_text_field.dart';
@@ -318,6 +320,16 @@ class _EventosPageState extends State<EventosPage> {
               ),
             ),
             actions: [
+               IconButton(
+                 icon: const Icon(Icons.contact_page_rounded, color: Colors.white70),
+                 tooltip: 'Ver Directorio Campamento',
+                 onPressed: () async {
+                   final url = Uri.parse('${ApiConstants.baseUrl.replaceAll('/api', '')}/directorio-campamento');
+                   if (await canLaunchUrl(url)) {
+                     await launchUrl(url, mode: LaunchMode.externalApplication);
+                   }
+                 },
+               ),
                IconButton(onPressed: () => store.fetchEventos(), icon: const Icon(Icons.refresh_rounded, color: Colors.white70)),
             ],
           ),

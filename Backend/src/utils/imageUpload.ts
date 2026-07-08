@@ -14,15 +14,15 @@ export const uploadImage = async (imageContent: string | null | undefined, folde
         return imageContent;
     }
 
-    // Si es base64, la subimos
-    if (imageContent.startsWith('data:image')) {
+    // Si es base64, la subimos (imagen o PDF)
+    if (imageContent.startsWith('data:image') || imageContent.startsWith('data:application/pdf')) {
         try {
-            console.log('Subiendo imagen a Cloudinary, longitud:', imageContent.length);
+            console.log('Subiendo archivo a Cloudinary, longitud:', imageContent.length);
             const uploadResponse = await cloudinary.uploader.upload(imageContent, {
                 folder: folder,
-                resource_type: 'image', // Cambiado de 'auto' a 'image' para ser más específicos
+                resource_type: 'auto', // Usar auto para permitir imágenes y PDFs
             });
-            console.log('Imagen subida exitosamente:', uploadResponse.secure_url);
+            console.log('Archivo subido exitosamente:', uploadResponse.secure_url);
             return uploadResponse.secure_url;
         } catch (error: any) {
             console.error('Error al subir imagen a Cloudinary:', error);

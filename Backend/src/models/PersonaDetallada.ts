@@ -18,6 +18,11 @@ export interface IPersonaDetallada extends Document {
     departamento: string;
     usuario?: mongoose.Types.ObjectId;
     foto?: string;
+    ministerio?: string;
+    asistenciaFamilia?: string;
+    miembrosFamilia?: number;
+    metodoPago?: string;
+    comprobantePago?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -101,6 +106,29 @@ const PersonaDetalladaSchema: Schema = new Schema({
         required: false
     },
     foto: {
+        type: String,
+        required: false
+    },
+    ministerio: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    asistenciaFamilia: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    miembrosFamilia: {
+        type: Number,
+        required: false
+    },
+    metodoPago: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    comprobantePago: {
         type: String,
         required: false
     }

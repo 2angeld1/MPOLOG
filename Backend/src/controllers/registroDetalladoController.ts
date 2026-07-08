@@ -4,11 +4,12 @@ import { uploadImage } from '../utils/imageUpload';
 
 export const crearPersonaDetallada = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, metodoPago, comprobantePago } = req.body;
         const userId = (req as any).userId;
 
-        // Subir foto a Cloudinary si existe
+        // Subir foto o comprobante a Cloudinary si existe
         const fotoUrl = await uploadImage(foto, 'kids_profiles');
+        const comprobanteUrl = await uploadImage(comprobantePago, 'comprobantes_pago');
 
         const persona = new PersonaDetallada({
             nombre,
@@ -26,7 +27,12 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
             alergiasMedicamentos,
             departamento: departamento || 'Teen',
             usuario: userId,
-            foto: fotoUrl
+            foto: fotoUrl,
+            ministerio,
+            asistenciaFamilia,
+            miembrosFamilia,
+            metodoPago,
+            comprobantePago: comprobanteUrl
         });
 
         await persona.save();
@@ -38,10 +44,11 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
 
 export const crearPersonaPublico = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, metodoPago, comprobantePago } = req.body;
 
-        // Subir foto a Cloudinary si existe
+        // Subir foto o comprobante a Cloudinary si existe
         const fotoUrl = await uploadImage(foto, 'kids_profiles');
+        const comprobanteUrl = await uploadImage(comprobantePago, 'comprobantes_pago');
 
         const persona = new PersonaDetallada({
             nombre,
@@ -58,7 +65,12 @@ export const crearPersonaPublico = async (req: Request, res: Response) => {
             direccion,
             alergiasMedicamentos,
             departamento: departamento || 'Teen',
-            foto: fotoUrl
+            foto: fotoUrl,
+            ministerio,
+            asistenciaFamilia,
+            miembrosFamilia,
+            metodoPago,
+            comprobantePago: comprobanteUrl
         });
 
         await persona.save();
@@ -84,14 +96,15 @@ export const obtenerPersonasDetalladas = async (req: Request, res: Response) => 
 export const actualizarPersonaDetallada = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto } = req.body;
+        const { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, metodoPago, comprobantePago } = req.body;
 
-        // Subir foto a Cloudinary si existe (base64)
+        // Subir foto y/o comprobante a Cloudinary si existe (base64)
         const fotoUrl = await uploadImage(foto, 'kids_profiles');
+        const comprobanteUrl = await uploadImage(comprobantePago, 'comprobantes_pago');
 
         const persona = await PersonaDetallada.findByIdAndUpdate(
             id,
-            { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl },
+            { nombre, apellido, telefono, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl, ministerio, asistenciaFamilia, miembrosFamilia, metodoPago, comprobantePago: comprobanteUrl },
             { new: true }
         );
 
