@@ -74,6 +74,7 @@ model Archivo {
   tamano          Int
   subidoPorId     String   // MongoDB ObjectId
   subidoPorNombre String? // Opcional, cachear nombre para no hacer join a Mongo
+  carpeta         String   @default("/")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -107,11 +108,12 @@ model MiembroDirectorio {
 }
 
 model UsuarioSistema {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  nombre    String
-  email     String   @unique
-  password  String
-  rol       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  nombre              String
+  email               String   @unique
+  password            String
+  rol                 String
+  miembroDirectorioId String?  @db.ObjectId
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

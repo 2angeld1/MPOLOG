@@ -25,10 +25,51 @@ export async function PUT(
     if (liderIds !== undefined) updateData.liderIds = liderIds;
     if (parentId !== undefined) updateData.parentId = parentId === '' ? null : parentId;
 
+    const oldMinisterio = await prisma.ministerio.findUnique({ where: { id } });
+
     const ministerioActualizado = await prisma.ministerio.update({
       where: { id },
       data: updateData
     });
+
+    // Sincronizar MiembrosDirectorio si se actualizó la lista de miembrosIds
+    if (miembrosIds !== undefined && oldMinisterio) {
+      const oldIds = oldMinisterio.miembrosIds;
+      const newIds = miembrosIds as string[];
+
+      const addedIds = newIds.filter(x => !oldIds.includes(x));
+      const removedIds = oldIds.filter(x => !newIds.includes(x));
+
+      // Agregar nombre del ministerio a los nuevos miembros
+      if (addedIds.length > 0) {
+        const addedMembers = await prisma.miembroDirectorio.findMany({ where: { id: { in: addedIds } } });
+        for (const m of addedMembers) {
+          const currentAreas = m.dondeSirve ? m.dondeSirve.split(',').map(s => s.trim()).filter(Boolean) : [];
+          if (!currentAreas.includes(ministerioActualizado.nombre)) {
+            currentAreas.push(ministerioActualizado.nombre);
+            await prisma.miembroDirectorio.update({
+              where: { id: m.id },
+              data: { dondeSirve: currentAreas.join(', ') }
+            });
+          }
+        }
+      }
+
+      // Remover nombre del ministerio de los miembros que salieron
+      if (removedIds.length > 0) {
+        const removedMembers = await prisma.miembroDirectorio.findMany({ where: { id: { in: removedIds } } });
+        for (const m of removedMembers) {
+          if (m.dondeSirve) {
+            const currentAreas = m.dondeSirve.split(',').map(s => s.trim()).filter(Boolean);
+            const newAreas = currentAreas.filter(a => a !== ministerioActualizado.nombre && a !== oldMinisterio.nombre);
+            await prisma.miembroDirectorio.update({
+              where: { id: m.id },
+              data: { dondeSirve: newAreas.join(', ') }
+            });
+          }
+        }
+      }
+    }
 
     return NextResponse.json({ mensaje: 'Ministerio actualizado', ministerio: ministerioActualizado });
   } catch (error) {

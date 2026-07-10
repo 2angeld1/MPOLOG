@@ -92,6 +92,21 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Sincronizar con Ministerios
+    if (nuevoMiembro.esServidor && nuevoMiembro.dondeSirve) {
+      const ministeriosNombres = nuevoMiembro.dondeSirve.split(',').map((s: string) => s.trim()).filter(Boolean);
+      const ministerios = await prisma.ministerio.findMany();
+      
+      for (const min of ministerios) {
+        if (ministeriosNombres.includes(min.nombre) && !min.miembrosIds.includes(nuevoMiembro.id)) {
+          await prisma.ministerio.update({
+            where: { id: min.id },
+            data: { miembrosIds: { push: nuevoMiembro.id } }
+          });
+        }
+      }
+    }
+
     return NextResponse.json({ miembro: nuevoMiembro }, { status: 201 });
   } catch (error) {
     console.error('Error al crear miembro:', error);

@@ -26,6 +26,11 @@ export function useMinisterios() {
   const [miembrosSeleccionados, setMiembrosSeleccionados] = useState<string[]>([]);
   const [busquedaMiembros, setBusquedaMiembros] = useState('');
 
+  // States Modal Líderes
+  const [showLeadersModal, setShowLeadersModal] = useState(false);
+  const [lideresSeleccionados, setLideresSeleccionados] = useState<string[]>([]);
+  const [busquedaLideres, setBusquedaLideres] = useState('');
+
   const fetchMinisterios = useCallback(async () => {
     try {
       const res = await fetch('/api/ministerios');
@@ -119,6 +124,8 @@ export function useMinisterios() {
     }
   };
 
+  // ── Miembros ──────────────────────────────────────────────
+
   const handleOpenManageMembers = (min: IMinisterio) => {
     setSelectedMinisterio(min);
     setMiembrosSeleccionados([...(min.miembrosIds || [])]);
@@ -161,6 +168,51 @@ export function useMinisterios() {
     m.nombre.toLowerCase().includes(busquedaMiembros.toLowerCase())
   );
 
+  // ── Líderes ───────────────────────────────────────────────
+
+  const handleOpenManageLeaders = (min: IMinisterio) => {
+    setSelectedMinisterio(min);
+    setLideresSeleccionados([...(min.liderIds || [])]);
+    setBusquedaLideres('');
+    setShowLeadersModal(true);
+  };
+
+  const handleToggleLeader = (id: string) => {
+    if (lideresSeleccionados.includes(id)) {
+      setLideresSeleccionados(prev => prev.filter(l => l !== id));
+    } else {
+      setLideresSeleccionados(prev => [...prev, id]);
+    }
+  };
+
+  const handleSaveLeaders = async () => {
+    if (!selectedMinisterio) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/ministerios/${selectedMinisterio.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ liderIds: lideresSeleccionados })
+      });
+      if (res.ok) {
+        toast.success('Líderes actualizados correctamente');
+        setShowLeadersModal(false);
+        fetchMinisterios();
+      } else {
+        toast.error('Error al guardar líderes');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Miembros filtrados del ministerio seleccionado (para el modal de líderes)
+  const miembrosDelMinisterio = selectedMinisterio
+    ? todosLosMiembros.filter(m => selectedMinisterio.miembrosIds?.includes(m._id))
+    : [];
+
   return {
     ministerios,
     loading,
@@ -170,6 +222,7 @@ export function useMinisterios() {
     submitting,
     formData,
     setFormData,
+    // Miembros
     showMembersModal,
     setShowMembersModal,
     selectedMinisterio,
@@ -183,6 +236,16 @@ export function useMinisterios() {
     handleOpenManageMembers,
     handleToggleMember,
     handleSaveMembers,
-    miembrosFiltrados
+    miembrosFiltrados,
+    // Líderes
+    showLeadersModal,
+    setShowLeadersModal,
+    lideresSeleccionados,
+    busquedaLideres,
+    setBusquedaLideres,
+    handleOpenManageLeaders,
+    handleToggleLeader,
+    handleSaveLeaders,
+    miembrosDelMinisterio,
   };
 }

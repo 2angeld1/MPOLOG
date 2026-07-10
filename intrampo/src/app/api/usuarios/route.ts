@@ -35,6 +35,7 @@ export async function GET() {
           nombre: true,
           email: true,
           rol: true,
+          miembroDirectorioId: true,
           createdAt: true,
         }
       });
@@ -46,6 +47,7 @@ export async function GET() {
       email: u.email,
       rol: u.rol,
       roles: [u.rol],
+      miembroDirectorioId: u.miembroDirectorioId,
       createdAt: u.createdAt,
       source: 'intrampo'
     }));
@@ -69,11 +71,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { nombre, email, rol } = await request.json();
+    const { miembroDirectorioId, email, rol } = await request.json();
 
-    if (!nombre || !email || !rol) {
-      return NextResponse.json({ error: 'Nombre, email y rol son requeridos' }, { status: 400 });
+    if (!miembroDirectorioId || !email || !rol) {
+      return NextResponse.json({ error: 'Debes seleccionar una persona del directorio, asignar email y rol' }, { status: 400 });
     }
+
+    // Buscar la persona del directorio
+    const miembro = await prisma.miembroDirectorio.findUnique({ where: { id: miembroDirectorioId } });
+    if (!miembro) {
+      return NextResponse.json({ error: 'Persona del directorio no encontrada' }, { status: 404 });
+    }
+
+    const nombre = miembro.nombre;
 
     // Check si el correo ya existe en Intrampo DB
     const existingIntrampo = await prisma.usuarioSistema.findUnique({ where: { email } });
@@ -88,6 +98,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'El correo ya existe en el sistema heredado (MongoDB)' }, { status: 400 });
     }
 
+    // Check si esta persona ya tiene acceso
+    const existingAccess = await prisma.usuarioSistema.findFirst({
+      where: { miembroDirectorioId }
+    });
+    if (existingAccess) {
+      return NextResponse.json({ error: 'Esta persona ya tiene acceso al sistema' }, { status: 400 });
+    }
+
     // Generar contraseña aleatoria de 8 caracteres
     const rawPassword = Math.random().toString(36).slice(-8);
 
@@ -100,7 +118,8 @@ export async function POST(request: NextRequest) {
         nombre,
         email,
         password: hashedPassword,
-        rol
+        rol,
+        miembroDirectorioId
       }
     });
 

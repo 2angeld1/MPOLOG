@@ -1,26 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import AppShell from '@/components/AppShell';
-import { useAppContext } from '@/components/AppShell';
-import { FadeIn, ScaleIn, StaggerContainer, StaggerItem } from '@/animations';
-
-export interface IComunicado {
-  id: string;
-  titulo: string;
-  contenido: string;
-  categoria: string;
-  autorId: string;
-  autorNombre: string;
-  fijado: boolean;
-  activo: boolean;
-  imagenUrl?: string | null;
-  archivoUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-type Categoria = 'todos' | 'lideres' | 'servidores' | 'general' | 'admin' | 'pastoral';
+import { FadeIn, StaggerContainer, StaggerItem } from '@/animations';
+import { useComunicados, Categoria } from '@/hooks/useComunicados';
+import ComunicadoFormModal from './ComunicadoFormModal';
+import FileSelectorModal from './FileSelectorModal';
 
 const categorias: { value: Categoria; label: string; emoji: string }[] = [
   { value: 'todos', label: 'Todos', emoji: '📋' },
@@ -43,82 +27,22 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function ComunicadosPage() {
-  const [comunicados, setComunicados] = useState<IComunicado[]>([]);
-  const [filtro, setFiltro] = useState<Categoria>('todos');
-  const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ titulo: '', contenido: '', categoria: 'general' });
-  const [imagen, setImagen] = useState<File | null>(null);
-  const [archivo, setArchivo] = useState<File | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchComunicados();
-  }, []);
-
-  const fetchComunicados = async () => {
-    try {
-      const res = await fetch('/api/comunicados');
-      if (res.ok) {
-        const data = await res.json();
-        setComunicados(data.comunicados || []);
-      }
-    } catch {
-      // Will get demo data from API
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      let imagenUrl = null;
-      let archivoUrl = null;
-
-      if (imagen) {
-        const formData = new FormData();
-        formData.append('file', imagen);
-        const res = await fetch('/api/archivos', { method: 'POST', body: formData });
-        if (res.ok) {
-          const data = await res.json();
-          imagenUrl = data.archivo.url;
-        }
-      }
-
-      if (archivo) {
-        const formData = new FormData();
-        formData.append('file', archivo);
-        const res = await fetch('/api/archivos', { method: 'POST', body: formData });
-        if (res.ok) {
-          const data = await res.json();
-          archivoUrl = data.archivo.url;
-        }
-      }
-
-      const res = await fetch('/api/comunicados', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, imagenUrl, archivoUrl }),
-      });
-      if (res.ok) {
-        setShowForm(false);
-        setFormData({ titulo: '', contenido: '', categoria: 'general' });
-        setImagen(null);
-        setArchivo(null);
-        fetchComunicados();
-      }
-    } catch {
-      // Handle error
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const filtered = filtro === 'todos'
-    ? comunicados
-    : comunicados.filter(c => c.categoria === filtro);
+  const {
+    filtro, setFiltro,
+    showForm, setShowForm,
+    loading,
+    formData, setFormData,
+    imagen, setImagen,
+    archivo, setArchivo,
+    imagenSeleccionada, setImagenSeleccionada,
+    archivoSeleccionado, setArchivoSeleccionado,
+    showImgSelector, setShowImgSelector,
+    showDocSelector, setShowDocSelector,
+    submitting,
+    isPastor,
+    handleSubmit,
+    filtered
+  } = useComunicados();
 
   return (
     <AppShell>
@@ -128,9 +52,15 @@ export default function ComunicadosPage() {
             <h1 className="font-display text-3xl font-bold text-gray-100 mb-2 tracking-tight">Comunicados</h1>
             <p className="text-gray-400 text-[0.95rem]">Noticias y avisos de la iglesia para la congregación.</p>
           </div>
-          <button className="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold py-2.5 px-5 rounded-lg transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 hover:-translate-y-0.5 flex items-center gap-2" onClick={() => setShowForm(true)} id="new-comunicado-btn">
-            <span>➕</span> Nuevo Comunicado
-          </button>
+          {isPastor && (
+            <button 
+              className="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold py-2.5 px-5 rounded-lg transition-all duration-300 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 hover:-translate-y-0.5 flex items-center gap-2" 
+              onClick={() => setShowForm(true)} 
+              id="new-comunicado-btn"
+            >
+              <span>➕</span> Nuevo Comunicado
+            </button>
+          )}
         </div>
 
         {/* Category filters */}
@@ -151,9 +81,15 @@ export default function ComunicadosPage() {
           <div className="flex justify-center p-12">
             <div className="w-8 h-8 border-4 border-white/20 border-t-amber-500 rounded-full animate-spin" />
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 text-gray-500 bg-[#1a1c25]/50 border border-white/5 rounded-2xl border-dashed">
+            <div className="text-4xl mb-4 opacity-50">📢</div>
+            <div className="font-display text-xl font-semibold mb-2 text-gray-400">Sin comunicados</div>
+            <div className="text-sm text-center">No hay comunicados en esta categoría.</div>
+          </div>
         ) : (
           <StaggerContainer className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-            {filtered.map((c) => (
+            {filtered.map((c: any) => (
               <StaggerItem key={c.id} className={`bg-[#1a1c25] rounded-2xl border border-white/10 p-6 break-inside-avoid transition-all duration-300 hover:border-white/20 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden group ${c.fijado ? 'ring-2 ring-amber-500 shadow-amber-500/10' : ''}`}>
                 {c.fijado && <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden"><div className="bg-amber-500 text-[0.6rem] font-bold text-gray-900 text-center py-1 absolute top-2 right-[-14px] w-[60px] rotate-45 shadow-md">FIJADO</div></div>}
                 
@@ -193,123 +129,52 @@ export default function ComunicadosPage() {
                 )}
               </StaggerItem>
             ))}
-            {filtered.length === 0 && (
-              <div className="col-span-full flex flex-col items-center justify-center p-12 text-gray-500 bg-[#1a1c25]/50 border border-white/5 rounded-2xl border-dashed">
-                <div className="text-4xl mb-4 opacity-50">📢</div>
-                <div className="font-display text-xl font-semibold mb-2 text-gray-400">Sin comunicados</div>
-                <div className="text-sm text-center">No hay comunicados en esta categoría.</div>
-              </div>
-            )}
           </StaggerContainer>
         )}
-
-        {/* New Comunicado Modal */}
-        {showForm && (
-          <FadeIn className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={() => setShowForm(false)} duration={0.2}>
-            <ScaleIn className="bg-[#1a1c25] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onClick={(e: React.MouseEvent) => e.stopPropagation()} duration={0.2}>
-              <div className="p-6 border-b border-white/10 flex items-center justify-between shrink-0">
-                <h3 className="font-display text-xl font-bold text-gray-100">Nuevo Comunicado</h3>
-                <button className="text-gray-400 hover:text-white transition-colors" onClick={() => setShowForm(false)}>✕</button>
-              </div>
-              <form onSubmit={handleSubmit} className="flex flex-col overflow-hidden">
-                <div className="p-6 overflow-y-auto custom-scrollbar">
-                  <div className="mb-5">
-                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider" htmlFor="com-titulo">Título</label>
-                    <input
-                      id="com-titulo"
-                      className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50"
-                      placeholder="Título del comunicado"
-                      value={formData.titulo}
-                      onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="mb-5">
-                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider" htmlFor="com-categoria">Categoría</label>
-                    <select
-                      id="com-categoria"
-                      className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 appearance-none"
-                      value={formData.categoria}
-                      onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                    >
-                      <option value="general">General</option>
-                      <option value="lideres">Líderes</option>
-                      <option value="servidores">Servidores</option>
-                      <option value="admin">Administradores</option>
-                      <option value="pastoral">Pastoral</option>
-                    </select>
-                  </div>
-                  <div className="mb-5">
-                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider" htmlFor="com-contenido">Contenido</label>
-                    <textarea
-                      id="com-contenido"
-                      className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 resize-y min-h-[120px]"
-                      placeholder="Escribe el contenido del comunicado..."
-                      value={formData.contenido}
-                      onChange={(e) => setFormData({ ...formData, contenido: e.target.value })}
-                      required
-                      rows={5}
-                    />
-                  </div>
-                  <div className="mb-5">
-                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Imagen (Opcional)</label>
-                    <div className="w-full bg-[#14161f] border border-white/10 border-dashed rounded-lg p-4 text-center hover:bg-white/5 transition-colors cursor-pointer relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onChange={(e) => setImagen(e.target.files ? e.target.files[0] : null)}
-                      />
-                      <div className="text-gray-400 text-sm font-medium">
-                        {imagen ? (
-                          <div className="flex items-center justify-center gap-2 text-amber-500">
-                            <span className="text-xl">🖼️</span> {imagen?.name}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-2xl mb-1">📸</span> Haz clic para subir imagen
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Archivo Adjunto (Opcional)</label>
-                    <div className="w-full bg-[#14161f] border border-white/10 border-dashed rounded-lg p-4 text-center hover:bg-white/5 transition-colors cursor-pointer relative">
-                      <input
-                        type="file"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onChange={(e) => setArchivo(e.target.files ? e.target.files[0] : null)}
-                      />
-                      <div className="text-gray-400 text-sm font-medium">
-                        {archivo ? (
-                          <div className="flex items-center justify-center gap-2 text-amber-500">
-                            <span className="text-xl">📎</span> {archivo?.name}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-2xl mb-1">📎</span> Haz clic para subir archivo
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-white/[0.02] shrink-0">
-                  <button type="button" className="px-5 py-2.5 rounded-lg font-semibold text-gray-300 hover:bg-white/5 transition-colors border border-transparent hover:border-white/10" onClick={() => setShowForm(false)}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold py-2.5 px-6 rounded-lg transition-all shadow-lg shadow-amber-500/20 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px] flex justify-center" disabled={submitting}>
-                    {submitting ? (
-                      <div className="w-5 h-5 border-2 border-gray-900/20 border-t-gray-900 rounded-full animate-spin" />
-                    ) : 'Publicar'}
-                  </button>
-                </div>
-              </form>
-            </ScaleIn>
-          </FadeIn>
-        )}
       </FadeIn>
+
+      {/* Formulario y Modales de Acción */}
+      <ComunicadoFormModal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        submitting={submitting}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSubmit}
+        imagen={imagen}
+        setImagen={setImagen}
+        archivo={archivo}
+        setArchivo={setArchivo}
+        imagenSeleccionada={imagenSeleccionada}
+        setImagenSeleccionada={setImagenSeleccionada}
+        archivoSeleccionado={archivoSeleccionado}
+        setArchivoSeleccionado={setArchivoSeleccionado}
+        onOpenImgSelector={() => setShowImgSelector(true)}
+        onOpenDocSelector={() => setShowDocSelector(true)}
+      />
+
+      {/* Modal: Elegir Imagen de la Galería */}
+      <FileSelectorModal
+        isOpen={showImgSelector}
+        onClose={() => setShowImgSelector(false)}
+        onSelect={(url, name) => {
+          setImagenSeleccionada({ url, nombre: name });
+          setShowImgSelector(false);
+        }}
+        allowedFormats={['jpg', 'jpeg', 'png', 'gif', 'webp']}
+        title="Elegir Imagen de la Galería"
+      />
+
+      {/* Modal: Elegir Archivo Adjunto de la Galería */}
+      <FileSelectorModal
+        isOpen={showDocSelector}
+        onClose={() => setShowDocSelector(false)}
+        onSelect={(url, name) => {
+          setArchivoSeleccionado({ url, nombre: name });
+          setShowDocSelector(false);
+        }}
+        title="Elegir Archivo Adjunto de la Galería"
+      />
     </AppShell>
   );
 }

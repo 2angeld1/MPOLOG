@@ -31,6 +31,44 @@ export async function PUT(
       data: updateData
     });
 
+    // Sincronizar Ministerios si se actualizó dondeSirve o esServidor
+    if (dondeSirve !== undefined || esServidor !== undefined) {
+      const oldMinisterios = await prisma.ministerio.findMany({
+        where: { miembrosIds: { has: id } }
+      });
+
+      const newMinisteriosNombres = (miembroActualizado.esServidor && miembroActualizado.dondeSirve) 
+          ? miembroActualizado.dondeSirve.split(',').map((s: string) => s.trim()).filter(Boolean)
+          : [];
+
+      const newMinisterios = await prisma.ministerio.findMany();
+      const newMinisteriosMap = new Map(newMinisterios.map(m => [m.nombre, m]));
+      
+      const ministeriosToAdd = newMinisteriosNombres.map((name: string) => newMinisteriosMap.get(name)).filter(Boolean) as any[];
+      const ministeriosToAddIds = ministeriosToAdd.map((m: any) => m.id);
+
+      // Remover de los viejos que ya no están
+      for (const oldMin of oldMinisterios) {
+          if (!ministeriosToAddIds.includes(oldMin.id)) {
+              await prisma.ministerio.update({
+                  where: { id: oldMin.id },
+                  data: { miembrosIds: oldMin.miembrosIds.filter(mId => mId !== id) }
+              });
+          }
+      }
+
+      // Añadir a los nuevos que no estaban
+      const oldMinisteriosIds = oldMinisterios.map(m => m.id);
+      for (const newMin of ministeriosToAdd) {
+          if (!oldMinisteriosIds.includes(newMin.id) && !newMin.miembrosIds.includes(id)) {
+              await prisma.ministerio.update({
+                  where: { id: newMin.id },
+                  data: { miembrosIds: { push: id } }
+              });
+          }
+      }
+    }
+
     return NextResponse.json({ mensaje: 'Miembro actualizado', miembro: miembroActualizado });
   } catch (error) {
     console.error('Error actualizando miembro:', error);

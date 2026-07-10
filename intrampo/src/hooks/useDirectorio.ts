@@ -14,20 +14,10 @@ export interface Miembro {
   createdAt: string;
 }
 
-export interface UserEntry {
-  _id: string;
-  nombre: string;
-  email: string;
-  rol: string;
-  roles: string[];
-}
-
 export function useDirectorio() {
   const [miembros, setMiembros] = useState<Miembro[]>([]);
-  const [users, setUsers] = useState<UserEntry[]>([]);
   const [ministerios, setMinisterios] = useState<any[]>([]);
   const [busqueda, setBusqueda] = useState('');
-  const [vista, setVista] = useState<'personas' | 'usuarios'>('personas');
   const [loading, setLoading] = useState(true);
 
   // States para Formularios y Modales
@@ -63,7 +53,6 @@ export function useDirectorio() {
         const data = await res.json();
         const minData = await resMinisterios.json();
         setMiembros(data.personas || []);
-        setUsers(data.users || []);
         setMinisterios(minData.ministerios || []);
       }
     } catch (err) {
@@ -136,7 +125,8 @@ export function useDirectorio() {
 
         const payloadArchivo = {
           nombre: foto.name,
-          base64Content
+          base64Content,
+          carpeta: '/directorio'
         };
 
         const res = await fetch('/api/archivos', { 
@@ -225,11 +215,8 @@ export function useDirectorio() {
 
   return {
     miembros,
-    users,
     busqueda,
     setBusqueda,
-    vista,
-    setVista,
     ministerios,
     loading,
     showForm,

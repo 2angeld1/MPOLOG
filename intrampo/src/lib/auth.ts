@@ -22,11 +22,24 @@ export async function authenticateUser(email: string, password: string): Promise
   if (userPg) {
     const isMatch = await bcrypt.compare(password, userPg.password);
     if (!isMatch) return null;
+
+    const roles = [userPg.rol];
+    const miembroDirectorioId = (userPg as any).miembroDirectorioId;
+    if (miembroDirectorioId) {
+      const miembro = await prisma.miembroDirectorio.findUnique({
+        where: { id: miembroDirectorioId }
+      });
+      if (miembro && miembro.esServidor && miembro.dondeSirve) {
+        const areas = miembro.dondeSirve.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        roles.push(...areas);
+      }
+    }
+
     return {
       userId: userPg.id,
       email: userPg.email,
       nombre: userPg.nombre,
-      roles: [userPg.rol],
+      roles,
     };
   }
 
@@ -41,11 +54,22 @@ export async function authenticateUser(email: string, password: string): Promise
       ? userMongo.roles
       : [userMongo.rol || 'usuario'];
 
+    const roles = [...rolesFromMongo];
+    if (userMongo.nombre) {
+      const miembro = await prisma.miembroDirectorio.findFirst({
+        where: { nombre: { equals: userMongo.nombre, mode: 'insensitive' } }
+      });
+      if (miembro && miembro.esServidor && miembro.dondeSirve) {
+        const areas = miembro.dondeSirve.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        roles.push(...areas);
+      }
+    }
+
     return {
       userId: userMongo._id.toString(),
       email: normalizedEmail,
       nombre: userMongo.nombre || 'Usuario',
-      roles: rolesFromMongo,
+      roles,
     };
   }
 

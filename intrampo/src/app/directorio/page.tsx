@@ -3,14 +3,14 @@
 import AppShell from '@/components/AppShell';
 import { StaggerContainer, StaggerItem } from '@/animations';
 import { useDirectorio } from '@/hooks/useDirectorio';
-import { FiPlus, FiEdit2, FiSearch, FiPhone, FiUpload, FiUser, FiLock, FiUsers } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiSearch, FiPhone, FiUpload, FiUser, FiUsers } from 'react-icons/fi';
 import { getAvatarColor, getInitials, isNuevo } from '@/lib/utils';
 import MiembroFormModal from './MiembroFormModal';
 import MiembroDetailModal from './MiembroDetailModal';
 
 export default function DirectorioPage() {
   const {
-    miembros, users, ministerios, busqueda, setBusqueda, vista, setVista,
+    miembros, ministerios, busqueda, setBusqueda,
     loading, showForm, setShowForm, editMode, selectedMiembro, setSelectedMiembro,
     submitting, csvInputRef, formData, setFormData, setFoto,
     handleOpenCreate, handleOpenEdit, handleDelete, handleSubmit, handleCsvImport,
@@ -23,26 +23,24 @@ export default function DirectorioPage() {
           <h1 className="font-display text-3xl font-bold text-gray-100 mb-2 tracking-tight">Directorio de Miembros</h1>
           <p className="text-gray-400 text-[0.95rem]">Encuentra y administra los miembros de la congregación.</p>
         </div>
-        {vista === 'personas' && (
-          <div className="flex gap-2">
-            <input type="file" accept=".csv" ref={csvInputRef} className="hidden" onChange={handleCsvImport} />
-            <button
-              className="px-4 py-2 rounded-lg font-semibold bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors border border-white/10 flex items-center gap-2"
-              onClick={() => csvInputRef.current?.click()}
-            >
-              <FiUpload size={16} /> Importar CSV
-            </button>
-            <button
-              className="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold py-2 px-4 rounded-lg transition-all shadow-lg shadow-amber-500/20 hover:-translate-y-0.5 flex items-center gap-2"
-              onClick={handleOpenCreate}
-            >
-              <FiPlus size={18} /> Agregar Miembro
-            </button>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <input type="file" accept=".csv" ref={csvInputRef} className="hidden" onChange={handleCsvImport} />
+          <button
+            className="px-4 py-2 rounded-lg font-semibold bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors border border-white/10 flex items-center gap-2"
+            onClick={() => csvInputRef.current?.click()}
+          >
+            <FiUpload size={16} /> Importar CSV
+          </button>
+          <button
+            className="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold py-2 px-4 rounded-lg transition-all shadow-lg shadow-amber-500/20 hover:-translate-y-0.5 flex items-center gap-2"
+            onClick={handleOpenCreate}
+          >
+            <FiPlus size={18} /> Agregar Miembro
+          </button>
+        </div>
       </div>
 
-      {/* Filters */}
+      {/* Search */}
       <div className="flex flex-col sm:flex-row items-center gap-4 mb-6 p-4 bg-[#1a1c25] rounded-xl border border-white/10 shadow-sm">
         <div className="relative flex-1 w-full max-w-sm">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -54,27 +52,12 @@ export default function DirectorioPage() {
             onChange={(e) => setBusqueda(e.target.value)}
           />
         </div>
-
-        <div className="sm:ml-auto flex gap-2">
-          <button
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 ${vista === 'personas' ? 'bg-amber-500 text-gray-900' : 'bg-[#14161f] text-gray-400 hover:text-white border border-white/10 hover:bg-white/5'}`}
-            onClick={() => setVista('personas')}
-          >
-            <FiUser size={14} /> Miembros
-          </button>
-          <button
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center gap-2 ${vista === 'usuarios' ? 'bg-amber-500 text-gray-900' : 'bg-[#14161f] text-gray-400 hover:text-white border border-white/10 hover:bg-white/5'}`}
-            onClick={() => setVista('usuarios')}
-          >
-            <FiLock size={14} /> Usuarios Sistema
-          </button>
-        </div>
       </div>
 
       {/* Summary badge */}
       <div className="mb-8">
         <span className="bg-amber-500/20 text-amber-500 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
-          {vista === 'personas' ? miembros.length : users.length} registros
+          {miembros.length} registros
         </span>
       </div>
 
@@ -82,7 +65,7 @@ export default function DirectorioPage() {
         <div className="flex justify-center p-12">
           <div className="w-8 h-8 border-4 border-white/20 border-t-amber-500 rounded-full animate-spin" />
         </div>
-      ) : vista === 'personas' ? (
+      ) : (
         <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {miembros.map((miembro) => {
             const nuevo = isNuevo(miembro.createdAt);
@@ -145,43 +128,6 @@ export default function DirectorioPage() {
             </div>
           )}
         </StaggerContainer>
-      ) : (
-        <div className="overflow-x-auto bg-[#1a1c25] rounded-2xl border border-white/10 shadow-xl">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-white/10 text-gray-400 text-sm">
-                <th className="p-4 font-semibold uppercase tracking-wider">Nombre</th>
-                <th className="p-4 font-semibold uppercase tracking-wider">Email</th>
-                <th className="p-4 font-semibold uppercase tracking-wider">Roles</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: getAvatarColor(user.nombre), color: '#fff' }}
-                      >
-                        {user.nombre?.substring(0, 2).toUpperCase()}
-                      </div>
-                      <span className="font-medium text-gray-200">{user.nombre}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-400">{user.email}</td>
-                  <td className="p-4">
-                    <div className="flex gap-1 flex-wrap">
-                      {(user.roles || [user.rol]).map((r, i) => (
-                        <span key={i} className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-[0.7rem] font-bold tracking-wider uppercase">{r}</span>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       )}
 
       {/* Modales separados */}

@@ -4,10 +4,12 @@ import AppShell from '@/components/AppShell';
 import { StaggerContainer, StaggerItem } from '@/animations';
 import { useMinisterios } from '@/hooks/useMinisterios';
 import { FiPlus, FiEdit2, FiTrash2, FiUsers } from 'react-icons/fi';
+import { FaCrown } from 'react-icons/fa';
 import { getMinisterioIcon } from '@/lib/ministerioIcons';
 import { FaChurch } from 'react-icons/fa';
 import MinisterioFormModal from './MinisterioFormModal';
 import MiembrosModal from './MiembrosModal';
+import LideresModal from './LideresModal';
 
 export default function MinisteriosPage() {
   const {
@@ -18,6 +20,11 @@ export default function MinisteriosPage() {
     handleOpenCreate, handleOpenEdit, handleDelete, handleSubmit,
     handleOpenManageMembers, handleToggleMember, handleSaveMembers,
     miembrosFiltrados,
+    // Líderes
+    showLeadersModal, setShowLeadersModal,
+    lideresSeleccionados, busquedaLideres, setBusquedaLideres,
+    handleOpenManageLeaders, handleToggleLeader, handleSaveLeaders,
+    miembrosDelMinisterio,
   } = useMinisterios();
 
   return (
@@ -82,9 +89,9 @@ export default function MinisteriosPage() {
                       <div className="text-2xl font-display font-bold text-gray-200 mb-1">{min.miembrosIds?.length || 0}</div>
                       <div className="text-[0.65rem] font-bold text-gray-500 uppercase tracking-wider flex items-center justify-center gap-1"><FiUsers size={10}/> Miembros</div>
                     </div>
-                    <div className="bg-[#14161f] rounded-xl p-3 border border-white/5 text-center">
-                      <div className="text-2xl font-display font-bold text-amber-500 mb-1">{(min as any).lideres?.length || 0}</div>
-                      <div className="text-[0.65rem] font-bold text-amber-500/70 uppercase tracking-wider">Líderes</div>
+                    <div className="bg-[#14161f] rounded-xl p-3 border border-white/5 text-center cursor-pointer hover:bg-white/5 transition-colors" onClick={() => handleOpenManageLeaders(min)}>
+                      <div className="text-2xl font-display font-bold text-amber-500 mb-1">{min.liderIds?.length || 0}</div>
+                      <div className="text-[0.65rem] font-bold text-amber-500/70 uppercase tracking-wider flex items-center justify-center gap-1"><FaCrown size={10}/> Líderes</div>
                     </div>
                   </div>
 
@@ -106,6 +113,7 @@ export default function MinisteriosPage() {
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover/sub:opacity-100 transition-opacity">
                               <button onClick={() => handleOpenManageMembers(sub)} className="p-1.5 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-md" title="Miembros"><FiUsers size={12} /></button>
+                              <button onClick={() => handleOpenManageLeaders(sub)} className="p-1.5 text-gray-400 hover:text-amber-500 bg-white/5 hover:bg-white/10 rounded-md" title="Líderes"><FaCrown size={12} /></button>
                               <button onClick={() => handleOpenEdit(sub)} className="p-1.5 text-gray-400 hover:text-amber-500 bg-white/5 hover:bg-white/10 rounded-md" title="Editar"><FiEdit2 size={12} /></button>
                               <button onClick={() => handleDelete(sub.id)} className="p-1.5 text-gray-400 hover:text-red-500 bg-white/5 hover:bg-white/10 rounded-md" title="Eliminar"><FiTrash2 size={12} /></button>
                             </div>
@@ -129,7 +137,7 @@ export default function MinisteriosPage() {
         </StaggerContainer>
       )}
 
-      {/* Acciones / Modales */}
+      {/* Modales */}
       <MinisterioFormModal
         isOpen={showForm}
         onClose={() => setShowForm(false)}
@@ -152,6 +160,19 @@ export default function MinisteriosPage() {
         miembrosSeleccionados={miembrosSeleccionados}
         onToggleMember={handleToggleMember}
         onSave={handleSaveMembers}
+      />
+
+      <LideresModal
+        isOpen={showLeadersModal && !!selectedMinisterio}
+        onClose={() => setShowLeadersModal(false)}
+        ministerioNombre={selectedMinisterio?.nombre}
+        submitting={submitting}
+        busqueda={busquedaLideres}
+        setBusqueda={setBusquedaLideres}
+        miembrosDelMinisterio={miembrosDelMinisterio}
+        lideresSeleccionados={lideresSeleccionados}
+        onToggleLeader={handleToggleLeader}
+        onSave={handleSaveLeaders}
       />
     </AppShell>
   );

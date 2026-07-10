@@ -29,8 +29,12 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
-  if (!session || !isAdmin(session)) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+  const safeRoles = session?.roles?.map(r => r.toLowerCase()) || [];
+  const safeEmail = session?.email?.toLowerCase() || '';
+  const isPastor = safeRoles.includes('pastor') || safeRoles.includes('superadmin') || safeEmail.startsWith('admin@superadmin');
+
+  if (!session || !isPastor) {
+    return NextResponse.json({ error: 'No autorizado. Solo los pastores pueden publicar comunicados.' }, { status: 403 });
   }
 
   try {

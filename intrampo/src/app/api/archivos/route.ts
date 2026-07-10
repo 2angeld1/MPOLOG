@@ -23,6 +23,7 @@ export async function GET() {
       public_id: a.public_id,
       formato: a.formato,
       tamano: a.tamano,
+      carpeta: a.carpeta,
       subidoPor: { nombre: a.subidoPorNombre, email: '' },
       createdAt: a.createdAt
     }));
@@ -41,49 +42,141 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { nombre, base64Content } = await request.json();
-
-    if (!nombre || !base64Content) {
-      return NextResponse.json({ error: 'Nombre y contenido del archivo son requeridos' }, { status: 400 });
-    }
-
-    await connectMongo();
-
-    // Identificar el tipo de recurso ('image' o 'raw' para pdf/doc)
-    let resource_type: 'image' | 'raw' | 'video' | 'auto' = 'auto';
+    let nombre = '';
+    let url = '';
+    let public_id = '';
     let formato = 'desconocido';
+    let sizeInBytes = 0;
+    let carpeta = '/';
 
-    const match = base64Content.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/);
-    if (match) {
+    const contentType = request.headers.get('content-type') || '';
+    const { prisma } = await import('@/lib/prisma');
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const file = formData.get('file') as File | null;
+      carpeta = (formData.get('carpeta') as string) || '/';
+      
+      if (!file) {
+        return NextResponse.json({ error: 'Archivo no proporcionado' }, { status: 400 });
+      }
+
+      nombre = file.name.split('.')[0];
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const mimeType = file.type;
+      const base64Data = buffer.toString('base64');
+      const fileUri = `data:${mimeType};base64,${base64Data}`;
+      
+      let resource_type: 'image' | 'raw' | 'video' | 'auto' = 'auto';
+      if (mimeType.startsWith('image/')) {
+        resource_type = 'image';
+      } else {
+        resource_type = 'raw';
+      }
+      formato = mimeType.split('/')[1] || 'desconocido';
+      sizeInBytes = file.size;
+
+      // Clean folder path for Cloudinary (remove leading slash if root, otherwise keep hierarchy)
+      const cloudinaryFolder = carpeta === '/' ? 'archivos_iglesia' : `archivos_iglesia${carpeta}`;
+
+      const uploadResponse = await cloudinary.uploader.upload(fileUri, {
+        folder: cloudinaryFolder,
+        resource_type: resource_type,
+      });
+
+      url = uploadResponse.secure_url;
+      public_id = uploadResponse.public_id;
+    } else {
+      // JSON body
+      const body = await request.json();
+      
+      // Check if it's a request to create a virtual folder
+      if (body.isFolder) {
+        const { nombre: folderName, carpeta: parentCarpeta } = body;
+        if (!folderName) {
+          return NextResponse.json({ error: 'Nombre de la carpeta es requerido' }, { status: 400 });
+        }
+
+        let uniqueName = folderName;
+        let counter = 1;
+
+        while (true) {
+          const existing = await prisma.archivo.findFirst({
+            where: {
+              nombre: uniqueName,
+              formato: 'folder',
+              carpeta: parentCarpeta || '/'
+            }
+          });
+
+          if (!existing) {
+            break;
+          }
+
+          uniqueName = `${folderName} ${counter}`;
+          counter++;
+        }
+
+        const nuevaCarpeta = await prisma.archivo.create({
+          data: {
+            nombre: uniqueName,
+            url: '',
+            public_id: '',
+            formato: 'folder',
+            tamano: 0,
+            subidoPorId: session.userId,
+            subidoPorNombre: session.nombre,
+            carpeta: parentCarpeta || '/'
+          }
+        });
+
+        return NextResponse.json({ mensaje: 'Carpeta creada correctamente', archivo: { ...nuevaCarpeta, _id: nuevaCarpeta.id } }, { status: 201 });
+      }
+
+      const base64Content = body.base64Content;
+      nombre = body.nombre;
+      carpeta = body.carpeta || '/';
+
+      if (!nombre || !base64Content) {
+        return NextResponse.json({ error: 'Nombre y contenido del archivo son requeridos' }, { status: 400 });
+      }
+
+      let resource_type: 'image' | 'raw' | 'video' | 'auto' = 'auto';
+      const match = base64Content.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/);
+      if (match) {
         const mimeType = match[1];
         if (mimeType.startsWith('image/')) {
-            resource_type = 'image';
+          resource_type = 'image';
         } else {
-            resource_type = 'raw';
+          resource_type = 'raw';
         }
         formato = mimeType.split('/')[1];
+      }
+
+      const stringLength = base64Content.length - (base64Content.indexOf(',') + 1);
+      sizeInBytes = Math.ceil((stringLength * 3) / 4);
+
+      const cloudinaryFolder = carpeta === '/' ? 'archivos_iglesia' : `archivos_iglesia${carpeta}`;
+
+      const uploadResponse = await cloudinary.uploader.upload(base64Content, {
+        folder: cloudinaryFolder,
+        resource_type: resource_type,
+      });
+
+      url = uploadResponse.secure_url;
+      public_id = uploadResponse.public_id;
     }
-
-    // Calcular el tamaño aproximado en base64
-    const stringLength = base64Content.length - (base64Content.indexOf(',') + 1);
-    const sizeInBytes = Math.ceil((stringLength * 3) / 4);
-
-    const uploadResponse = await cloudinary.uploader.upload(base64Content, {
-      folder: 'archivos_iglesia',
-      resource_type: resource_type,
-    });
-
-    const { prisma } = await import('@/lib/prisma');
 
     const nuevoArchivo = await prisma.archivo.create({
       data: {
         nombre,
-        url: uploadResponse.secure_url,
-        public_id: uploadResponse.public_id,
+        url,
+        public_id,
         formato,
         tamano: sizeInBytes,
         subidoPorId: session.userId,
-        subidoPorNombre: session.nombre
+        subidoPorNombre: session.nombre,
+        carpeta
       }
     });
 
