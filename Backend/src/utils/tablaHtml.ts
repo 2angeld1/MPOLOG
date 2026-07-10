@@ -237,11 +237,6 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
         
         const pJson = JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
         
-        let familiaTxt = 'Solo(a)';
-        if (p.miembrosFamilia > 0) {
-            familiaTxt = 'Sí (+' + p.miembrosFamilia + ')';
-        }
-
         let montoTxt = '';
         if (p.montoPago) {
             montoTxt = '<br><small style="color:var(--success)">$' + p.montoPago + '</small>';
@@ -252,7 +247,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             '<td>' + (p.sexo || '-') + '</td>' +
             '<td><span class="badge">' + (p.ministerio || '-') + '</span></td>' +
             '<td>' + (p.necesitaTransporte || '-') + '</td>' +
-            '<td>' + familiaTxt + '</td>' +
+            
             '<td>' + (p.metodoPago || '-') + montoTxt + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' + comprobanteBtn + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' +
@@ -458,7 +453,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                         <th>Sexo</th>
                         <th>Ministerios</th>
                         <th>Transporte</th>
-                        <th>Familia</th>
+                        
                         <th>Pago</th>
                         <th style="text-align: center;">Comprobante</th>
                         <th style="text-align: center;">Acciones</th>
@@ -519,10 +514,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                         <option value="No">No</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Miembros Familia (Acompañantes)</label>
-                    <input type="number" id="editFamilia" min="0" required>
-                </div>
+                
                 <div class="form-group">
                     <label>Método de Pago</label>
                     <select id="editMetodoPago" required>
@@ -555,7 +547,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             document.getElementById('editApellido').value = currentRecord.apellido || '';
             document.getElementById('editSexo').value = currentRecord.sexo || 'Masculino';
             document.getElementById('editTransporte').value = currentRecord.necesitaTransporte || 'No';
-            document.getElementById('editFamilia').value = currentRecord.miembrosFamilia || 0;
+            
             document.getElementById('editMetodoPago').value = currentRecord.metodoPago || 'Yappy';
             document.getElementById('editMontoPago').value = currentRecord.montoPago || 0;
             
@@ -587,7 +579,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                 sexo: document.getElementById('editSexo').value,
                 ministerio: checkedMin.join(', '),
                 necesitaTransporte: document.getElementById('editTransporte').value,
-                miembrosFamilia: parseInt(document.getElementById('editFamilia').value) || 0,
+                
                 metodoPago: document.getElementById('editMetodoPago').value,
                 montoPago: parseFloat(document.getElementById('editMontoPago').value) || 0
             };

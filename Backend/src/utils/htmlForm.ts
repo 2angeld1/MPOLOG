@@ -1268,8 +1268,9 @@ export const getCampamentoFormHtml = () => {
             <div class="card card-header">
                 <h1>CAMPAMENTO DE SERVIDORES 2026.</h1>
                 <p class="subtitle">
-                    <strong>Campamento Monte Carmelo en Villa Lobos.</strong><br>
-                    <em>Días Viernes 17 y Sábado 18 de Julio</em>
+                    <strong>Iglesia Maranatha</strong><br>
+                    <em>Viernes 17 (5:00 PM a 10:00 PM) y Sábado 18 (10:00 AM a 5:00 PM)</em><br>
+                    <strong>Valor: $10</strong>
                 </p>
                 <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
                 <p class="required-notice">* Indica que la pregunta es obligatoria</p>
@@ -1324,7 +1325,7 @@ export const getCampamentoFormHtml = () => {
 
                 <div class="card">
                     <div class="input-group">
-                        <label>¿Necesita Transporte? <span style="color: var(--error);">*</span></label>
+                        <label>¿Tienes transporte para regresar a tu casa el viernes después de las 10:00 PM? <span style="color: var(--error);">*</span></label>
                         <div class="radio-group">
                             <label class="radio-option">
                                 <input type="radio" name="necesitaTransporte" value="Sí" required>
@@ -1338,20 +1339,7 @@ export const getCampamentoFormHtml = () => {
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="input-group">
-                        <label for="miembrosFamilia">¿Cuántos Miembros de la Familia Asistirán al Campamento? <span style="color: var(--error);">*</span></label>
-                        <select id="miembrosFamilia" name="miembrosFamilia" required style="max-width: 150px; padding: 12px; border: 1px solid var(--border-color); border-radius: 4px;">
-                            <option value="" disabled selected>Elegir</option>
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </div>
-                </div>
+                
 
                 <div class="card">
                     <div class="input-group">
@@ -1473,7 +1461,6 @@ export const getCampamentoFormHtml = () => {
                     sexo: document.querySelector('input[name="sexo"]:checked').value,
                     ministerio: checkedMinisterios.join(', '), 
                     necesitaTransporte: document.querySelector('input[name="necesitaTransporte"]:checked').value,
-                    miembrosFamilia: parseInt(document.getElementById('miembrosFamilia').value) || 0,
                     metodoPago: document.querySelector('input[name="metodoPago"]:checked').value,
                     montoPago: parseFloat(document.getElementById('montoPago').value) || 0,
                     comprobantePago: comprobanteBase64,
