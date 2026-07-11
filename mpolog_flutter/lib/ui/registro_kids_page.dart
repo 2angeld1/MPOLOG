@@ -109,98 +109,123 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
       _esComandanteSeleccionado = false;
     }
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: Text(
-            persona == null ? 'Nuevo Registro' : 'Editar Registro',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          content: SizedBox(
-            width: 450,
-            child: StatefulBuilder(
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          maxChildSize: 0.95,
+          minChildSize: 0.5,
+          expand: false,
+          builder: (context, scrollController) {
+            return StatefulBuilder(
               builder: (context, setDialogState) {
                 return SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(28),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        onTap: () async {
-                          final picker = ImagePicker();
-                          final XFile? image = await picker.pickImage(
-                            source: ImageSource.camera,
-                            imageQuality: 50,
-                          );
-                          if (image != null) {
-                            final bytes = await image.readAsBytes();
-                            final base64String =
-                                'data:image/jpeg;base64,${base64Encode(bytes)}';
-                            setDialogState(() {
-                              _fotoBase64 = base64String;
-                            });
-                          }
-                        },
+                      Center(
                         child: Container(
-                          width: 100,
-                          height: 100,
+                          width: 48,
+                          height: 5,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primary,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.15,
-                                ),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: _fotoBase64 != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: _fotoBase64!.startsWith('http')
-                                      ? Image.network(
-                                          _fotoBase64!,
-                                          fit: BoxFit.cover,
-                                          width: 100,
-                                          height: 100,
-                                        )
-                                      : Image.memory(
-                                          base64Decode(
-                                            _fotoBase64!.split(',')[1],
-                                          ),
-                                          fit: BoxFit.cover,
-                                          width: 100,
-                                          height: 100,
-                                        ),
-                                )
-                              : const Icon(
-                                  Icons.camera_alt_rounded,
-                                  color: Colors.white54,
-                                  size: 32,
-                                ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 24),
                       Text(
-                        _esComandanteSeleccionado ? 'Foto (Toca para capturar)' : 'Foto del Niño (Toca para capturar)',
+                        persona == null ? 'Nuevo Registro' : 'Editar Registro',
                         style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () async {
+                                final picker = ImagePicker();
+                                final XFile? image = await picker.pickImage(
+                                  source: ImageSource.camera,
+                                  imageQuality: 50,
+                                );
+                                if (image != null) {
+                                  final bytes = await image.readAsBytes();
+                                  final base64String =
+                                      'data:image/jpeg;base64,${base64Encode(bytes)}';
+                                  setDialogState(() {
+                                    _fotoBase64 = base64String;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.05),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppColors.primary,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      blurRadius: 10,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: _fotoBase64 != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: _fotoBase64!.startsWith('http')
+                                            ? Image.network(
+                                                _fotoBase64!,
+                                                fit: BoxFit.cover,
+                                                width: 100,
+                                                height: 100,
+                                              )
+                                            : Image.memory(
+                                                base64Decode(
+                                                  _fotoBase64!.split(',')[1],
+                                                ),
+                                                fit: BoxFit.cover,
+                                                width: 100,
+                                                height: 100,
+                                              ),
+                                      )
+                                    : const Icon(
+                                        Icons.camera_alt_rounded,
+                                        color: Colors.white54,
+                                        size: 32,
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _esComandanteSeleccionado ? 'Foto (Toca para capturar)' : 'Foto del Niño (Toca para capturar)',
+                              style: const TextStyle(
+                                color: Colors.white38,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -312,94 +337,109 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                         label: 'Tipo de Sangre',
                         controller: _tipoSangreController,
                       ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: const Text(
+                                'CANCELAR',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (_nombreController.text.trim().isEmpty ||
+                                    _apellidoController.text.trim().isEmpty ||
+                                    _telefonoController.text.trim().isEmpty ||
+                                    _edadController.text.trim().isEmpty ||
+                                    _tallaSueterController.text.trim().isEmpty ||
+                                    _grupoSeleccionado == null ||
+                                    (!_esComandanteSeleccionado && _adultoResponsableController.text.trim().isEmpty) ||
+                                    _direccionController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Por favor, completa los campos requeridos (*).',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final store = context.read<RegistroKidsStore>();
+                                final data = {
+                                  'nombre': _nombreController.text,
+                                  'apellido': _apellidoController.text,
+                                  'telefono': _telefonoController.text,
+                                  'edad': int.tryParse(_edadController.text),
+                                  'tipoSangre': _tipoSangreController.text,
+                                  'departamento': 'Kids',
+                                  if (_fotoBase64 != null) 'foto': _fotoBase64,
+                                  'tallaSueter': _tallaSueterController.text,
+                                  'grupo': _grupoSeleccionado,
+                                  'adultoResponsable': _esComandanteSeleccionado ? '' : _adultoResponsableController.text,
+                                  'direccion': _direccionController.text,
+                                  'alergiasMedicamentos': _alergiasMedicamentosController.text,
+                                  'esComandante': _esComandanteSeleccionado,
+                                };
+
+                                bool success;
+                                if (persona == null) {
+                                  success = await store.crearPersona(data);
+                                } else {
+                                  success = await store.actualizarPersona(persona.id, data);
+                                }
+
+                                if (!mounted) return;
+                                Navigator.pop(context);
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        persona == null
+                                            ? 'Creado correctamente'
+                                            : 'Actualizado correctamente',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: const Text(
+                                'GUARDAR',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 );
               },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'CANCELAR',
-                style: TextStyle(
-                  color: Colors.white54,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_nombreController.text.trim().isEmpty ||
-                    _apellidoController.text.trim().isEmpty ||
-                    _telefonoController.text.trim().isEmpty ||
-                    _edadController.text.trim().isEmpty ||
-                    _tallaSueterController.text.trim().isEmpty ||
-                    _grupoSeleccionado == null ||
-                    (!_esComandanteSeleccionado && _adultoResponsableController.text.trim().isEmpty) ||
-                    _direccionController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Por favor, completa los campos requeridos (*).',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-
-                final store = context.read<RegistroKidsStore>();
-                final data = {
-                  'nombre': _nombreController.text,
-                  'apellido': _apellidoController.text,
-                  'telefono': _telefonoController.text,
-                  'edad': int.tryParse(_edadController.text),
-                  'tipoSangre': _tipoSangreController.text,
-                  'departamento': 'Kids',
-                  if (_fotoBase64 != null) 'foto': _fotoBase64,
-                  'tallaSueter': _tallaSueterController.text,
-                  'grupo': _grupoSeleccionado,
-                  'adultoResponsable': _esComandanteSeleccionado ? '' : _adultoResponsableController.text,
-                  'direccion': _direccionController.text,
-                  'alergiasMedicamentos': _alergiasMedicamentosController.text,
-                  'esComandante': _esComandanteSeleccionado,
-                };
-
-                bool success;
-                if (persona == null) {
-                  success = await store.crearPersona(data);
-                } else {
-                  success = await store.actualizarPersona(persona.id, data);
-                }
-
-                if (!mounted) return;
-                Navigator.pop(context);
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        persona == null
-                            ? 'Creado correctamente'
-                            : 'Actualizado correctamente',
-                      ),
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'GUARDAR',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );
