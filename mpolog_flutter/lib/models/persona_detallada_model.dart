@@ -24,6 +24,7 @@ class PersonaDetalladaModel {
   final String? metodoPago;
   final double? montoPago;
   final String? comprobantePago;
+  final bool esComandante;
 
   PersonaDetalladaModel({
     required this.id,
@@ -51,6 +52,7 @@ class PersonaDetalladaModel {
     this.metodoPago,
     this.montoPago,
     this.comprobantePago,
+    this.esComandante = false,
   });
 
   factory PersonaDetalladaModel.fromJson(Map<String, dynamic> json) {
@@ -83,6 +85,7 @@ class PersonaDetalladaModel {
       metodoPago: json['metodoPago'],
       montoPago: json['montoPago'] != null ? (json['montoPago'] as num).toDouble() : null,
       comprobantePago: json['comprobantePago'],
+      esComandante: json['esComandante'] ?? false,
     );
   }
 
@@ -111,6 +114,7 @@ class PersonaDetalladaModel {
       'metodoPago': metodoPago,
       'montoPago': montoPago,
       'comprobantePago': comprobantePago,
+      'esComandante': esComandante,
     };
   }
 

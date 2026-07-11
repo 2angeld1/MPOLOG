@@ -26,6 +26,7 @@ export interface IPersonaDetallada extends Document {
     metodoPago?: string;
     montoPago?: number;
     comprobantePago?: string;
+    esComandante?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -148,6 +149,10 @@ const PersonaDetalladaSchema: Schema = new Schema({
     comprobantePago: {
         type: String,
         required: false
+    },
+    esComandante: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

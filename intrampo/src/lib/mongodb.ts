@@ -83,6 +83,7 @@ const personaDetalladaSchema = new mongoose.Schema({
   departamento: String,
   usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   foto: String,
+  esComandante: Boolean,
 }, { timestamps: true });
 
 const conteoPersonasSchema = new mongoose.Schema({

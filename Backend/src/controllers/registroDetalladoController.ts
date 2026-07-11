@@ -4,7 +4,7 @@ import { uploadImage } from '../utils/imageUpload';
 
 export const crearPersonaDetallada = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago } = req.body;
+        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago, esComandante } = req.body;
         const userId = (req as any).userId;
 
         // Subir foto o comprobante a Cloudinary si existe
@@ -33,7 +33,8 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
             miembrosFamilia,
             metodoPago,
             montoPago,
-            comprobantePago: comprobanteUrl
+            comprobantePago: comprobanteUrl,
+            esComandante: !!esComandante
         });
 
         await persona.save();
@@ -45,7 +46,7 @@ export const crearPersonaDetallada = async (req: Request, res: Response) => {
 
 export const crearPersonaPublico = async (req: Request, res: Response) => {
     try {
-        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago } = req.body;
+        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago, esComandante } = req.body;
 
         // Subir foto o comprobante a Cloudinary si existe
         const fotoUrl = await uploadImage(foto, 'kids_profiles');
@@ -72,7 +73,8 @@ export const crearPersonaPublico = async (req: Request, res: Response) => {
             miembrosFamilia,
             metodoPago,
             montoPago,
-            comprobantePago: comprobanteUrl
+            comprobantePago: comprobanteUrl,
+            esComandante: !!esComandante
         });
 
         await persona.save();
@@ -98,7 +100,7 @@ export const obtenerPersonasDetalladas = async (req: Request, res: Response) => 
 export const actualizarPersonaDetallada = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago } = req.body;
+        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago, esComandante } = req.body;
 
         // Subir foto y/o comprobante a Cloudinary si existe (base64)
         const fotoUrl = await uploadImage(foto, 'kids_profiles');
@@ -106,7 +108,7 @@ export const actualizarPersonaDetallada = async (req: Request, res: Response) =>
 
         const persona = await PersonaDetallada.findByIdAndUpdate(
             id,
-            { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago: comprobanteUrl },
+            { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago: comprobanteUrl, esComandante: esComandante !== undefined ? !!esComandante : undefined },
             { new: true }
         );
 
@@ -130,7 +132,7 @@ export const eliminarPersonaDetallada = async (req: Request, res: Response) => {
 export const actualizarPersonaPublico = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago } = req.body;
+        const { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago, esComandante } = req.body;
 
         // Subir foto y/o comprobante a Cloudinary si existe (base64)
         const fotoUrl = await uploadImage(foto, 'kids_profiles');
@@ -138,7 +140,7 @@ export const actualizarPersonaPublico = async (req: Request, res: Response) => {
 
         const persona = await PersonaDetallada.findByIdAndUpdate(
             id,
-            { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago: comprobanteUrl },
+            { nombre, apellido, telefono, sexo, departamento, edad, escuela, tipoSangre, nombrePadres, correo, tallaSueter, grupo, adultoResponsable, direccion, alergiasMedicamentos, foto: fotoUrl, ministerio, asistenciaFamilia, miembrosFamilia, necesitaTransporte, metodoPago, montoPago, comprobantePago: comprobanteUrl, esComandante: esComandante !== undefined ? !!esComandante : undefined },
             { new: true }
         );
 

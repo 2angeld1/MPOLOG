@@ -36,6 +36,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
   final _alergiasMedicamentosController = TextEditingController();
   String? _grupoSeleccionado;
   String? _fotoBase64;
+  bool _esComandanteSeleccionado = false;
 
   static const _tabs = [
     _GrupoTab(valor: 'exploradores', label: 'Exploradores'),
@@ -92,6 +93,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
       _alergiasMedicamentosController.text = persona.alergiasMedicamentos ?? '';
       _grupoSeleccionado = persona.grupo;
       _fotoBase64 = persona.foto;
+      _esComandanteSeleccionado = persona.esComandante;
     } else {
       _nombreController.clear();
       _apellidoController.clear();
@@ -104,6 +106,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
       _alergiasMedicamentosController.clear();
       _grupoSeleccionado = null;
       _fotoBase64 = null;
+      _esComandanteSeleccionado = false;
     }
 
     showDialog(
@@ -192,9 +195,9 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Foto del Niño (Toca para capturar)',
-                        style: TextStyle(
+                      Text(
+                        _esComandanteSeleccionado ? 'Foto (Toca para capturar)' : 'Foto del Niño (Toca para capturar)',
+                        style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -202,7 +205,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                       ),
                       const SizedBox(height: 24),
                       GlassTextField(
-                        label: 'Nombre Completo del Niño *',
+                        label: _esComandanteSeleccionado ? 'Nombre Completo *' : 'Nombre Completo del Niño *',
                         controller: _nombreController,
                       ),
                       const SizedBox(height: 16),
@@ -266,13 +269,30 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                         },
                       ),
                       const SizedBox(height: 16),
-                      GlassTextField(
-                        label: 'Nombre del Adulto Responsable *',
-                        controller: _adultoResponsableController,
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          'Es Comandante de este grupo',
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                        value: _esComandanteSeleccionado,
+                        activeColor: AppColors.accent,
+                        onChanged: (val) {
+                          setDialogState(() {
+                            _esComandanteSeleccionado = val;
+                          });
+                        },
                       ),
+                      if (!_esComandanteSeleccionado) ...[
+                        const SizedBox(height: 16),
+                        GlassTextField(
+                          label: 'Nombre del Adulto Responsable *',
+                          controller: _adultoResponsableController,
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       GlassTextField(
-                        label: 'Teléfono del Adulto *',
+                        label: _esComandanteSeleccionado ? 'Teléfono *' : 'Teléfono del Adulto *',
                         controller: _telefonoController,
                         keyboardType: TextInputType.phone,
                       ),
@@ -317,7 +337,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                     _edadController.text.trim().isEmpty ||
                     _tallaSueterController.text.trim().isEmpty ||
                     _grupoSeleccionado == null ||
-                    _adultoResponsableController.text.trim().isEmpty ||
+                    (!_esComandanteSeleccionado && _adultoResponsableController.text.trim().isEmpty) ||
                     _direccionController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -340,9 +360,10 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                   if (_fotoBase64 != null) 'foto': _fotoBase64,
                   'tallaSueter': _tallaSueterController.text,
                   'grupo': _grupoSeleccionado,
-                  'adultoResponsable': _adultoResponsableController.text,
+                  'adultoResponsable': _esComandanteSeleccionado ? '' : _adultoResponsableController.text,
                   'direccion': _direccionController.text,
                   'alergiasMedicamentos': _alergiasMedicamentosController.text,
+                  'esComandante': _esComandanteSeleccionado,
                 };
 
                 bool success;
@@ -382,6 +403,44 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
         );
       },
     );
+  }
+
+  Future<bool> _askIfComandante(String nombreCompleto, int edad) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Confirmar Comandante',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          '¿$nombreCompleto ($edad años) es comandante de su grupo?',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'NO',
+              style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('SÍ', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   Future<void> _importarCSV() async {
@@ -442,6 +501,15 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
         String direccion = row[8].toString().trim();
         String alergias = row[9].toString().trim();
 
+        bool esComandante = false;
+        if (edad != null) {
+          if (edad > 19) {
+            esComandante = true;
+          } else if (edad >= 18) {
+            esComandante = await _askIfComandante(nombreCompleto, edad);
+          }
+        }
+
         listaPersonas.add({
           'nombre': nombre,
           'apellido': apellido,
@@ -451,9 +519,10 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
           'departamento': 'Kids',
           'tallaSueter': tallaSueter,
           'grupo': grupoSeleccionado,
-          'adultoResponsable': adultoResponsable,
+          'adultoResponsable': esComandante ? '' : adultoResponsable,
           'direccion': direccion,
           'alergiasMedicamentos': alergias,
+          'esComandante': esComandante,
         });
       }
 
@@ -803,13 +872,37 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: Text(
-                      '${p.nombre} ${p.apellido}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Colors.white,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${p.nombre} ${p.apellido}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (p.esComandante) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.accent, width: 1),
+                            ),
+                            child: const Text(
+                              'COMANDANTE',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
@@ -852,18 +945,26 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                     ? p.grupo!.toUpperCase()
                     : 'No registrado',
               ),
-              _buildDetailItem(
-                Icons.family_restroom_rounded,
-                'Adulto Responsable',
-                p.adultoResponsable?.isNotEmpty == true
-                    ? p.adultoResponsable!
-                    : 'No registrado',
-              ),
-              _buildDetailItem(
-                Icons.phone_rounded,
-                'Teléfono del Adulto',
-                p.telefono,
-              ),
+              if (!p.esComandante) ...[
+                _buildDetailItem(
+                  Icons.family_restroom_rounded,
+                  'Adulto Responsable',
+                  p.adultoResponsable?.isNotEmpty == true
+                      ? p.adultoResponsable!
+                      : 'No registrado',
+                ),
+                _buildDetailItem(
+                  Icons.phone_rounded,
+                  'Teléfono del Adulto',
+                  p.telefono,
+                ),
+              ] else ...[
+                _buildDetailItem(
+                  Icons.phone_rounded,
+                  'Teléfono del Comandante',
+                  p.telefono,
+                ),
+              ],
               _buildDetailItem(
                 Icons.location_on_rounded,
                 'Dirección de Residencia',
@@ -1195,14 +1296,18 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
               borderRadius: 20,
               border: isSelected
                   ? Border.all(color: AppColors.primary, width: 2)
-                  : null,
+                  : p.esComandante
+                      ? Border.all(color: AppColors.accent, width: 2)
+                      : null,
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: asistioHoy
                         ? AppColors.success.withValues(alpha: 0.2)
-                        : Colors.white10,
+                        : p.esComandante
+                            ? AppColors.accent.withValues(alpha: 0.2)
+                            : Colors.white10,
                     backgroundImage: p.foto != null && p.foto!.isNotEmpty
                         ? NetworkImage(p.foto!)
                         : null,
@@ -1212,7 +1317,9 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                             style: TextStyle(
                               color: asistioHoy
                                   ? AppColors.success
-                                  : Colors.white,
+                                  : p.esComandante
+                                      ? AppColors.accent
+                                      : Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           )
@@ -1223,12 +1330,36 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${p.nombre} ${p.apellido}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${p.nombre} ${p.apellido}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            if (p.esComandante)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppColors.accent, width: 1),
+                                ),
+                                child: const Text(
+                                  'COMANDANTE',
+                                  style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Row(
