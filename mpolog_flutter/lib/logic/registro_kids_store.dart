@@ -44,7 +44,21 @@ class RegistroKidsStore extends ChangeNotifier {
     int importados = 0;
     try {
       for (final data in lista) {
-        final success = await _service.crearPersona(data);
+        final nombre = data['nombre']?.toString().toLowerCase().trim() ?? '';
+        final apellido = data['apellido']?.toString().toLowerCase().trim() ?? '';
+        
+        final idx = _personas.indexWhere((p) =>
+            p.nombre.toLowerCase().trim() == nombre &&
+            p.apellido.toLowerCase().trim() == apellido);
+
+        bool success;
+        if (idx != -1) {
+          final id = _personas[idx].id;
+          success = await _service.actualizarPersona(id, data);
+        } else {
+          success = await _service.crearPersona(data);
+        }
+
         if (success) importados++;
       }
       if (importados > 0) {

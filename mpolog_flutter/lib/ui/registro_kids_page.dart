@@ -43,6 +43,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
     _GrupoTab(valor: 'seguidores de la senda', label: 'Seguidores'),
     _GrupoTab(valor: 'pioneros', label: 'Pioneros'),
     _GrupoTab(valor: 'navegantes', label: 'Navegantes'),
+    _GrupoTab(valor: 'comandantes', label: 'Comandantes'),
   ];
 
   @override
@@ -77,6 +78,9 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
     List<PersonaDetalladaModel> personas,
   ) {
     final grupo = _grupoActual();
+    if (grupo == 'comandantes') {
+      return personas.where((p) => p.esComandante).toList();
+    }
     return personas.where((p) => p.grupo?.toLowerCase() == grupo).toList();
   }
 
@@ -258,7 +262,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                           fontSize: 15,
                         ),
                         decoration: InputDecoration(
-                          labelText: 'Grupo Perteneciente *',
+                          labelText: _esComandanteSeleccionado ? 'Grupo Perteneciente (Opcional)' : 'Grupo Perteneciente *',
                           labelStyle: const TextStyle(color: Colors.white54),
                           filled: true,
                           fillColor: Colors.white.withValues(alpha: 0.05),
@@ -367,7 +371,7 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
                                     _telefonoController.text.trim().isEmpty ||
                                     _edadController.text.trim().isEmpty ||
                                     _tallaSueterController.text.trim().isEmpty ||
-                                    _grupoSeleccionado == null ||
+                                    (!_esComandanteSeleccionado && _grupoSeleccionado == null) ||
                                     (!_esComandanteSeleccionado && _adultoResponsableController.text.trim().isEmpty) ||
                                     _direccionController.text.trim().isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -529,18 +533,6 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
         int? edad = int.tryParse(row[2].toString().trim());
         String tallaSueter = row[3].toString().trim();
         
-        String grupoStr = row[4].toString().toLowerCase().trim();
-        String grupoSeleccionado = 'exploradores';
-        if (grupoStr.contains('pionero')) grupoSeleccionado = 'pioneros';
-        else if (grupoStr.contains('navegante')) grupoSeleccionado = 'navegantes';
-        else if (grupoStr.contains('seguidor')) grupoSeleccionado = 'seguidores de la senda';
-
-        String tipoSangre = row[5].toString().trim();
-        String adultoResponsable = row[6].toString().trim();
-        String telefono = row[7].toString().trim();
-        String direccion = row[8].toString().trim();
-        String alergias = row[9].toString().trim();
-
         bool esComandante = false;
         if (edad != null) {
           if (edad > 19) {
@@ -549,6 +541,26 @@ class _RegistroKidsPageState extends State<RegistroKidsPage>
             esComandante = await _askIfComandante(nombreCompleto, edad);
           }
         }
+
+        String grupoStr = row[4].toString().toLowerCase().trim();
+        String? grupoSeleccionado;
+        if (grupoStr.contains('pionero')) {
+          grupoSeleccionado = 'pioneros';
+        } else if (grupoStr.contains('navegante')) {
+          grupoSeleccionado = 'navegantes';
+        } else if (grupoStr.contains('seguidor')) {
+          grupoSeleccionado = 'seguidores de la senda';
+        } else if (grupoStr.contains('explorador')) {
+          grupoSeleccionado = 'exploradores';
+        } else {
+          grupoSeleccionado = esComandante ? null : 'exploradores';
+        }
+
+        String tipoSangre = row[5].toString().trim();
+        String adultoResponsable = row[6].toString().trim();
+        String telefono = row[7].toString().trim();
+        String direccion = row[8].toString().trim();
+        String alergias = row[9].toString().trim();
 
         listaPersonas.add({
           'nombre': nombre,
@@ -1510,6 +1522,8 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
       color: AppColors.background,
       child: TabBar(
         controller: tabController,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
         indicatorColor: AppColors.primary,
         labelColor: AppColors.primary,
         unselectedLabelColor: Colors.white54,
