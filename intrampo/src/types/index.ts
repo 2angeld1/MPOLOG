@@ -20,6 +20,8 @@ export interface IEvento {
   color?: string;
   fechaInicio: string;
   fechaFin: string;
+  horaInicio?: string;
+  horaFin?: string;
   precioTotal: number;
   activo: boolean;
   descripcion?: string;
@@ -30,6 +32,25 @@ export interface IEvento {
   };
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface IEventoPlantilla {
+  _id: string;
+  nombre: string;
+  tipo: IEvento['tipo'];
+  departamento: string;
+  color?: string;
+  descripcion?: string;
+  horaInicio?: string;
+  horaFin?: string;
+  diaSemana?: number; // 0=Domingo, 6=Sábado
+  precioTotal?: number;
+  ubicacion?: {
+    lat?: number;
+    lng?: number;
+    nombreLugar: string;
+  };
+  usageCount: number;
 }
 
 export interface IPersonaDetallada {

@@ -51,6 +51,8 @@ const eventoSchema = new mongoose.Schema({
   color: String,
   fechaInicio: Date,
   fechaFin: Date,
+  horaInicio: String,
+  horaFin: String,
   precioTotal: Number,
   activo: Boolean,
   descripcion: String,
@@ -63,6 +65,25 @@ const eventoSchema = new mongoose.Schema({
   duracionDias: Number,
   requiereAlojamiento: Boolean,
   equipos: [String],
+}, { timestamps: true });
+
+const eventoPlantillaSchema = new mongoose.Schema({
+  nombre: String,
+  tipo: { type: String, enum: ['campamento', 'retiro', 'conferencia', 'asignacion', 'reunion', 'ayuno', 'vigilia', 'culto', 'evangelismo', 'convencion', 'otro'] },
+  departamento: String,
+  color: String,
+  descripcion: String,
+  horaInicio: String,
+  horaFin: String,
+  diaSemana: { type: Number, min: 0, max: 6 }, // 0=Domingo, 6=Sábado
+  precioTotal: Number,
+  ubicacion: {
+    lat: Number,
+    lng: Number,
+    nombreLugar: String,
+  },
+  usageCount: { type: Number, default: 0 },
+  usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 const personaDetalladaSchema = new mongoose.Schema({
@@ -120,6 +141,7 @@ const eventoPersonaSchema = new mongoose.Schema({
 // Use existing models if already registered (hot reload safety)
 export const User = mongoose.models.User || mongoose.model('User', userSchema);
 export const Evento = mongoose.models.Evento || mongoose.model('Evento', eventoSchema);
+export const EventoPlantilla = mongoose.models.EventoPlantilla || mongoose.model('EventoPlantilla', eventoPlantillaSchema);
 export const PersonaDetallada = mongoose.models.PersonaDetallada || mongoose.model('PersonaDetallada', personaDetalladaSchema);
 export const ConteoPersonas = mongoose.models.ConteoPersonas || mongoose.model('ConteoPersonas', conteoPersonasSchema);
 export const EventoPersona = mongoose.models.EventoPersona || mongoose.model('EventoPersona', eventoPersonaSchema);
