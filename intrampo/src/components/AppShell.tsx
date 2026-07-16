@@ -30,6 +30,7 @@ const pageTitles: Record<string, string> = {
   '/comunicados': 'Comunicados',
   '/asistencia': 'Reportes de Asistencia',
   '/ministerios': 'Ministerios',
+  '/inventario': 'Inventario de Materiales',
 };
 
 export default function AppShell({ children }: { children: React.ReactNode }) {

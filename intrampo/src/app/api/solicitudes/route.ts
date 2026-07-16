@@ -49,8 +49,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const data = await request.json();
+    const { descripcionEquipo, fechaSalida, fechaEstimadaRegreso, fotoEstadoActual, itemId, itemNombre } = data;
 
-    if (!data.descripcionEquipo || !data.fechaSalida || !data.fechaEstimadaRegreso) {
+    if ((!descripcionEquipo && !itemNombre) || !fechaSalida || !fechaEstimadaRegreso) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
     }
 
@@ -60,11 +61,13 @@ export async function POST(request: NextRequest) {
       data: {
         liderId: session.userId,
         liderNombre: session.nombre,
-        descripcionEquipo: data.descripcionEquipo,
-        fotoEstadoActual: data.fotoEstadoActual || null,
-        fechaSalida: new Date(data.fechaSalida),
-        fechaEstimadaRegreso: new Date(data.fechaEstimadaRegreso),
-        estado: 'Solicitado'
+        descripcionEquipo: descripcionEquipo || itemNombre || 'Equipo sin nombre',
+        fotoEstadoActual: fotoEstadoActual || null,
+        fechaSalida: new Date(fechaSalida),
+        fechaEstimadaRegreso: new Date(fechaEstimadaRegreso),
+        estado: 'Solicitado',
+        itemId: itemId || null,
+        itemNombre: itemNombre || null,
       }
     });
 

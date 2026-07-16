@@ -10,6 +10,7 @@ import {
   FiBarChart2,
   FiFolder,
   FiInbox,
+  FiPackage,
   FiShield,
   FiLogOut,
 } from 'react-icons/fi';
@@ -42,6 +43,7 @@ const navItems: { section: string; items: { label: string; href: string; icon: I
     section: 'Recursos',
     items: [
       { label: 'Archivos', href: '/archivos', icon: FiFolder },
+      { label: 'Inventario', href: '/inventario', icon: FiPackage },
       { label: 'Solicitudes', href: '/solicitudes', icon: FiInbox },
     ],
   },

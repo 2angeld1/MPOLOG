@@ -89,6 +89,8 @@ model SolicitudRecurso {
   fechaEstimadaRegreso  DateTime
   estado                String   @default("Solicitado") // "Solicitado", "Retirado", "Disponible"
   observacionesRetorno  String?
+  itemId                String?  @db.ObjectId
+  itemNombre            String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
@@ -116,4 +118,24 @@ model UsuarioSistema {
   miembroDirectorioId String?  @db.ObjectId
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+model ItemInventario {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  nombre          String
+  descripcion     String
+  estado          String   // "Nuevo", "Bueno", "Regular", "Deteriorado", "Fuera de servicio"
+  imagenUrl       String?
+  imagenPublicId  String?  // Para poder eliminar de Cloudinary
+  archivoId       String?  @db.ObjectId  // Referencia opcional a un Archivo existente
+  ministerioId    String?  @db.ObjectId  // Referencia al ministerio donde se usa
+  ministerioNombre String? // Cache del nombre del ministerio
+  cantidad        Int      @default(1)
+  ubicacion       String?  // Ubicación física opcional
+  notas           String?
+  creadoPorId     String
+  creadoPorNombre String?
+  activo          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

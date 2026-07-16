@@ -13,17 +13,26 @@ interface ISolicitud {
   fechaEstimadaRegreso: string;
   estado: 'Solicitado' | 'Retirado' | 'Disponible';
   observacionesRetorno?: string;
+  itemId?: string;
+  itemNombre?: string;
   createdAt: string;
 }
 
 export default function SolicitudesPage() {
   const { user } = useAppContext();
   const [solicitudes, setSolicitudes] = useState<ISolicitud[]>([]);
+  const [inventarioItems, setInventarioItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
-  const [formData, setFormData] = useState({ descripcionEquipo: '', fechaSalida: '', fechaEstimadaRegreso: '' });
+  const [formData, setFormData] = useState({
+    descripcionEquipo: '',
+    fechaSalida: '',
+    fechaEstimadaRegreso: '',
+    itemId: '',
+    itemNombre: ''
+  });
   const [foto, setFoto] = useState<File | null>(null);
   
   const [errorMsg, setErrorMsg] = useState('');
@@ -32,7 +41,20 @@ export default function SolicitudesPage() {
 
   useEffect(() => {
     fetchSolicitudes();
+    fetchInventario();
   }, []);
+
+  const fetchInventario = async () => {
+    try {
+      const res = await fetch('/api/inventario');
+      if (res.ok) {
+        const data = await res.json();
+        setInventarioItems(data.items || []);
+      }
+    } catch (err) {
+      console.error('Error al cargar inventario:', err);
+    }
+  };
 
   const fetchSolicitudes = async () => {
     try {
@@ -71,9 +93,10 @@ export default function SolicitudesPage() {
       });
       if (res.ok) {
         setShowForm(false);
-        setFormData({ descripcionEquipo: '', fechaSalida: '', fechaEstimadaRegreso: '' });
+        setFormData({ descripcionEquipo: '', fechaSalida: '', fechaEstimadaRegreso: '', itemId: '', itemNombre: '' });
         setFoto(null);
         fetchSolicitudes();
+        fetchInventario();
       } else {
         const data = await res.json();
         setErrorMsg(data.error || 'Error al crear');
@@ -145,7 +168,14 @@ export default function SolicitudesPage() {
               return (
                 <StaggerItem key={s._id} className="bg-[#1a1c25] rounded-2xl border border-white/10 p-6 flex flex-col gap-4 transition-all duration-300 hover:border-white/20 hover:shadow-xl group">
                   <div className="flex justify-between items-start gap-4 flex-wrap">
-                    <div className="font-display text-xl font-bold text-gray-100 group-hover:text-amber-400 transition-colors">{s.descripcionEquipo}</div>
+                    <div>
+                      <div className="font-display text-xl font-bold text-gray-100 group-hover:text-amber-400 transition-colors">{s.descripcionEquipo}</div>
+                      {s.itemNombre && (
+                        <span className="inline-flex items-center gap-1.5 mt-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-lg text-xs font-semibold">
+                          📦 Item de Inventario: {s.itemNombre}
+                        </span>
+                      )}
+                    </div>
                     <span className="px-3 py-1 rounded-full text-[0.75rem] font-bold tracking-wider uppercase" style={{ background: colors.bg, color: colors.text }}>
                       {s.estado}
                     </span>
@@ -237,16 +267,44 @@ export default function SolicitudesPage() {
               <form onSubmit={handleCreate} className="flex flex-col overflow-hidden">
                 <div className="p-6 overflow-y-auto custom-scrollbar">
                   <div className="mb-5">
-                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">¿Qué solicitas o qué cantidad?</label>
-                    <textarea
-                      className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 resize-y"
-                      placeholder="Ej: 2 micrófonos, 1 corneta activa..."
-                      value={formData.descripcionEquipo}
-                      onChange={(e) => setFormData({ ...formData, descripcionEquipo: e.target.value })}
+                    <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Seleccionar Item del Inventario</label>
+                    <select
+                      className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 appearance-none"
+                      value={formData.itemId}
+                      onChange={(e) => {
+                        const selectedId = e.target.value;
+                        const item = inventarioItems.find(i => i._id === selectedId);
+                        setFormData({
+                          ...formData,
+                          itemId: selectedId,
+                          itemNombre: item ? item.nombre : '',
+                          descripcionEquipo: item ? `${item.nombre} (Estado: ${item.estado}, Área: ${item.ministerioNombre || 'General'})` : ''
+                        });
+                      }}
                       required
-                      rows={3}
-                    />
+                    >
+                      <option value="">-- Selecciona un recurso/equipo --</option>
+                      {inventarioItems.map(item => (
+                        <option key={item._id} value={item._id}>
+                          {item.nombre} (Cant: {item.cantidad} - {item.estado})
+                        </option>
+                      ))}
+                    </select>
                   </div>
+                  
+                  {formData.itemId && (
+                    <div className="mb-5">
+                      <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Detalles / Observaciones del préstamo</label>
+                      <textarea
+                        className="w-full bg-[#14161f] border border-white/10 text-white rounded-lg px-4 py-3 outline-none transition-all focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 resize-y"
+                        placeholder="Ej: Necesitamos este proyector para el servicio de jóvenes del sábado por la tarde."
+                        value={formData.descripcionEquipo}
+                        onChange={(e) => setFormData({ ...formData, descripcionEquipo: e.target.value })}
+                        required
+                        rows={3}
+                      />
+                    </div>
+                  )}
                   <div className="mb-5">
                     <label className="block text-[0.8rem] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Foto del Estado Actual (Opcional)</label>
                     <div className="w-full bg-[#14161f] border border-white/10 border-dashed rounded-lg p-4 text-center hover:bg-white/5 transition-colors cursor-pointer relative">
