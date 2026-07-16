@@ -21,10 +21,10 @@ export async function PUT(
       return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
     }
 
-    const updateData: Record<string, unknown> = {};
     const allowedFields = [
       'nombre', 'tipo', 'departamento', 'color', 'precioTotal',
       'activo', 'descripcion', 'ubicacion', 'horaInicio', 'horaFin',
+      'visibleSoloPor',
     ];
 
     for (const field of allowedFields) {
@@ -59,6 +59,7 @@ export async function PUT(
         ubicacion: e.ubicacion,
         horaInicio: e.horaInicio,
         horaFin: e.horaFin,
+        visibleSoloPor: e.visibleSoloPor || null,
       },
     });
   } catch (error) {

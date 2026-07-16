@@ -30,6 +30,7 @@ export interface IEvento {
     lng?: number;
     nombreLugar: string;
   };
+  visibleSoloPor?: string;
   createdAt?: string;
   updatedAt?: string;
 }

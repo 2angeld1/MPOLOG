@@ -47,6 +47,7 @@ export default function EventDetailModal({
             </span>
             <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-md text-xs font-bold tracking-wider uppercase">{evento.departamento}</span>
             {evento.activo && <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-md text-xs font-bold tracking-wider uppercase">Activo</span>}
+            {evento.visibleSoloPor && <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded-md text-xs font-bold tracking-wider uppercase">🔒 Solo: {evento.visibleSoloPor}</span>}
           </div>
 
           <div className="flex flex-col gap-4">

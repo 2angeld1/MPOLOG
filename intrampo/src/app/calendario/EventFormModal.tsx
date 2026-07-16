@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Modal from '@/components/Modal';
 import { EVENT_TYPES, EVENT_TYPE_COLORS, DEPARTMENTS } from '@/hooks/useCalendario';
 import type { EventFormData } from '@/hooks/useCalendario';
@@ -24,6 +25,16 @@ export default function EventFormModal({
   isEditing,
 }: EventFormModalProps) {
   const selectedColor = formData.color || EVENT_TYPE_COLORS[formData.tipo] || '#673AB7';
+  const [ministerios, setMinisterios] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/ministerios')
+        .then(res => res.json())
+        .then(data => setMinisterios(data.ministerios || []))
+        .catch(console.error);
+    }
+  }, [isOpen]);
 
   return (
     <Modal
@@ -225,6 +236,26 @@ export default function EventFormModal({
             placeholder="Detalles adicionales del evento..."
             className="w-full px-4 py-3 rounded-xl bg-[#14161f] border border-white/10 text-gray-100 text-sm placeholder:text-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all resize-none"
           />
+        </div>
+
+        {/* Solo visible por (Ministerio) */}
+        <div>
+          <label className="block text-[0.7rem] text-gray-500 uppercase tracking-widest font-semibold mb-1.5">
+            Solo visible por (Opcional)
+          </label>
+          <select
+            value={formData.visibleSoloPor || ''}
+            onChange={(e) => setFormData(prev => ({ ...prev, visibleSoloPor: e.target.value }))}
+            className="w-full px-4 py-3 rounded-xl bg-[#14161f] border border-white/10 text-gray-100 text-sm focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 outline-none transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Todos (Público)</option>
+            {ministerios.map(m => (
+              <option key={m.id} value={m.nombre}>{m.nombre}</option>
+            ))}
+          </select>
+          <span className="text-[0.65rem] text-gray-500 mt-1 block">
+            Si seleccionas un ministerio, esta actividad solo aparecerá en el calendario de los integrantes de ese ministerio.
+          </span>
         </div>
       </form>
     </Modal>

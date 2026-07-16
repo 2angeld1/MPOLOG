@@ -37,8 +37,20 @@ export async function GET(request: NextRequest) {
       .sort({ fechaInicio: -1 })
       .lean();
 
+    const safeRoles = session.roles?.map((r: string) => r.toLowerCase()) || [];
+    const isUserAdmin = isAdmin(session);
+
+    const filteredEventos = eventos.filter((e: any) => {
+      // Admins and Pastores see all events
+      if (isUserAdmin) return true;
+      // Public events (no restriction) are visible to everyone
+      if (!e.visibleSoloPor) return true;
+      // Otherwise, user must have the corresponding role
+      return safeRoles.includes(e.visibleSoloPor.toLowerCase());
+    });
+
     return NextResponse.json({
-      eventos: eventos.map((e: Record<string, unknown>) => ({
+      eventos: filteredEventos.map((e: Record<string, any>) => ({
         _id: String(e._id),
         nombre: e.nombre,
         tipo: e.tipo,
@@ -53,6 +65,7 @@ export async function GET(request: NextRequest) {
         equipos: e.equipos,
         horaInicio: e.horaInicio,
         horaFin: e.horaFin,
+        visibleSoloPor: e.visibleSoloPor || null,
       })),
     });
   } catch (error) {
@@ -74,7 +87,7 @@ export async function POST(request: NextRequest) {
     await connectMongo();
     const body = await request.json();
 
-    const { nombre, tipo, departamento, fechaInicio, fechaFin } = body;
+    const { nombre, tipo, departamento, fechaInicio, fechaFin, visibleSoloPor } = body;
     if (!nombre || !tipo || !departamento || !fechaInicio || !fechaFin) {
       return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
     }
@@ -93,6 +106,7 @@ export async function POST(request: NextRequest) {
       horaInicio: body.horaInicio || undefined,
       horaFin: body.horaFin || undefined,
       usuario: session.userId,
+      visibleSoloPor: visibleSoloPor || undefined,
     });
 
     return NextResponse.json({
@@ -110,6 +124,7 @@ export async function POST(request: NextRequest) {
         ubicacion: evento.ubicacion,
         horaInicio: evento.horaInicio,
         horaFin: evento.horaFin,
+        visibleSoloPor: evento.visibleSoloPor || null,
       },
     }, { status: 201 });
   } catch (error) {

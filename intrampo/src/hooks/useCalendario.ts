@@ -28,6 +28,7 @@ export interface EventFormData {
   descripcion: string;
   precioTotal: number;
   ubicacion: string;
+  visibleSoloPor: string;
 }
 
 const EMPTY_FORM: EventFormData = {
@@ -42,6 +43,7 @@ const EMPTY_FORM: EventFormData = {
   descripcion: '',
   precioTotal: 0,
   ubicacion: '',
+  visibleSoloPor: '',
 };
 
 export const parseUTCDate = (dateStr: string): Date => {
@@ -235,6 +237,7 @@ export function useCalendario() {
       descripcion: evento.descripcion || '',
       precioTotal: evento.precioTotal,
       ubicacion: evento.ubicacion?.nombreLugar || '',
+      visibleSoloPor: evento.visibleSoloPor || '',
     });
     setShowEventForm(true);
     setSelectedEvent(null);
@@ -261,6 +264,7 @@ export function useCalendario() {
       descripcion: plantilla.descripcion || '',
       precioTotal: plantilla.precioTotal || 0,
       ubicacion: plantilla.ubicacion?.nombreLugar || '',
+      visibleSoloPor: '',
     });
     setEditingEvent(null);
     setShowTemplatePanel(false);
@@ -292,6 +296,7 @@ export function useCalendario() {
         precioTotal: formData.precioTotal,
         ubicacion: formData.ubicacion ? { nombreLugar: formData.ubicacion } : undefined,
         activo: true,
+        visibleSoloPor: formData.visibleSoloPor || undefined,
       };
 
       const url = editingEvent ? `/api/eventos/${editingEvent._id}` : '/api/eventos';

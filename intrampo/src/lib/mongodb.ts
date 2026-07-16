@@ -65,6 +65,7 @@ const eventoSchema = new mongoose.Schema({
   duracionDias: Number,
   requiereAlojamiento: Boolean,
   equipos: [String],
+  visibleSoloPor: String,
 }, { timestamps: true });
 
 const eventoPlantillaSchema = new mongoose.Schema({
