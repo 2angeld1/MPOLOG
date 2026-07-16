@@ -139,3 +139,37 @@ model ItemInventario {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model Formulario {
+  id              String               @id @default(auto()) @map("_id") @db.ObjectId
+  slug            String               @unique // Alias para la URL pública, ej. "retiro-jovenes-2026"
+  titulo          String
+  descripcion     String?
+  fechaEvento     DateTime?            // Opcional: Fecha del evento asociado
+  lugarEvento     String?              // Opcional: Lugar del evento asociado
+  precioEvento    Float?               // Opcional: Costo o precio de inscripción
+  fotoFondoUrl    String?              // URL de la imagen de fondo personalizada
+  campos          Json                 // Arreglo de campos [{ id, label, tipo, requerido, opciones[] }]
+  activo          Boolean              @default(true)
+  creadoPorId     String
+  creadoPorNombre String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  respuestas      RespuestaFormulario[]
+}
+
+model RespuestaFormulario {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  formularioId String     @db.ObjectId
+  formulario   Formulario @relation(fields: [formularioId], references: [id], onDelete: Cascade)
+  respuestas   Json       // Objeto llave-valor con las respuestas { "nombre": "Juan", "telefono": "123" }
+  createdAt    DateTime   @default(now())
+}
+
+model CampoSugerido {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  label     String   @unique
+  tipo      String   // "texto", "numero", "fecha", "select", "textarea", etc.
+  opciones  String[] // Opciones predefinidas (si aplica)
+  createdAt DateTime @default(now())
+}

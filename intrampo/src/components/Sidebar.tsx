@@ -11,6 +11,7 @@ import {
   FiFolder,
   FiInbox,
   FiPackage,
+  FiFileText,
   FiShield,
   FiLogOut,
 } from 'react-icons/fi';
@@ -45,6 +46,7 @@ const navItems: { section: string; items: { label: string; href: string; icon: I
       { label: 'Archivos', href: '/archivos', icon: FiFolder },
       { label: 'Inventario', href: '/inventario', icon: FiPackage },
       { label: 'Solicitudes', href: '/solicitudes', icon: FiInbox },
+      { label: 'Formularios', href: '/formularios', icon: FiFileText },
     ],
   },
   {

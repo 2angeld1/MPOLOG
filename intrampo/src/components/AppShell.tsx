@@ -31,6 +31,7 @@ const pageTitles: Record<string, string> = {
   '/asistencia': 'Reportes de Asistencia',
   '/ministerios': 'Ministerios',
   '/inventario': 'Inventario de Materiales',
+  '/formularios': 'Generador de Formularios',
 };
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
