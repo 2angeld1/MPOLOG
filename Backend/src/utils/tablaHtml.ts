@@ -302,9 +302,35 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
         .header {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 24px;
+        }
+
+        .export-btn {
+            background-color: #1e7e34;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+        }
+        .export-btn:hover {
+            background-color: #155d27;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+        .export-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
 
         h1 {
@@ -438,11 +464,13 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             margin-right: 6px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Directorio Campamento de Servidores 2026</h1>
+            <button id="exportExcelBtn" class="export-btn" onclick="exportToExcel()">📥 Exportar a Excel</button>
         </div>
 
         <div class="table-container">
@@ -535,6 +563,7 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
 
     <script>
         const baseUrl = '${baseUrl}';
+        const personasList = ${JSON.stringify(personas).replace(/</g, '\\u003c')};
         const modal = document.getElementById('editModal');
         const form = document.getElementById('editForm');
         
@@ -615,6 +644,57 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                     alert('Error de red');
                 }
             }
+        }
+
+        function exportToExcel() {
+            if (!personasList || personasList.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            // Map standard and extra database fields to clean headers
+            const exportData = personasList.map(p => ({
+                'Nombre': p.nombre || '',
+                'Apellido': (p.apellido && p.apellido !== '.') ? p.apellido : '',
+                'Sexo': p.sexo || '',
+                'Ministerios': p.ministerio || '',
+                'Transporte': p.necesitaTransporte || '',
+                'Método de Pago': p.metodoPago || '',
+                'Monto Pago ($)': p.montoPago || 0,
+                'Comprobante': p.comprobantePago || '',
+                'Teléfono': p.telefono || '',
+                'Edad': p.edad || '',
+                'Talla Suéter': p.tallaSueter || '',
+                'Correo': p.correo || '',
+                'Adulto Responsable': p.adultoResponsable || '',
+                'Dirección': p.direccion || '',
+                'Alergias/Medicamentos': p.alergiasMedicamentos || '',
+                'Fecha Registro': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
+            }));
+
+            // Create worksheet from data
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            
+            // Auto-fit column widths
+            const max_len = exportData.reduce((acc, row) => {
+                Object.keys(row).forEach((key) => {
+                    const val = String(row[key] || '');
+                    const cell_len = val.length;
+                    const header_len = key.length;
+                    const current_max = Math.max(cell_len, header_len);
+                    acc[key] = Math.max(acc[key] || 0, current_max);
+                });
+                return acc;
+            }, {});
+            
+            worksheet['!cols'] = Object.keys(max_len).map(key => ({ wch: max_len[key] + 3 }));
+
+            // Create workbook and append worksheet
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Servidores');
+
+            // Download file
+            XLSX.writeFile(workbook, 'Directorio_Campamento_Servidores_2026.xlsx');
         }
     </script>
 </body>
