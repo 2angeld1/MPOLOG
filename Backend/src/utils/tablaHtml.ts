@@ -663,12 +663,6 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                 'Monto Pago ($)': p.montoPago || 0,
                 'Comprobante': p.comprobantePago || '',
                 'Teléfono': p.telefono || '',
-                'Edad': p.edad || '',
-                'Talla Suéter': p.tallaSueter || '',
-                'Correo': p.correo || '',
-                'Adulto Responsable': p.adultoResponsable || '',
-                'Dirección': p.direccion || '',
-                'Alergias/Medicamentos': p.alergiasMedicamentos || '',
                 'Fecha Registro': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
             }));
 
