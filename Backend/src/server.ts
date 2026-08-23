@@ -16,9 +16,9 @@ import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
-import { getTeenFormHtml, getMentorClubFormHtml, getCampamentoFormHtml } from './utils/htmlForm';
+import { getTeenFormHtml, getMentorClubFormHtml, getCampamentoFormHtml, getConvencionFormHtml } from './utils/htmlForm';
 import { getCarnetHtml } from './utils/carnetHtml';
-import { getTablaNinosHtml, getCampamentoTableHtml } from './utils/tablaHtml';
+import { getTablaNinosHtml, getCampamentoTableHtml, getConvencionTableHtml } from './utils/tablaHtml';
 import PersonaDetallada from './models/PersonaDetallada';
 
 const app = express();
@@ -88,6 +88,14 @@ app.get('/registro-campamento', (req, res) => {
     res.send(getCampamentoFormHtml());
 });
 
+// Ruta de registro público Convención de Jóvenes (Juegos)
+app.get('/registro-convencion', (req, res) => {
+    res.send(getConvencionFormHtml());
+});
+app.get('/registro-juegos', (req, res) => {
+    res.send(getConvencionFormHtml());
+});
+
 // Directorio HTML de Mentor Club (Kids) con QR
 app.get('/directorio-mentor-club', async (req, res) => {
     try {
@@ -113,6 +121,23 @@ app.get('/directorio-campamento', async (req, res) => {
         const baseUrl = `${activeProtocol}://${host}`;
 
         res.send(getCampamentoTableHtml(personas, baseUrl));
+    } catch (error: any) {
+        res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
+    }
+});
+
+// Directorio HTML de Convención de Jóvenes (Juegos) con Tabs
+app.get(['/directorio-convencion', '/directorio-juegos'], async (req, res) => {
+    try {
+        const personas = await PersonaDetallada.find({ 
+            departamento: { $in: ['Convencion', 'Convención', 'Juegos'] } 
+        }).sort({ createdAt: 1, nombre: 1 });
+        const host = req.get('host') || 'localhost:5000';
+        const protocol = req.protocol;
+        const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
+        const baseUrl = `${activeProtocol}://${host}`;
+
+        res.send(getConvencionTableHtml(personas, baseUrl));
     } catch (error: any) {
         res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
     }

@@ -1501,3 +1501,597 @@ export const getCampamentoFormHtml = () => {
 </body>
 </html>`;
 };
+
+export const getConvencionFormHtml = () => {
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción de Juegos - Convención de Jóvenes 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --primary-light: #4cc9f0;
+            --primary-glow: rgba(67, 97, 238, 0.35);
+            --bg-color: #f4f6fb;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --badge-bg: rgba(67, 97, 238, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 14px;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            border-top: 10px solid var(--primary);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--badge-bg);
+            border: 1px solid rgba(67, 97, 238, 0.25);
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
+        }
+
+        p.subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .games-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .game-badge {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .game-badge-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .game-badge-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .game-badge-cap {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .required-notice {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 14px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #334155;
+        }
+
+        label .desc {
+            display: block;
+            font-size: 13px;
+            font-weight: normal;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="tel"]:focus,
+        select:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .radio-game-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-game-card {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            background: #f8fafc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .radio-game-card:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+        }
+
+        .radio-game-card.selected {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.04);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        .radio-game-card input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 14px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .game-info {
+            flex: 1;
+        }
+
+        .game-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .game-details {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .game-cap-tag {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: rgba(67, 97, 238, 0.12);
+            color: var(--primary);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--primary-glow);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.45);
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
+        .btn-submit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .feedback-state {
+            display: none;
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .success-icon-wrap {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.12);
+            border: 2px solid var(--success);
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .success-icon-wrap svg {
+            width: 36px;
+            height: 36px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feedback-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .feedback-desc {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div id="form-state">
+            <div class="card card-header">
+                <span class="tag-pill">🏆 Convención 2026</span>
+                <h1>CONVENCIÓN DE JÓVENES 2026</h1>
+                <p class="subtitle">
+                    <strong>Inscripción para Torneo y Estaciones de Juegos</strong><br>
+                    Regístrate en una de las disciplinas disponibles para participar. Los cupos son limitados por actividad.
+                </p>
+
+                <div class="games-summary">
+                    <div class="game-badge">
+                        <span class="game-badge-icon">🏐</span>
+                        <span class="game-badge-title">Vóleibol</span>
+                        <span class="game-badge-cap">24 Cupos</span>
+                    </div>
+                    <div class="game-badge">
+                        <span class="game-badge-icon">⚽</span>
+                        <span class="game-badge-title">Fútbol</span>
+                        <span class="game-badge-cap">25 Cupos</span>
+                    </div>
+                    <div class="game-badge">
+                        <span class="game-badge-icon">🏓</span>
+                        <span class="game-badge-title">Ping Pong</span>
+                        <span class="game-badge-cap">25 Cupos</span>
+                    </div>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+                <p class="required-notice">* Indica que el campo es obligatorio</p>
+            </div>
+
+            <form id="registroForm">
+                
+                <div class="card">
+                    <div class="input-group">
+                        <label for="nombreCompleto">Nombre y Apellido del Participante <span style="color: var(--error);">*</span></label>
+                        <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="input-group">
+                        <label for="edad">Edad <span style="color: var(--error);">*</span></label>
+                        <input type="number" min="1" max="99" id="edad" name="edad" placeholder="Ej: 16" required>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="input-group">
+                        <label for="adultoResponsable">
+                            Nombre del Acudiente o Dependiente <span style="color: var(--error);">*</span>
+                            <span class="desc">Persona responsable o representante del joven / niño</span>
+                        </label>
+                        <input type="text" id="adultoResponsable" name="adultoResponsable" placeholder="Ej: Carlos Pérez (Padre / Tutor)" required>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="input-group">
+                        <label for="telefono">Teléfono de Contacto <span style="color: var(--error);">*</span></label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="Ej: 6123-4567" required>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="input-group">
+                        <label>
+                            Selecciona el Juego / Deporte <span style="color: var(--error);">*</span>
+                            <span class="desc">Elige una sola disciplina en la que participarás</span>
+                        </label>
+                        <div class="radio-game-cards">
+                            <label class="radio-game-card" id="card-voleibol">
+                                <input type="radio" name="juego" value="Vóleibol" required onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">🏐 Vóleibol</div>
+                                    <div class="game-details">Torneo Cuadrangular de Voleibol</div>
+                                </div>
+                                <span class="game-cap-tag">Cupo: 24</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-futbol">
+                                <input type="radio" name="juego" value="Fútbol" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">⚽ Fútbol</div>
+                                    <div class="game-details">Torneo de Fútbol de Jóvenes</div>
+                                </div>
+                                <span class="game-cap-tag">Cupo: 25</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-pingpong">
+                                <input type="radio" name="juego" value="Ping Pong" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">🏓 Estación de Ping Pong</div>
+                                    <div class="game-details">Estación de Tenis de Mesa</div>
+                                </div>
+                                <span class="game-cap-tag">Cupo: 25</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px;">
+                    <button type="submit" class="btn-submit" id="btnSubmit">
+                        <span id="btn-text">Completar Inscripción</span>
+                        <span class="spinner" id="btn-spinner"></span>
+                    </button>
+                    <button type="button" onclick="resetForm()" style="background: none; border: none; color: var(--primary); font-size: 14px; font-weight: 600; cursor: pointer; padding: 10px;">
+                        Borrar formulario
+                    </button>
+                </div>
+            </form>
+
+            <div class="footer-links">
+                <a href="/directorio-convencion" target="_blank">📋 Ver Lista de Inscritos en Directorio</a>
+            </div>
+        </div>
+
+        <div id="success-state" class="card feedback-state">
+            <div class="success-icon-wrap">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h2 class="feedback-title" style="color: var(--success);">¡Inscripción Exitosa!</h2>
+            <p class="feedback-desc" id="successDetails">Se ha guardado correctamente tu inscripción para el juego seleccionado en la Convención de Jóvenes 2026.</p>
+            <div style="display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto;">
+                <button class="btn-submit" style="width: 100%;" onclick="resetForm()">Inscribir a otra persona</button>
+                <a href="/directorio-convencion" class="btn-submit" style="width: 100%; background: #334155; text-decoration: none; box-shadow: none;">Ver Directorio</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registroForm');
+        const card = document.getElementById('form-state');
+        const successState = document.getElementById('success-state');
+        const spinner = document.getElementById('btn-spinner');
+        const btnText = document.getElementById('btn-text');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        function handleGameSelect(radio) {
+            document.querySelectorAll('.radio-game-card').forEach(c => c.classList.remove('selected'));
+            if (radio.checked) {
+                radio.closest('.radio-game-card').classList.add('selected');
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const juegoRadio = document.querySelector('input[name="juego"]:checked');
+            if (!juegoRadio) {
+                alert('Por favor selecciona el juego o deporte en el que deseas participar.');
+                return;
+            }
+
+            const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
+            const partes = nombreCompleto.split(' ');
+            const nombre = partes[0];
+            const apellido = partes.length > 1 ? partes.slice(1).join(' ') : '.';
+            const edad = parseInt(document.getElementById('edad').value) || undefined;
+            const adultoResponsable = document.getElementById('adultoResponsable').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const juego = juegoRadio.value;
+
+            spinner.style.display = 'block';
+            btnText.style.display = 'none';
+            btnSubmit.disabled = true;
+
+            const payload = {
+                nombre: nombre,
+                apellido: apellido,
+                edad: edad,
+                adultoResponsable: adultoResponsable,
+                nombrePadres: adultoResponsable,
+                telefono: telefono,
+                grupo: juego,
+                ministerio: juego,
+                departamento: 'Convencion'
+            };
+
+            try {
+                const response = await fetch('/api/registro-detallado/publico', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('successDetails').textContent = '¡Felicidades ' + nombre + '! Tu inscripción para ' + juego + ' ha sido registrada exitosamente.';
+                    card.style.display = 'none';
+                    successState.style.display = 'block';
+                    window.scrollTo(0, 0);
+                } else {
+                    const errData = await response.json();
+                    throw new Error(errData.message || 'Error en el servidor al procesar el registro.');
+                }
+            } catch (error) {
+                console.error('Error registrando:', error);
+                alert('Hubo un error al guardar tu registro: ' + error.message);
+            } finally {
+                spinner.style.display = 'none';
+                btnText.style.display = 'block';
+                btnSubmit.disabled = false;
+            }
+        });
+
+        function resetForm() {
+            form.reset();
+            document.querySelectorAll('.radio-game-card').forEach(c => c.classList.remove('selected'));
+            successState.style.display = 'none';
+            card.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>`;
+};
+
