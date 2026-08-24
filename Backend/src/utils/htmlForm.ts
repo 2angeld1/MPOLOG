@@ -1549,7 +1549,7 @@ export const getConvencionFormHtml = () => {
 
         .container {
             width: 100%;
-            max-width: 640px;
+            max-width: 660px;
         }
 
         .card {
@@ -1608,7 +1608,7 @@ export const getConvencionFormHtml = () => {
 
         .games-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 10px;
             margin: 16px 0;
         }
@@ -1638,6 +1638,12 @@ export const getConvencionFormHtml = () => {
         .game-badge-cap {
             font-size: 12px;
             color: var(--primary);
+            font-weight: 700;
+        }
+
+        .game-badge-free {
+            font-size: 12px;
+            color: #10b981;
             font-weight: 700;
         }
 
@@ -1693,16 +1699,35 @@ export const getConvencionFormHtml = () => {
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
+        .section-separator {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 14px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-separator::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
         .radio-game-cards {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .radio-game-card {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
+            padding: 12px 16px;
             border: 2px solid var(--border-color);
             background: #f8fafc;
             border-radius: 10px;
@@ -1735,7 +1760,7 @@ export const getConvencionFormHtml = () => {
         }
 
         .game-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #1e293b;
             display: flex;
@@ -1756,6 +1781,17 @@ export const getConvencionFormHtml = () => {
             border-radius: 100px;
             background: rgba(67, 97, 238, 0.12);
             color: var(--primary);
+            white-space: nowrap;
+        }
+
+        .game-free-tag {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            white-space: nowrap;
         }
 
         .btn-submit {
@@ -1879,11 +1915,11 @@ export const getConvencionFormHtml = () => {
         
         <div id="form-state">
             <div class="card card-header">
-                <span class="tag-pill">🏆 Convención 2026</span>
+                <span class="tag-pill">🏆 Convención de Jóvenes 2026</span>
                 <h1>CONVENCIÓN DE JÓVENES 2026</h1>
                 <p class="subtitle">
-                    <strong>Inscripción para Torneo y Estaciones de Juegos</strong><br>
-                    Regístrate en una de las disciplinas disponibles para participar. Los cupos son limitados por actividad.
+                    <strong>Inscripción para Juegos, Torneos y Estaciones de Actividades</strong><br>
+                    Regístrate en una de las disciplinas o actividades disponibles. Los torneos de Vóleibol, Fútbol y Ping Pong cuentan con cupos limitados.
                 </p>
 
                 <div class="games-summary">
@@ -1901,6 +1937,11 @@ export const getConvencionFormHtml = () => {
                         <span class="game-badge-icon">🏓</span>
                         <span class="game-badge-title">Ping Pong</span>
                         <span class="game-badge-cap">25 Cupos</span>
+                    </div>
+                    <div class="game-badge">
+                        <span class="game-badge-icon">🎮</span>
+                        <span class="game-badge-title">+6 Estaciones</span>
+                        <span class="game-badge-free">Acceso Libre</span>
                     </div>
                 </div>
 
@@ -1928,7 +1969,7 @@ export const getConvencionFormHtml = () => {
                     <div class="input-group">
                         <label for="adultoResponsable">
                             Nombre del Acudiente o Dependiente <span style="color: var(--error);">*</span>
-                            <span class="desc">Persona responsable o representante del joven / niño</span>
+                            <span class="desc">Persona responsable, representante o tutor del joven / participante</span>
                         </label>
                         <input type="text" id="adultoResponsable" name="adultoResponsable" placeholder="Ej: Carlos Pérez (Padre / Tutor)" required>
                     </div>
@@ -1944,15 +1985,17 @@ export const getConvencionFormHtml = () => {
                 <div class="card">
                     <div class="input-group">
                         <label>
-                            Selecciona el Juego / Deporte <span style="color: var(--error);">*</span>
-                            <span class="desc">Elige una sola disciplina en la que participarás</span>
+                            Selecciona el Juego o Actividad <span style="color: var(--error);">*</span>
+                            <span class="desc">Elige la actividad en la que deseas participar</span>
                         </label>
+                        
+                        <div class="section-separator">🏆 Torneos con Cupo Limitado</div>
                         <div class="radio-game-cards">
                             <label class="radio-game-card" id="card-voleibol">
                                 <input type="radio" name="juego" value="Vóleibol" required onchange="handleGameSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🏐 Vóleibol</div>
-                                    <div class="game-details">Torneo Cuadrangular de Voleibol</div>
+                                    <div class="game-details">Torneo Cuadrangular de Vóleibol</div>
                                 </div>
                                 <span class="game-cap-tag">Cupo: 24</span>
                             </label>
@@ -1961,18 +2004,75 @@ export const getConvencionFormHtml = () => {
                                 <input type="radio" name="juego" value="Fútbol" onchange="handleGameSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">⚽ Fútbol</div>
-                                    <div class="game-details">Torneo de Fútbol de Jóvenes</div>
+                                    <div class="game-details">Torneo de Fútbol</div>
                                 </div>
                                 <span class="game-cap-tag">Cupo: 25</span>
                             </label>
 
                             <label class="radio-game-card" id="card-pingpong">
-                                <input type="radio" name="juego" value="Ping Pong" onchange="handleGameSelect(this)">
+                                <input type="radio" name="juego" value="Estación de Ping Pong" onchange="handleGameSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🏓 Estación de Ping Pong</div>
-                                    <div class="game-details">Estación de Tenis de Mesa</div>
+                                    <div class="game-details">Torneo de Tenis de Mesa</div>
                                 </div>
                                 <span class="game-cap-tag">Cupo: 25</span>
+                            </label>
+                        </div>
+
+                        <div class="section-separator">🎯 Estaciones y Actividades Libres</div>
+                        <div class="radio-game-cards">
+                            <label class="radio-game-card" id="card-videojuegos">
+                                <input type="radio" name="juego" value="Videojuegos (Mario Kart y FIFA)" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">🎮 Videojuegos (Mario Kart y FIFA)</div>
+                                    <div class="game-details">Área de consolas (abanicos del comedor)</div>
+                                </div>
+                                <span class="game-free-tag">Acceso Libre</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-tiro-arco">
+                                <input type="radio" name="juego" value="Tiro al Arco o Flecha" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">🏹 Tiro al Arco o Flecha</div>
+                                    <div class="game-details">Estación de puntería y tiro con flechas</div>
+                                </div>
+                                <span class="game-free-tag">Acceso Libre</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-belleza">
+                                <input type="radio" name="juego" value="Belleza (Trenzas, Neón y Estrellas)" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">💅 Belleza (Muchachas)</div>
+                                    <div class="game-details">Trenzas, maquillaje neón para la noche y estrellas</div>
+                                </div>
+                                <span class="game-free-tag">Ilimitado</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-arte">
+                                <input type="radio" name="juego" value="Sesión de Arte" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">🎨 Sesión de Arte</div>
+                                    <div class="game-details">Taller y pintura creativa</div>
+                                </div>
+                                <span class="game-free-tag">Acceso Libre</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-square">
+                                <input type="radio" name="juego" value="Square in the Air" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">⬛ Square in the Air</div>
+                                    <div class="game-details">Dinámica y juego Square in the air</div>
+                                </div>
+                                <span class="game-free-tag">Ilimitado</span>
+                            </label>
+
+                            <label class="radio-game-card" id="card-karaoke">
+                                <input type="radio" name="juego" value="Karaoke" onchange="handleGameSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">🎤 Karaoke</div>
+                                    <div class="game-details">Estación musical y canto</div>
+                                </div>
+                                <span class="game-free-tag">Acceso Libre</span>
                             </label>
                         </div>
                     </div>
@@ -2027,7 +2127,7 @@ export const getConvencionFormHtml = () => {
 
             const juegoRadio = document.querySelector('input[name="juego"]:checked');
             if (!juegoRadio) {
-                alert('Por favor selecciona el juego o deporte en el que deseas participar.');
+                alert('Por favor selecciona el juego o actividad en la que deseas participar.');
                 return;
             }
 

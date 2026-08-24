@@ -696,14 +696,28 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
 };
 
 export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
-    // Clasificar listas por juego
-    const isVoleibol = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('vól')) || (p.ministerio && p.ministerio.toLowerCase().includes('vól')) || (p.grupo && p.grupo.toLowerCase().includes('vol'));
-    const isFutbol = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('fút')) || (p.ministerio && p.ministerio.toLowerCase().includes('fút')) || (p.grupo && p.grupo.toLowerCase().includes('fut'));
+    // Clasificar listas por actividad / juego
+    const isVoleibol = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('vol')) || (p.ministerio && p.ministerio.toLowerCase().includes('vol'));
+    const isFutbol = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('fut')) || (p.ministerio && p.ministerio.toLowerCase().includes('fut'));
     const isPingPong = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('ping')) || (p.ministerio && p.ministerio.toLowerCase().includes('ping'));
+    const isVideojuegos = (p: any) => (p.grupo && (p.grupo.toLowerCase().includes('video') || p.grupo.toLowerCase().includes('mario') || p.grupo.toLowerCase().includes('fifa'))) || (p.ministerio && (p.ministerio.toLowerCase().includes('video') || p.ministerio.toLowerCase().includes('mario')));
+    const isTiroArco = (p: any) => (p.grupo && (p.grupo.toLowerCase().includes('tiro') || p.grupo.toLowerCase().includes('arco') || p.grupo.toLowerCase().includes('flecha'))) || (p.ministerio && (p.ministerio.toLowerCase().includes('tiro') || p.ministerio.toLowerCase().includes('arco')));
+    const isBelleza = (p: any) => (p.grupo && (p.grupo.toLowerCase().includes('belleza') || p.grupo.toLowerCase().includes('trenza') || p.grupo.toLowerCase().includes('neón') || p.grupo.toLowerCase().includes('neon'))) || (p.ministerio && (p.ministerio.toLowerCase().includes('belleza') || p.ministerio.toLowerCase().includes('trenza')));
+    const isArte = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('arte')) || (p.ministerio && p.ministerio.toLowerCase().includes('arte'));
+    const isSquareAir = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('square')) || (p.ministerio && p.ministerio.toLowerCase().includes('square'));
+    const isKaraoke = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('karaoke')) || (p.ministerio && p.ministerio.toLowerCase().includes('karaoke'));
 
     const voleibolList = personas.filter(isVoleibol);
     const futbolList = personas.filter(isFutbol);
     const pingPongList = personas.filter(isPingPong);
+    const videojuegosList = personas.filter(isVideojuegos);
+    const tiroArcoList = personas.filter(isTiroArco);
+    const bellezaList = personas.filter(isBelleza);
+    const arteList = personas.filter(isArte);
+    const squareAirList = personas.filter(isSquareAir);
+    const karaokeList = personas.filter(isKaraoke);
+
+    const libresCount = videojuegosList.length + tiroArcoList.length + bellezaList.length + arteList.length + squareAirList.length + karaokeList.length;
 
     const renderTableRows = (list: any[]) => {
         return list.map((p, idx) => {
@@ -721,12 +735,30 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             } else if (isPingPong(p)) {
                 badgeClass = 'badge-pingpong';
                 icon = '🏓';
+            } else if (isVideojuegos(p)) {
+                badgeClass = 'badge-videojuegos';
+                icon = '🎮';
+            } else if (isTiroArco(p)) {
+                badgeClass = 'badge-tiroarco';
+                icon = '🏹';
+            } else if (isBelleza(p)) {
+                badgeClass = 'badge-belleza';
+                icon = '💅';
+            } else if (isArte(p)) {
+                badgeClass = 'badge-arte';
+                icon = '🎨';
+            } else if (isSquareAir(p)) {
+                badgeClass = 'badge-square';
+                icon = '⬛';
+            } else if (isKaraoke(p)) {
+                badgeClass = 'badge-karaoke';
+                icon = '🎤';
             }
 
             const acudiente = p.adultoResponsable || p.nombrePadres || '-';
             const fechaStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
 
-            return '<tr data-juego="' + (p.grupo || '') + '" data-search="' + (p.nombre + ' ' + (p.apellido || '') + ' ' + acudiente + ' ' + (p.telefono || '')).toLowerCase() + '">' +
+            return '<tr data-juego="' + (p.grupo || '') + '" data-search="' + (p.nombre + ' ' + (p.apellido || '') + ' ' + acudiente + ' ' + (p.telefono || '') + ' ' + juego).toLowerCase() + '">' +
                 '<td style="text-align: center; font-weight: 700; color: var(--text-muted);">' + (idx + 1) + '</td>' +
                 '<td><strong>' + p.nombre + ' ' + (p.apellido && p.apellido !== '.' ? p.apellido : '') + '</strong></td>' +
                 '<td style="text-align: center;">' + (p.edad || '-') + '</td>' +
@@ -767,6 +799,12 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             --voleibol-color: #7209b7;
             --futbol-color: #10b981;
             --pingpong-color: #f72585;
+            --videojuegos-color: #3a86ff;
+            --tiro-color: #d97706;
+            --belleza-color: #ec4899;
+            --arte-color: #8b5cf6;
+            --square-color: #0284c7;
+            --karaoke-color: #e11d48;
         }
 
         * {
@@ -788,7 +826,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
 
         .container {
             width: 100%;
-            max-width: 1240px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
@@ -858,8 +896,8 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         /* Metrics Grid */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
             margin-bottom: 24px;
         }
 
@@ -867,23 +905,23 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 18px 20px;
+            padding: 16px 18px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.04);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             position: relative;
             overflow: hidden;
         }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .metric-info {
@@ -891,7 +929,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         }
 
         .metric-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -899,7 +937,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         }
 
         .metric-value {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             color: #0f172a;
             margin-top: 2px;
@@ -916,7 +954,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             height: 6px;
             background: #e2e8f0;
             border-radius: 100px;
-            margin-top: 8px;
+            margin-top: 6px;
             overflow: hidden;
         }
 
@@ -930,25 +968,26 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         .tabs-header {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 20px;
             overflow-x: auto;
             padding-bottom: 4px;
+            scrollbar-width: thin;
         }
 
         .tab-btn {
             background: transparent;
             border: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 14px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text-muted);
             cursor: pointer;
             border-radius: 8px 8px 0 0;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             position: relative;
             transition: all 0.2s ease;
             white-space: nowrap;
@@ -976,9 +1015,9 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         }
 
         .tab-pill {
-            padding: 2px 8px;
+            padding: 2px 7px;
             border-radius: 100px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             background: #e2e8f0;
             color: var(--text-main);
@@ -998,7 +1037,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
 
         .search-input {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             padding: 10px 16px 10px 38px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -1028,7 +1067,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            min-width: 860px;
+            min-width: 880px;
         }
 
         th, td {
@@ -1061,31 +1100,19 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             border-radius: 100px;
             font-size: 12px;
             font-weight: 600;
+            white-space: nowrap;
         }
 
-        .badge-voleibol {
-            background: rgba(114, 9, 183, 0.12);
-            color: var(--voleibol-color);
-            border: 1px solid rgba(114, 9, 183, 0.25);
-        }
-
-        .badge-futbol {
-            background: rgba(16, 185, 129, 0.12);
-            color: var(--futbol-color);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-        }
-
-        .badge-pingpong {
-            background: rgba(247, 37, 133, 0.12);
-            color: var(--pingpong-color);
-            border: 1px solid rgba(247, 37, 133, 0.25);
-        }
-
-        .badge-general {
-            background: rgba(67, 97, 238, 0.12);
-            color: var(--primary);
-            border: 1px solid rgba(67, 97, 238, 0.25);
-        }
+        .badge-voleibol { background: rgba(114, 9, 183, 0.12); color: var(--voleibol-color); border: 1px solid rgba(114, 9, 183, 0.25); }
+        .badge-futbol { background: rgba(16, 185, 129, 0.12); color: var(--futbol-color); border: 1px solid rgba(16, 185, 129, 0.25); }
+        .badge-pingpong { background: rgba(247, 37, 133, 0.12); color: var(--pingpong-color); border: 1px solid rgba(247, 37, 133, 0.25); }
+        .badge-videojuegos { background: rgba(58, 134, 255, 0.12); color: var(--videojuegos-color); border: 1px solid rgba(58, 134, 255, 0.25); }
+        .badge-tiroarco { background: rgba(217, 119, 6, 0.12); color: var(--tiro-color); border: 1px solid rgba(217, 119, 6, 0.25); }
+        .badge-belleza { background: rgba(236, 72, 153, 0.12); color: var(--belleza-color); border: 1px solid rgba(236, 72, 153, 0.25); }
+        .badge-arte { background: rgba(139, 92, 246, 0.12); color: var(--arte-color); border: 1px solid rgba(139, 92, 246, 0.25); }
+        .badge-square { background: rgba(2, 132, 199, 0.12); color: var(--square-color); border: 1px solid rgba(2, 132, 199, 0.25); }
+        .badge-karaoke { background: rgba(225, 29, 72, 0.12); color: var(--karaoke-color); border: 1px solid rgba(225, 29, 72, 0.25); }
+        .badge-general { background: rgba(67, 97, 238, 0.12); color: var(--primary); border: 1px solid rgba(67, 97, 238, 0.25); }
 
         .action-btn {
             background: transparent;
@@ -1121,7 +1148,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         .modal {
             background: var(--card-bg);
             border-radius: 12px;
-            width: 100%; max-width: 480px; max-height: 90vh;
+            width: 100%; max-width: 500px; max-height: 90vh;
             overflow-y: auto; padding: 24px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             border-top: 8px solid var(--primary);
@@ -1156,7 +1183,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         <div class="header">
             <div class="header-title-group">
                 <h1>Directorio de Juegos - Convención 2026</h1>
-                <p>Monitoreo y control de inscripciones por disciplina deportiva</p>
+                <p>Monitoreo de inscripciones por torneo y estaciones de actividades</p>
             </div>
             <div class="header-actions">
                 <button id="exportExcelBtn" class="btn-action btn-export" onclick="exportToExcel()">📥 Exportar a Excel</button>
@@ -1171,7 +1198,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                 <div class="metric-info">
                     <div class="metric-title">Total Inscritos</div>
                     <div class="metric-value">${personas.length}</div>
-                    <div class="metric-cap">En todas las disciplinas</div>
+                    <div class="metric-cap">En todas las actividades</div>
                 </div>
             </div>
 
@@ -1207,6 +1234,15 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                     </div>
                 </div>
             </div>
+
+            <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(58, 134, 255, 0.12); color: var(--videojuegos-color);">🎯</div>
+                <div class="metric-info">
+                    <div class="metric-title">Actividades Libres</div>
+                    <div class="metric-value">${libresCount}</div>
+                    <div class="metric-cap">Videojuegos, Arte, etc.</div>
+                </div>
+            </div>
         </div>
 
         <!-- Tabs Navigation -->
@@ -1227,11 +1263,35 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                 <span>🏓 Ping Pong</span>
                 <span class="tab-pill" id="pill-pingpong">${pingPongList.length} / 25</span>
             </button>
+            <button class="tab-btn" onclick="switchTab('videojuegos', this)">
+                <span>🎮 Videojuegos</span>
+                <span class="tab-pill" id="pill-videojuegos">${videojuegosList.length}</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('tiro-arco', this)">
+                <span>🏹 Tiro al Arco</span>
+                <span class="tab-pill" id="pill-tiro-arco">${tiroArcoList.length}</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('belleza', this)">
+                <span>💅 Belleza</span>
+                <span class="tab-pill" id="pill-belleza">${bellezaList.length}</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('arte', this)">
+                <span>🎨 Arte</span>
+                <span class="tab-pill" id="pill-arte">${arteList.length}</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('square', this)">
+                <span>⬛ Square in the Air</span>
+                <span class="tab-pill" id="pill-square">${squareAirList.length}</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('karaoke', this)">
+                <span>🎤 Karaoke</span>
+                <span class="tab-pill" id="pill-karaoke">${karaokeList.length}</span>
+            </button>
         </div>
 
         <!-- Search Bar -->
         <div class="search-bar-wrap">
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por participante, acudiente o teléfono..." oninput="handleSearch()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por participante, acudiente, teléfono o actividad..." oninput="handleSearch()">
         </div>
 
         <!-- Table Container -->
@@ -1243,7 +1303,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                             <th style="width: 50px; text-align: center;">#</th>
                             <th>Participante</th>
                             <th style="text-align: center;">Edad</th>
-                            <th>Juego / Disciplina</th>
+                            <th>Actividad / Disciplina</th>
                             <th>Acudiente / Dependiente</th>
                             <th>Teléfono</th>
                             <th>Fecha Registro</th>
@@ -1319,6 +1379,132 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                 </table>
                 ${pingPongList.length === 0 ? '<div class="empty-state">No hay inscritos en Estación de Ping Pong todavía.</div>' : ''}
             </div>
+
+            <div id="tab-pane-videojuegos" class="tab-pane" style="display: none;">
+                <table id="table-videojuegos">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th>Participante</th>
+                            <th style="text-align: center;">Edad</th>
+                            <th>Actividad</th>
+                            <th>Acudiente / Dependiente</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-videojuegos">
+                        ${renderTableRows(videojuegosList)}
+                    </tbody>
+                </table>
+                ${videojuegosList.length === 0 ? '<div class="empty-state">No hay inscritos en Videojuegos todavía.</div>' : ''}
+            </div>
+
+            <div id="tab-pane-tiro-arco" class="tab-pane" style="display: none;">
+                <table id="table-tiro-arco">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th>Participante</th>
+                            <th style="text-align: center;">Edad</th>
+                            <th>Actividad</th>
+                            <th>Acudiente / Dependiente</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-tiro-arco">
+                        ${renderTableRows(tiroArcoList)}
+                    </tbody>
+                </table>
+                ${tiroArcoList.length === 0 ? '<div class="empty-state">No hay inscritos en Tiro al Arco todavía.</div>' : ''}
+            </div>
+
+            <div id="tab-pane-belleza" class="tab-pane" style="display: none;">
+                <table id="table-belleza">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th>Participante</th>
+                            <th style="text-align: center;">Edad</th>
+                            <th>Actividad</th>
+                            <th>Acudiente / Dependiente</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-belleza">
+                        ${renderTableRows(bellezaList)}
+                    </tbody>
+                </table>
+                ${bellezaList.length === 0 ? '<div class="empty-state">No hay inscritos en Belleza todavía.</div>' : ''}
+            </div>
+
+            <div id="tab-pane-arte" class="tab-pane" style="display: none;">
+                <table id="table-arte">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th>Participante</th>
+                            <th style="text-align: center;">Edad</th>
+                            <th>Actividad</th>
+                            <th>Acudiente / Dependiente</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-arte">
+                        ${renderTableRows(arteList)}
+                    </tbody>
+                </table>
+                ${arteList.length === 0 ? '<div class="empty-state">No hay inscritos en Sesión de Arte todavía.</div>' : ''}
+            </div>
+
+            <div id="tab-pane-square" class="tab-pane" style="display: none;">
+                <table id="table-square">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th>Participante</th>
+                            <th style="text-align: center;">Edad</th>
+                            <th>Actividad</th>
+                            <th>Acudiente / Dependiente</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-square">
+                        ${renderTableRows(squareAirList)}
+                    </tbody>
+                </table>
+                ${squareAirList.length === 0 ? '<div class="empty-state">No hay inscritos en Square in the Air todavía.</div>' : ''}
+            </div>
+
+            <div id="tab-pane-karaoke" class="tab-pane" style="display: none;">
+                <table id="table-karaoke">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th>Participante</th>
+                            <th style="text-align: center;">Edad</th>
+                            <th>Actividad</th>
+                            <th>Acudiente / Dependiente</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-karaoke">
+                        ${renderTableRows(karaokeList)}
+                    </tbody>
+                </table>
+                ${karaokeList.length === 0 ? '<div class="empty-state">No hay inscritos en Karaoke todavía.</div>' : ''}
+            </div>
         </div>
     </div>
 
@@ -1358,11 +1544,21 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                 </div>
                 
                 <div class="form-group">
-                    <label>Juego / Disciplina</label>
+                    <label>Actividad / Disciplina</label>
                     <select id="editJuego" required>
-                        <option value="Vóleibol">🏐 Vóleibol (Cupo: 24)</option>
-                        <option value="Fútbol">⚽ Fútbol (Cupo: 25)</option>
-                        <option value="Ping Pong">🏓 Estación de Ping Pong (Cupo: 25)</option>
+                        <optgroup label="🏆 Torneos con Cupo Limitado">
+                            <option value="Vóleibol">🏐 Vóleibol (Cupo: 24)</option>
+                            <option value="Fútbol">⚽ Fútbol (Cupo: 25)</option>
+                            <option value="Estación de Ping Pong">🏓 Estación de Ping Pong (Cupo: 25)</option>
+                        </optgroup>
+                        <optgroup label="🎯 Estaciones y Actividades Libres">
+                            <option value="Videojuegos (Mario Kart y FIFA)">🎮 Videojuegos (Mario Kart y FIFA)</option>
+                            <option value="Tiro al Arco o Flecha">🏹 Tiro al Arco o Flecha</option>
+                            <option value="Belleza (Trenzas, Neón y Estrellas)">💅 Belleza (Trenzas, Neón y Estrellas)</option>
+                            <option value="Sesión de Arte">🎨 Sesión de Arte</option>
+                            <option value="Square in the Air">⬛ Square in the Air</option>
+                            <option value="Karaoke">🎤 Karaoke</option>
+                        </optgroup>
                     </select>
                 </div>
                 
@@ -1418,14 +1614,27 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             document.getElementById('editAdultoResponsable').value = currentRecord.adultoResponsable || currentRecord.nombrePadres || '';
             document.getElementById('editTelefono').value = currentRecord.telefono || '';
             
-            const currentJuego = currentRecord.grupo || currentRecord.ministerio || 'Vóleibol';
+            const currentJuego = (currentRecord.grupo || currentRecord.ministerio || '').toLowerCase();
             const selectJuego = document.getElementById('editJuego');
-            if (currentJuego.toLowerCase().includes('vól') || currentJuego.toLowerCase().includes('vol')) {
+            
+            if (currentJuego.includes('vol')) {
                 selectJuego.value = 'Vóleibol';
-            } else if (currentJuego.toLowerCase().includes('fút') || currentJuego.toLowerCase().includes('fut')) {
+            } else if (currentJuego.includes('fut')) {
                 selectJuego.value = 'Fútbol';
-            } else if (currentJuego.toLowerCase().includes('ping')) {
-                selectJuego.value = 'Ping Pong';
+            } else if (currentJuego.includes('ping')) {
+                selectJuego.value = 'Estación de Ping Pong';
+            } else if (currentJuego.includes('video') || currentJuego.includes('mario') || currentJuego.includes('fifa')) {
+                selectJuego.value = 'Videojuegos (Mario Kart y FIFA)';
+            } else if (currentJuego.includes('tiro') || currentJuego.includes('arco') || currentJuego.includes('flecha')) {
+                selectJuego.value = 'Tiro al Arco o Flecha';
+            } else if (currentJuego.includes('belleza') || currentJuego.includes('trenza') || currentJuego.includes('neon') || currentJuego.includes('neón')) {
+                selectJuego.value = 'Belleza (Trenzas, Neón y Estrellas)';
+            } else if (currentJuego.includes('arte')) {
+                selectJuego.value = 'Sesión de Arte';
+            } else if (currentJuego.includes('square')) {
+                selectJuego.value = 'Square in the Air';
+            } else if (currentJuego.includes('karaoke')) {
+                selectJuego.value = 'Karaoke';
             } else {
                 selectJuego.value = 'Vóleibol';
             }
@@ -1500,7 +1709,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                 'Nombre': p.nombre || '',
                 'Apellido': (p.apellido && p.apellido !== '.') ? p.apellido : '',
                 'Edad': p.edad || '',
-                'Juego / Disciplina': p.grupo || p.ministerio || '',
+                'Actividad / Disciplina': p.grupo || p.ministerio || '',
                 'Acudiente / Dependiente': p.adultoResponsable || p.nombrePadres || '',
                 'Teléfono': p.telefono || '',
                 'Fecha Registro': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
@@ -1512,20 +1721,26 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             const wsTodos = XLSX.utils.json_to_sheet(personasList.map(mapRow));
             XLSX.utils.book_append_sheet(workbook, wsTodos, 'Todos');
 
-            // Hoja 2: Vóleibol
-            const voleibolRows = personasList.filter(p => (p.grupo && p.grupo.toLowerCase().includes('vol')) || (p.ministerio && p.ministerio.toLowerCase().includes('vol'))).map(mapRow);
-            const wsVoleibol = XLSX.utils.json_to_sheet(voleibolRows);
-            XLSX.utils.book_append_sheet(workbook, wsVoleibol, 'Voleibol (24)');
+            // Hojas por actividad
+            const sheetsConfig = [
+                { name: 'Voleibol (24)', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('vol')) || (p.ministerio && p.ministerio.toLowerCase().includes('vol')) },
+                { name: 'Futbol (25)', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('fut')) || (p.ministerio && p.ministerio.toLowerCase().includes('fut')) },
+                { name: 'Ping Pong (25)', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('ping')) || (p.ministerio && p.ministerio.toLowerCase().includes('ping')) },
+                { name: 'Videojuegos', filter: (p) => (p.grupo && (p.grupo.toLowerCase().includes('video') || p.grupo.toLowerCase().includes('mario') || p.grupo.toLowerCase().includes('fifa'))) },
+                { name: 'Tiro al Arco', filter: (p) => (p.grupo && (p.grupo.toLowerCase().includes('tiro') || p.grupo.toLowerCase().includes('arco') || p.grupo.toLowerCase().includes('flecha'))) },
+                { name: 'Belleza', filter: (p) => (p.grupo && (p.grupo.toLowerCase().includes('belleza') || p.grupo.toLowerCase().includes('trenza') || p.grupo.toLowerCase().includes('neon') || p.grupo.toLowerCase().includes('neón'))) },
+                { name: 'Sesion de Arte', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('arte')) },
+                { name: 'Square in the Air', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('square')) },
+                { name: 'Karaoke', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('karaoke')) }
+            ];
 
-            // Hoja 3: Fútbol
-            const futbolRows = personasList.filter(p => (p.grupo && p.grupo.toLowerCase().includes('fut')) || (p.ministerio && p.ministerio.toLowerCase().includes('fut'))).map(mapRow);
-            const wsFutbol = XLSX.utils.json_to_sheet(futbolRows);
-            XLSX.utils.book_append_sheet(workbook, wsFutbol, 'Futbol (25)');
-
-            // Hoja 4: Ping Pong
-            const pingPongRows = personasList.filter(p => (p.grupo && p.grupo.toLowerCase().includes('ping')) || (p.ministerio && p.ministerio.toLowerCase().includes('ping'))).map(mapRow);
-            const wsPingPong = XLSX.utils.json_to_sheet(pingPongRows);
-            XLSX.utils.book_append_sheet(workbook, wsPingPong, 'Ping Pong (25)');
+            sheetsConfig.forEach(cfg => {
+                const filteredRows = personasList.filter(cfg.filter).map(mapRow);
+                if (filteredRows.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(filteredRows);
+                    XLSX.utils.book_append_sheet(workbook, ws, cfg.name.substring(0, 31));
+                }
+            });
 
             // Descargar archivo Excel
             XLSX.writeFile(workbook, 'Inscritos_Juegos_Convencion_2026.xlsx');
