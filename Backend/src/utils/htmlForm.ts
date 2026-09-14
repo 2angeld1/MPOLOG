@@ -1718,13 +1718,13 @@ export const getConvencionFormHtml = () => {
             background: var(--border-color);
         }
 
-        .radio-game-cards {
+        .radio-game-cards, .checkbox-game-cards {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        .radio-game-card {
+        .radio-game-card, .checkbox-game-card {
             display: flex;
             align-items: center;
             padding: 12px 16px;
@@ -1736,23 +1736,34 @@ export const getConvencionFormHtml = () => {
             position: relative;
         }
 
-        .radio-game-card:hover {
+        .radio-game-card:hover, .checkbox-game-card:hover {
             border-color: #cbd5e1;
             background: #f1f5f9;
         }
 
-        .radio-game-card.selected {
+        .radio-game-card.selected, .checkbox-game-card.selected {
             border-color: var(--primary);
             background: rgba(67, 97, 238, 0.04);
             box-shadow: 0 0 0 2px var(--primary-glow);
         }
 
-        .radio-game-card input[type="radio"] {
+        .radio-game-card input[type="radio"], .checkbox-game-card input[type="checkbox"] {
             width: 20px;
             height: 20px;
             margin-right: 14px;
             cursor: pointer;
             accent-color: var(--primary);
+        }
+
+        .radio-game-card.disabled, .checkbox-game-card.disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        .radio-game-card.disabled input[type="radio"], .checkbox-game-card.disabled input[type="checkbox"] {
+            cursor: not-allowed;
         }
 
         .game-info {
@@ -1784,6 +1795,26 @@ export const getConvencionFormHtml = () => {
             white-space: nowrap;
         }
 
+        .game-warning-tag {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            white-space: nowrap;
+        }
+
+        .game-agotado-tag {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            white-space: nowrap;
+        }
+
         .game-free-tag {
             font-size: 12px;
             font-weight: 700;
@@ -1792,6 +1823,17 @@ export const getConvencionFormHtml = () => {
             background: rgba(16, 185, 129, 0.12);
             color: #10b981;
             white-space: nowrap;
+        }
+
+        .radio-game-card.disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        .radio-game-card.disabled input[type="radio"] {
+            cursor: not-allowed;
         }
 
         .btn-submit {
@@ -1926,17 +1968,17 @@ export const getConvencionFormHtml = () => {
                     <div class="game-badge">
                         <span class="game-badge-icon">🏐</span>
                         <span class="game-badge-title">Vóleibol</span>
-                        <span class="game-badge-cap">24 Cupos</span>
+                        <span class="game-badge-cap" id="sum-cap-voleibol">24 Cupos</span>
                     </div>
                     <div class="game-badge">
                         <span class="game-badge-icon">⚽</span>
                         <span class="game-badge-title">Fútbol</span>
-                        <span class="game-badge-cap">25 Cupos</span>
+                        <span class="game-badge-cap" id="sum-cap-futbol">25 Cupos</span>
                     </div>
                     <div class="game-badge">
                         <span class="game-badge-icon">🏓</span>
                         <span class="game-badge-title">Ping Pong</span>
-                        <span class="game-badge-cap">25 Cupos</span>
+                        <span class="game-badge-cap" id="sum-cap-pingpong">25 Cupos</span>
                     </div>
                     <div class="game-badge">
                         <span class="game-badge-icon">🎮</span>
@@ -1985,44 +2027,55 @@ export const getConvencionFormHtml = () => {
                 <div class="card">
                     <div class="input-group">
                         <label>
-                            Selecciona el Juego o Actividad <span style="color: var(--error);">*</span>
-                            <span class="desc">Elige la actividad en la que deseas participar</span>
+                            Selecciona los Juegos o Actividades <span style="color: var(--error);">*</span>
+                            <span class="desc">Elige las actividades en las que deseas participar</span>
                         </label>
                         
-                        <div class="section-separator">🏆 Torneos con Cupo Limitado</div>
+                        <div class="section-separator">🏆 Torneos con Cupo Limitado (Opcional - Máximo 1)</div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Puedes elegir un torneo deportivo con cupo limitado, o marcar "Ninguno" si solo deseas participar en estaciones libres:</p>
                         <div class="radio-game-cards">
+                            <label class="radio-game-card selected" id="card-ninguno">
+                                <input type="radio" name="juegoLimitado" value="" id="radio-ninguno" checked onchange="handleLimitedSelect(this)">
+                                <div class="game-info">
+                                    <div class="game-name">⭐ Ninguno / Solo actividades libres</div>
+                                    <div class="game-details">No participaré en torneos de cupo limitado</div>
+                                </div>
+                                <span class="game-free-tag">Opcional</span>
+                            </label>
+
                             <label class="radio-game-card" id="card-voleibol">
-                                <input type="radio" name="juego" value="Vóleibol" required onchange="handleGameSelect(this)">
+                                <input type="radio" name="juegoLimitado" value="Vóleibol" id="radio-voleibol" onchange="handleLimitedSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🏐 Vóleibol</div>
                                     <div class="game-details">Torneo Cuadrangular de Vóleibol</div>
                                 </div>
-                                <span class="game-cap-tag">Cupo: 24</span>
+                                <span class="game-cap-tag" id="tag-voleibol">Cupo: 24</span>
                             </label>
 
                             <label class="radio-game-card" id="card-futbol">
-                                <input type="radio" name="juego" value="Fútbol" onchange="handleGameSelect(this)">
+                                <input type="radio" name="juegoLimitado" value="Fútbol" id="radio-futbol" onchange="handleLimitedSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">⚽ Fútbol</div>
                                     <div class="game-details">Torneo de Fútbol</div>
                                 </div>
-                                <span class="game-cap-tag">Cupo: 25</span>
+                                <span class="game-cap-tag" id="tag-futbol">Cupo: 25</span>
                             </label>
 
                             <label class="radio-game-card" id="card-pingpong">
-                                <input type="radio" name="juego" value="Estación de Ping Pong" onchange="handleGameSelect(this)">
+                                <input type="radio" name="juegoLimitado" value="Estación de Ping Pong" id="radio-pingpong" onchange="handleLimitedSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🏓 Estación de Ping Pong</div>
                                     <div class="game-details">Torneo de Tenis de Mesa</div>
                                 </div>
-                                <span class="game-cap-tag">Cupo: 25</span>
+                                <span class="game-cap-tag" id="tag-pingpong">Cupo: 25</span>
                             </label>
                         </div>
 
-                        <div class="section-separator">🎯 Estaciones y Actividades Libres</div>
-                        <div class="radio-game-cards">
-                            <label class="radio-game-card" id="card-videojuegos">
-                                <input type="radio" name="juego" value="Videojuegos (Mario Kart y FIFA)" onchange="handleGameSelect(this)">
+                        <div class="section-separator" style="margin-top: 20px;">🎯 Estaciones y Actividades Libres (Selección Múltiple)</div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Puedes marcar todas las estaciones libres en las que deseas participar:</p>
+                        <div class="checkbox-game-cards">
+                            <label class="checkbox-game-card" id="card-videojuegos">
+                                <input type="checkbox" name="juegosLibres" value="Videojuegos (Mario Kart y FIFA)" onchange="handleFreeSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🎮 Videojuegos (Mario Kart y FIFA)</div>
                                     <div class="game-details">Área de consolas (abanicos del comedor)</div>
@@ -2030,8 +2083,8 @@ export const getConvencionFormHtml = () => {
                                 <span class="game-free-tag">Acceso Libre</span>
                             </label>
 
-                            <label class="radio-game-card" id="card-tiro-arco">
-                                <input type="radio" name="juego" value="Tiro al Arco o Flecha" onchange="handleGameSelect(this)">
+                            <label class="checkbox-game-card" id="card-tiro-arco">
+                                <input type="checkbox" name="juegosLibres" value="Tiro al Arco o Flecha" onchange="handleFreeSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🏹 Tiro al Arco o Flecha</div>
                                     <div class="game-details">Estación de puntería y tiro con flechas</div>
@@ -2039,8 +2092,8 @@ export const getConvencionFormHtml = () => {
                                 <span class="game-free-tag">Acceso Libre</span>
                             </label>
 
-                            <label class="radio-game-card" id="card-belleza">
-                                <input type="radio" name="juego" value="Belleza (Trenzas, Neón y Estrellas)" onchange="handleGameSelect(this)">
+                            <label class="checkbox-game-card" id="card-belleza">
+                                <input type="checkbox" name="juegosLibres" value="Belleza (Trenzas, Neón y Estrellas)" onchange="handleFreeSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">💅 Belleza (Muchachas)</div>
                                     <div class="game-details">Trenzas, maquillaje neón para la noche y estrellas</div>
@@ -2048,8 +2101,8 @@ export const getConvencionFormHtml = () => {
                                 <span class="game-free-tag">Ilimitado</span>
                             </label>
 
-                            <label class="radio-game-card" id="card-arte">
-                                <input type="radio" name="juego" value="Sesión de Arte" onchange="handleGameSelect(this)">
+                            <label class="checkbox-game-card" id="card-arte">
+                                <input type="checkbox" name="juegosLibres" value="Sesión de Arte" onchange="handleFreeSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🎨 Sesión de Arte</div>
                                     <div class="game-details">Taller y pintura creativa</div>
@@ -2057,8 +2110,8 @@ export const getConvencionFormHtml = () => {
                                 <span class="game-free-tag">Acceso Libre</span>
                             </label>
 
-                            <label class="radio-game-card" id="card-square">
-                                <input type="radio" name="juego" value="Square in the Air" onchange="handleGameSelect(this)">
+                            <label class="checkbox-game-card" id="card-square">
+                                <input type="checkbox" name="juegosLibres" value="Square in the Air" onchange="handleFreeSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">⬛ Square in the Air</div>
                                     <div class="game-details">Dinámica y juego Square in the air</div>
@@ -2066,8 +2119,8 @@ export const getConvencionFormHtml = () => {
                                 <span class="game-free-tag">Ilimitado</span>
                             </label>
 
-                            <label class="radio-game-card" id="card-karaoke">
-                                <input type="radio" name="juego" value="Karaoke" onchange="handleGameSelect(this)">
+                            <label class="checkbox-game-card" id="card-karaoke">
+                                <input type="checkbox" name="juegosLibres" value="Karaoke" onchange="handleFreeSelect(this)">
                                 <div class="game-info">
                                     <div class="game-name">🎤 Karaoke</div>
                                     <div class="game-details">Estación musical y canto</div>
@@ -2099,7 +2152,7 @@ export const getConvencionFormHtml = () => {
                 <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
             <h2 class="feedback-title" style="color: var(--success);">¡Inscripción Exitosa!</h2>
-            <p class="feedback-desc" id="successDetails">Se ha guardado correctamente tu inscripción para el juego seleccionado en la Convención de Jóvenes 2026.</p>
+            <p class="feedback-desc" id="successDetails">Se ha guardado correctamente tu inscripción en la Convención de Jóvenes 2026.</p>
             <div style="display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto;">
                 <button class="btn-submit" style="width: 100%;" onclick="resetForm()">Inscribir a otra persona</button>
                 <a href="/directorio-convencion" class="btn-submit" style="width: 100%; background: #334155; text-decoration: none; box-shadow: none;">Ver Directorio</a>
@@ -2115,19 +2168,95 @@ export const getConvencionFormHtml = () => {
         const btnText = document.getElementById('btn-text');
         const btnSubmit = document.getElementById('btnSubmit');
 
-        function handleGameSelect(radio) {
+        function handleLimitedSelect(radio) {
+            if (radio.disabled) return;
             document.querySelectorAll('.radio-game-card').forEach(c => c.classList.remove('selected'));
             if (radio.checked) {
                 radio.closest('.radio-game-card').classList.add('selected');
             }
         }
 
+        function handleFreeSelect(checkbox) {
+            const parentCard = checkbox.closest('.checkbox-game-card');
+            if (checkbox.checked) {
+                parentCard.classList.add('selected');
+            } else {
+                parentCard.classList.remove('selected');
+            }
+        }
+
+        async function loadCupos() {
+            try {
+                const res = await fetch('/api/registro-detallado/cupos-convencion');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                const sports = [
+                    { key: 'voleibol', max: 24 },
+                    { key: 'futbol', max: 25 },
+                    { key: 'pingpong', max: 25 }
+                ];
+
+                sports.forEach(s => {
+                    const info = data[s.key];
+                    if (!info) return;
+
+                    const sumEl = document.getElementById('sum-cap-' + s.key);
+                    const tagEl = document.getElementById('tag-' + s.key);
+                    const cardEl = document.getElementById('card-' + s.key);
+                    const radioEl = document.getElementById('radio-' + s.key);
+
+                    if (info.lleno) {
+                        if (sumEl) sumEl.innerHTML = '<span style="color: var(--error); font-weight: 700;">Agotado</span>';
+                        if (tagEl) {
+                            tagEl.className = 'game-agotado-tag';
+                            tagEl.textContent = 'AGOTADO (' + info.count + '/' + s.max + ')';
+                        }
+                        if (cardEl) cardEl.classList.add('disabled');
+                        if (radioEl) {
+                            if (radioEl.checked) {
+                                document.getElementById('radio-ninguno').checked = true;
+                                document.getElementById('card-ninguno').classList.add('selected');
+                            }
+                            radioEl.disabled = true;
+                        }
+                    } else {
+                        if (sumEl) sumEl.textContent = info.count + ' / ' + s.max + ' Cupos';
+                        if (tagEl) {
+                            if (info.disponible <= 5) {
+                                tagEl.className = 'game-warning-tag';
+                                tagEl.textContent = '¡Solo quedan ' + info.disponible + ' cupos!';
+                            } else {
+                                tagEl.className = 'game-cap-tag';
+                                tagEl.textContent = 'Quedan ' + info.disponible + ' de ' + s.max;
+                            }
+                        }
+                        if (cardEl) cardEl.classList.remove('disabled');
+                        if (radioEl) radioEl.disabled = false;
+                    }
+                });
+            } catch (err) {
+                console.warn('No se pudo cargar disponibilidad de cupos:', err);
+            }
+        }
+
+        // Cargar cupos al inicio
+        loadCupos();
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const juegoRadio = document.querySelector('input[name="juego"]:checked');
-            if (!juegoRadio) {
-                alert('Por favor selecciona el juego o actividad en la que deseas participar.');
+            const limitedRadio = document.querySelector('input[name="juegoLimitado"]:checked');
+            const freeCheckboxes = Array.from(document.querySelectorAll('input[name="juegosLibres"]:checked'));
+
+            const selectedActivities = [];
+            if (limitedRadio && limitedRadio.value) {
+                selectedActivities.push(limitedRadio.value);
+            }
+            freeCheckboxes.forEach(cb => selectedActivities.push(cb.value));
+
+            if (selectedActivities.length === 0) {
+                alert('Por favor selecciona al menos una actividad (un torneo deportivo o al menos una estación libre).');
                 return;
             }
 
@@ -2138,7 +2267,7 @@ export const getConvencionFormHtml = () => {
             const edad = parseInt(document.getElementById('edad').value) || undefined;
             const adultoResponsable = document.getElementById('adultoResponsable').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
-            const juego = juegoRadio.value;
+            const juego = selectedActivities.join(', ');
 
             spinner.style.display = 'block';
             btnText.style.display = 'none';
@@ -2176,6 +2305,7 @@ export const getConvencionFormHtml = () => {
             } catch (error) {
                 console.error('Error registrando:', error);
                 alert('Hubo un error al guardar tu registro: ' + error.message);
+                loadCupos();
             } finally {
                 spinner.style.display = 'none';
                 btnText.style.display = 'block';
@@ -2186,9 +2316,15 @@ export const getConvencionFormHtml = () => {
         function resetForm() {
             form.reset();
             document.querySelectorAll('.radio-game-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.checkbox-game-card').forEach(c => c.classList.remove('selected'));
+            const ningunoCard = document.getElementById('card-ninguno');
+            if (ningunoCard) ningunoCard.classList.add('selected');
+            const ningunoRadio = document.getElementById('radio-ninguno');
+            if (ningunoRadio) ningunoRadio.checked = true;
             successState.style.display = 'none';
             card.style.display = 'block';
             window.scrollTo(0, 0);
+            loadCupos();
         }
     </script>
 </body>

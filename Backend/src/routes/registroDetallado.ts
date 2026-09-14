@@ -7,7 +7,8 @@ import {
     eliminarPersonaDetallada, 
     marcarAsistencia,
     actualizarPersonaPublico,
-    eliminarPersonaPublico
+    eliminarPersonaPublico,
+    obtenerCuposConvencion
 } from '../controllers/registroDetalladoController';
 import { auth } from '../middleware/auth';
 import { checkRole } from '../middleware/checkRole';
@@ -18,6 +19,7 @@ const router = Router();
 const ROLES_REGISTRO = ['superadmin', 'jef teen', 'mentor club'];
 
 // Ruta pública para captación de datos (formulario QR, sin autenticación)
+router.get('/cupos-convencion', obtenerCuposConvencion);
 router.post('/publico', crearPersonaPublico);
 router.put('/publico/:id', actualizarPersonaPublico);
 router.delete('/publico/:id', eliminarPersonaPublico);

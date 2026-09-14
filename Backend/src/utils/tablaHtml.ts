@@ -696,16 +696,29 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
 };
 
 export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
-    // Clasificar listas por actividad / juego
-    const isVoleibol = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('vol')) || (p.ministerio && p.ministerio.toLowerCase().includes('vol'));
-    const isFutbol = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('fut')) || (p.ministerio && p.ministerio.toLowerCase().includes('fut'));
-    const isPingPong = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('ping')) || (p.ministerio && p.ministerio.toLowerCase().includes('ping'));
-    const isVideojuegos = (p: any) => (p.grupo && (p.grupo.toLowerCase().includes('video') || p.grupo.toLowerCase().includes('mario') || p.grupo.toLowerCase().includes('fifa'))) || (p.ministerio && (p.ministerio.toLowerCase().includes('video') || p.ministerio.toLowerCase().includes('mario')));
-    const isTiroArco = (p: any) => (p.grupo && (p.grupo.toLowerCase().includes('tiro') || p.grupo.toLowerCase().includes('arco') || p.grupo.toLowerCase().includes('flecha'))) || (p.ministerio && (p.ministerio.toLowerCase().includes('tiro') || p.ministerio.toLowerCase().includes('arco')));
-    const isBelleza = (p: any) => (p.grupo && (p.grupo.toLowerCase().includes('belleza') || p.grupo.toLowerCase().includes('trenza') || p.grupo.toLowerCase().includes('neón') || p.grupo.toLowerCase().includes('neon'))) || (p.ministerio && (p.ministerio.toLowerCase().includes('belleza') || p.ministerio.toLowerCase().includes('trenza')));
-    const isArte = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('arte')) || (p.ministerio && p.ministerio.toLowerCase().includes('arte'));
-    const isSquareAir = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('square')) || (p.ministerio && p.ministerio.toLowerCase().includes('square'));
-    const isKaraoke = (p: any) => (p.grupo && p.grupo.toLowerCase().includes('karaoke')) || (p.ministerio && p.ministerio.toLowerCase().includes('karaoke'));
+    // Normalizar texto eliminando tildes y diacríticos
+    const normalizeText = (str: string = '') => 
+        str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    // Clasificar listas por actividad / juego con normalización de tildes
+    const isVoleibol = (p: any) => normalizeText((p.grupo || '') + ' ' + (p.ministerio || '')).includes('vol');
+    const isFutbol = (p: any) => normalizeText((p.grupo || '') + ' ' + (p.ministerio || '')).includes('fut');
+    const isPingPong = (p: any) => normalizeText((p.grupo || '') + ' ' + (p.ministerio || '')).includes('ping');
+    const isVideojuegos = (p: any) => {
+        const t = normalizeText((p.grupo || '') + ' ' + (p.ministerio || ''));
+        return t.includes('video') || t.includes('mario') || t.includes('fifa');
+    };
+    const isTiroArco = (p: any) => {
+        const t = normalizeText((p.grupo || '') + ' ' + (p.ministerio || ''));
+        return t.includes('tiro') || t.includes('arco') || t.includes('flecha');
+    };
+    const isBelleza = (p: any) => {
+        const t = normalizeText((p.grupo || '') + ' ' + (p.ministerio || ''));
+        return t.includes('belleza') || t.includes('trenza') || t.includes('neon');
+    };
+    const isArte = (p: any) => normalizeText((p.grupo || '') + ' ' + (p.ministerio || '')).includes('arte');
+    const isSquareAir = (p: any) => normalizeText((p.grupo || '') + ' ' + (p.ministerio || '')).includes('square');
+    const isKaraoke = (p: any) => normalizeText((p.grupo || '') + ' ' + (p.ministerio || '')).includes('karaoke');
 
     const voleibolList = personas.filter(isVoleibol);
     const futbolList = personas.filter(isFutbol);
@@ -723,46 +736,30 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         return list.map((p, idx) => {
             const pJson = JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
             const juego = p.grupo || p.ministerio || 'Sin asignar';
-            
-            let badgeClass = 'badge-general';
-            let icon = '🎮';
-            if (isVoleibol(p)) {
-                badgeClass = 'badge-voleibol';
-                icon = '🏐';
-            } else if (isFutbol(p)) {
-                badgeClass = 'badge-futbol';
-                icon = '⚽';
-            } else if (isPingPong(p)) {
-                badgeClass = 'badge-pingpong';
-                icon = '🏓';
-            } else if (isVideojuegos(p)) {
-                badgeClass = 'badge-videojuegos';
-                icon = '🎮';
-            } else if (isTiroArco(p)) {
-                badgeClass = 'badge-tiroarco';
-                icon = '🏹';
-            } else if (isBelleza(p)) {
-                badgeClass = 'badge-belleza';
-                icon = '💅';
-            } else if (isArte(p)) {
-                badgeClass = 'badge-arte';
-                icon = '🎨';
-            } else if (isSquareAir(p)) {
-                badgeClass = 'badge-square';
-                icon = '⬛';
-            } else if (isKaraoke(p)) {
-                badgeClass = 'badge-karaoke';
-                icon = '🎤';
-            }
+            const badges: string[] = [];
+            if (isVoleibol(p)) badges.push('<span class="game-badge-tag badge-voleibol">🏐 Vóleibol</span>');
+            if (isFutbol(p)) badges.push('<span class="game-badge-tag badge-futbol">⚽ Fútbol</span>');
+            if (isPingPong(p)) badges.push('<span class="game-badge-tag badge-pingpong">🏓 Ping Pong</span>');
+            if (isVideojuegos(p)) badges.push('<span class="game-badge-tag badge-videojuegos">🎮 Videojuegos</span>');
+            if (isTiroArco(p)) badges.push('<span class="game-badge-tag badge-tiroarco">🏹 Tiro al Arco</span>');
+            if (isBelleza(p)) badges.push('<span class="game-badge-tag badge-belleza">💅 Belleza</span>');
+            if (isArte(p)) badges.push('<span class="game-badge-tag badge-arte">🎨 Arte</span>');
+            if (isSquareAir(p)) badges.push('<span class="game-badge-tag badge-square">⬛ Square</span>');
+            if (isKaraoke(p)) badges.push('<span class="game-badge-tag badge-karaoke">🎤 Karaoke</span>');
+
+            const badgesDisplay = badges.length > 0
+                ? '<div style="display: flex; flex-wrap: wrap; gap: 4px;">' + badges.join('') + '</div>'
+                : '<span class="game-badge-tag badge-general">🎮 ' + juego + '</span>';
 
             const acudiente = p.adultoResponsable || p.nombrePadres || '-';
             const fechaStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+            const searchTerms = normalizeText(p.nombre + ' ' + (p.apellido || '') + ' ' + acudiente + ' ' + (p.telefono || '') + ' ' + juego);
 
-            return '<tr data-juego="' + (p.grupo || '') + '" data-search="' + (p.nombre + ' ' + (p.apellido || '') + ' ' + acudiente + ' ' + (p.telefono || '') + ' ' + juego).toLowerCase() + '">' +
+            return '<tr data-juego="' + (p.grupo || '') + '" data-search="' + searchTerms + '">' +
                 '<td style="text-align: center; font-weight: 700; color: var(--text-muted);">' + (idx + 1) + '</td>' +
                 '<td><strong>' + p.nombre + ' ' + (p.apellido && p.apellido !== '.' ? p.apellido : '') + '</strong></td>' +
                 '<td style="text-align: center;">' + (p.edad || '-') + '</td>' +
-                '<td><span class="game-badge-tag ' + badgeClass + '">' + icon + ' ' + juego + '</span></td>' +
+                '<td>' + badgesDisplay + '</td>' +
                 '<td>' + acudiente + '</td>' +
                 '<td><a href="tel:' + (p.telefono || '') + '" style="color: inherit; text-decoration: none;">' + (p.telefono || '-') + '</a></td>' +
                 '<td style="font-size: 13px; color: var(--text-muted);">' + fechaStr + '</td>' +
@@ -1544,22 +1541,43 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
                 </div>
                 
                 <div class="form-group">
-                    <label>Actividad / Disciplina</label>
-                    <select id="editJuego" required>
-                        <optgroup label="🏆 Torneos con Cupo Limitado">
-                            <option value="Vóleibol">🏐 Vóleibol (Cupo: 24)</option>
-                            <option value="Fútbol">⚽ Fútbol (Cupo: 25)</option>
-                            <option value="Estación de Ping Pong">🏓 Estación de Ping Pong (Cupo: 25)</option>
-                        </optgroup>
-                        <optgroup label="🎯 Estaciones y Actividades Libres">
-                            <option value="Videojuegos (Mario Kart y FIFA)">🎮 Videojuegos (Mario Kart y FIFA)</option>
-                            <option value="Tiro al Arco o Flecha">🏹 Tiro al Arco o Flecha</option>
-                            <option value="Belleza (Trenzas, Neón y Estrellas)">💅 Belleza (Trenzas, Neón y Estrellas)</option>
-                            <option value="Sesión de Arte">🎨 Sesión de Arte</option>
-                            <option value="Square in the Air">⬛ Square in the Air</option>
-                            <option value="Karaoke">🎤 Karaoke</option>
-                        </optgroup>
+                    <label>🏆 Torneo con Cupo Limitado (Máximo 1)</label>
+                    <select id="editTorneoLimitado">
+                        <option value="">-- Ninguno (Solo actividades libres) --</option>
+                        <option value="Vóleibol">🏐 Vóleibol (Cupo: 24)</option>
+                        <option value="Fútbol">⚽ Fútbol (Cupo: 25)</option>
+                        <option value="Estación de Ping Pong">🏓 Estación de Ping Pong (Cupo: 25)</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label style="margin-bottom: 8px;">🎯 Estaciones y Actividades Libres</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="edit_videojuegos" value="Videojuegos (Mario Kart y FIFA)">
+                            <span>🎮 Videojuegos (Mario Kart y FIFA)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="edit_tiroarco" value="Tiro al Arco o Flecha">
+                            <span>🏹 Tiro al Arco o Flecha</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="edit_belleza" value="Belleza (Trenzas, Neón y Estrellas)">
+                            <span>💅 Belleza (Trenzas, Neón y Estrellas)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="edit_arte" value="Sesión de Arte">
+                            <span>🎨 Sesión de Arte</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="edit_square" value="Square in the Air">
+                            <span>⬛ Square in the Air</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="edit_karaoke" value="Karaoke">
+                            <span>🎤 Karaoke</span>
+                        </label>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn-save-modal">Guardar Cambios</button>
@@ -1574,6 +1592,10 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         const form = document.getElementById('editForm');
         let currentRecord = null;
         let activeTabName = 'todos';
+
+        function normalizeClientText(str) {
+            return (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
 
         function switchTab(tabName, btn) {
             activeTabName = tabName;
@@ -1590,7 +1612,7 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         }
 
         function handleSearch() {
-            const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const query = normalizeClientText(document.getElementById('searchInput').value || '').trim();
             const currentPane = document.getElementById('tab-pane-' + activeTabName);
             if (!currentPane) return;
 
@@ -1614,30 +1636,25 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             document.getElementById('editAdultoResponsable').value = currentRecord.adultoResponsable || currentRecord.nombrePadres || '';
             document.getElementById('editTelefono').value = currentRecord.telefono || '';
             
-            const currentJuego = (currentRecord.grupo || currentRecord.ministerio || '').toLowerCase();
-            const selectJuego = document.getElementById('editJuego');
+            const currentJuego = normalizeClientText(currentRecord.grupo || currentRecord.ministerio || '');
+            const selectTorneo = document.getElementById('editTorneoLimitado');
             
             if (currentJuego.includes('vol')) {
-                selectJuego.value = 'Vóleibol';
+                selectTorneo.value = 'Vóleibol';
             } else if (currentJuego.includes('fut')) {
-                selectJuego.value = 'Fútbol';
-            } else if (currentJuego.includes('ping')) {
-                selectJuego.value = 'Estación de Ping Pong';
-            } else if (currentJuego.includes('video') || currentJuego.includes('mario') || currentJuego.includes('fifa')) {
-                selectJuego.value = 'Videojuegos (Mario Kart y FIFA)';
-            } else if (currentJuego.includes('tiro') || currentJuego.includes('arco') || currentJuego.includes('flecha')) {
-                selectJuego.value = 'Tiro al Arco o Flecha';
-            } else if (currentJuego.includes('belleza') || currentJuego.includes('trenza') || currentJuego.includes('neon') || currentJuego.includes('neón')) {
-                selectJuego.value = 'Belleza (Trenzas, Neón y Estrellas)';
-            } else if (currentJuego.includes('arte')) {
-                selectJuego.value = 'Sesión de Arte';
-            } else if (currentJuego.includes('square')) {
-                selectJuego.value = 'Square in the Air';
-            } else if (currentJuego.includes('karaoke')) {
-                selectJuego.value = 'Karaoke';
+                selectTorneo.value = 'Fútbol';
+            } else if (currentJuego.includes('ping') || currentJuego.includes('pong')) {
+                selectTorneo.value = 'Estación de Ping Pong';
             } else {
-                selectJuego.value = 'Vóleibol';
+                selectTorneo.value = '';
             }
+
+            document.getElementById('edit_videojuegos').checked = currentJuego.includes('video') || currentJuego.includes('mario') || currentJuego.includes('fifa');
+            document.getElementById('edit_tiroarco').checked = currentJuego.includes('tiro') || currentJuego.includes('arco') || currentJuego.includes('flecha');
+            document.getElementById('edit_belleza').checked = currentJuego.includes('belleza') || currentJuego.includes('trenza') || currentJuego.includes('neon');
+            document.getElementById('edit_arte').checked = currentJuego.includes('arte');
+            document.getElementById('edit_square').checked = currentJuego.includes('square');
+            document.getElementById('edit_karaoke').checked = currentJuego.includes('karaoke');
 
             modal.style.display = 'flex';
         }
@@ -1649,7 +1666,24 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const juegoSelected = document.getElementById('editJuego').value;
+            const limitedVal = document.getElementById('editTorneoLimitado').value;
+            const activities = [];
+            if (limitedVal) activities.push(limitedVal);
+
+            const freeIds = ['edit_videojuegos', 'edit_tiroarco', 'edit_belleza', 'edit_arte', 'edit_square', 'edit_karaoke'];
+            freeIds.forEach(fid => {
+                const el = document.getElementById(fid);
+                if (el && el.checked) {
+                    activities.push(el.value);
+                }
+            });
+
+            if (activities.length === 0) {
+                alert('Por favor selecciona al menos una disciplina o actividad.');
+                return;
+            }
+
+            const juegoSelected = activities.join(', ');
             const payload = {
                 ...currentRecord,
                 nombre: document.getElementById('editNombre').value.trim(),
@@ -1721,17 +1755,19 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
             const wsTodos = XLSX.utils.json_to_sheet(personasList.map(mapRow));
             XLSX.utils.book_append_sheet(workbook, wsTodos, 'Todos');
 
-            // Hojas por actividad
+            // Hojas por actividad con normalización
+            const isMatch = (p, term) => normalizeClientText((p.grupo || '') + ' ' + (p.ministerio || '')).includes(term);
+
             const sheetsConfig = [
-                { name: 'Voleibol (24)', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('vol')) || (p.ministerio && p.ministerio.toLowerCase().includes('vol')) },
-                { name: 'Futbol (25)', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('fut')) || (p.ministerio && p.ministerio.toLowerCase().includes('fut')) },
-                { name: 'Ping Pong (25)', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('ping')) || (p.ministerio && p.ministerio.toLowerCase().includes('ping')) },
-                { name: 'Videojuegos', filter: (p) => (p.grupo && (p.grupo.toLowerCase().includes('video') || p.grupo.toLowerCase().includes('mario') || p.grupo.toLowerCase().includes('fifa'))) },
-                { name: 'Tiro al Arco', filter: (p) => (p.grupo && (p.grupo.toLowerCase().includes('tiro') || p.grupo.toLowerCase().includes('arco') || p.grupo.toLowerCase().includes('flecha'))) },
-                { name: 'Belleza', filter: (p) => (p.grupo && (p.grupo.toLowerCase().includes('belleza') || p.grupo.toLowerCase().includes('trenza') || p.grupo.toLowerCase().includes('neon') || p.grupo.toLowerCase().includes('neón'))) },
-                { name: 'Sesion de Arte', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('arte')) },
-                { name: 'Square in the Air', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('square')) },
-                { name: 'Karaoke', filter: (p) => (p.grupo && p.grupo.toLowerCase().includes('karaoke')) }
+                { name: 'Voleibol (24)', filter: (p) => isMatch(p, 'vol') },
+                { name: 'Futbol (25)', filter: (p) => isMatch(p, 'fut') },
+                { name: 'Ping Pong (25)', filter: (p) => isMatch(p, 'ping') },
+                { name: 'Videojuegos', filter: (p) => isMatch(p, 'video') || isMatch(p, 'mario') || isMatch(p, 'fifa') },
+                { name: 'Tiro al Arco', filter: (p) => isMatch(p, 'tiro') || isMatch(p, 'arco') || isMatch(p, 'flecha') },
+                { name: 'Belleza', filter: (p) => isMatch(p, 'belleza') || isMatch(p, 'trenza') || isMatch(p, 'neon') },
+                { name: 'Sesion de Arte', filter: (p) => isMatch(p, 'arte') },
+                { name: 'Square in the Air', filter: (p) => isMatch(p, 'square') },
+                { name: 'Karaoke', filter: (p) => isMatch(p, 'karaoke') }
             ];
 
             sheetsConfig.forEach(cfg => {
