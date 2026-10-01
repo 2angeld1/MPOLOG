@@ -1,26 +1,32 @@
+import { picnicLogoBase64 } from './picnicLogoBase64';
 import { rangerChefLogoBase64 } from './rangerChefLogoBase64';
 
-export const getTeenFormHtml = () => {
+export const getPicnicFormHtml = () => {
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Registro - MPOLOG</title>
+    <title>Registro - Picnic con Propósito 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #9d4edd;
-            --primary-glow: rgba(157, 78, 221, 0.4);
-            --bg-dark: #0a0915;
-            --card-bg: rgba(20, 18, 38, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-main: #f3f0fc;
-            --text-muted: #a5a1b8;
-            --success: #00f5d4;
-            --error: #ff5d8f;
+            --primary: #f43f5e;
+            --primary-dark: #e11d48;
+            --primary-light: #fb7185;
+            --primary-glow: rgba(244, 63, 94, 0.35);
+            --bg-color: #fff1f2;
+            --card-bg: #ffffff;
+            --text-main: #881337;
+            --text-dark: #4c0519;
+            --text-muted: #9f1239;
+            --border-color: #fecdd3;
+            --border-light: #ffe4e6;
+            --success: #10b981;
+            --error: #e11d48;
+            --badge-bg: rgba(244, 63, 94, 0.12);
         }
 
         * {
@@ -32,261 +38,264 @@ export const getTeenFormHtml = () => {
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            background-color: var(--bg-color);
+            color: var(--text-dark);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 20px 14px 40px;
+            background-image: radial-gradient(#fda4af 1px, transparent 1px);
+            background-size: 24px 24px;
             position: relative;
         }
 
-        .blob {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-            opacity: 0.15;
-            filter: blur(50px);
-            z-index: 0;
+        /* Subtle watermark logo in background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background-image: url('${picnicLogoBase64}');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.035;
             pointer-events: none;
+            z-index: 0;
         }
-
-        .blob-1 { top: -50px; left: -50px; }
-        .blob-2 { bottom: -50px; right: -50px; }
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 620px;
             z-index: 1;
+            position: relative;
+        }
+
+        .banner-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(244, 63, 94, 0.08);
+            text-align: center;
+        }
+
+        .banner-img-wrap {
+            width: 100%;
+            background: linear-gradient(135deg, #f43f5e 0%, #fb7185 50%, #fda4af 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 14px;
+        }
+
+        .banner-img {
+            max-width: 100%;
+            max-height: 380px;
+            width: auto;
+            height: auto;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(136, 19, 55, 0.2);
+            object-fit: contain;
+            background: white;
+            padding: 4px;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 40px 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .logo-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #7b2cbf, var(--primary));
             border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 20px var(--primary-glow);
-            margin-bottom: 10px;
+            padding: 26px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .logo-icon svg { width: 32px; height: 32px; fill: white; }
+        .card-header {
+            border-top: 8px solid var(--primary);
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+        }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--badge-bg);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            color: var(--primary-dark);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
 
         h1 {
             font-size: 28px;
             font-weight: 800;
-            background: linear-gradient(to right, #f3f0fc, #c8b6ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-dark);
             margin-bottom: 8px;
             letter-spacing: -0.5px;
+            line-height: 1.25;
+            font-family: 'Playfair Display', serif;
         }
 
-        .subtitle {
-            color: var(--text-muted);
+        p.intro-text {
             font-size: 15px;
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 14px;
-            background: rgba(157, 78, 221, 0.15);
-            border: 1px solid rgba(157, 78, 221, 0.3);
-            color: #d8b4fe;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
             margin-bottom: 20px;
-            text-transform: uppercase;
+            font-style: italic;
         }
 
-        form { text-align: left; }
-
-        .form-grid {
+        .info-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
         }
 
-        @media (max-width: 580px) {
-            .form-grid { grid-template-columns: 1fr; gap: 0; }
-        }
-
-        .input-group { position: relative; margin-bottom: 16px; }
-        .input-group.full-width { grid-column: 1 / -1; }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            transition: color 0.3s;
-        }
-
-        .input-wrapper { position: relative; display: flex; align-items: center; }
-
-        .input-icon {
-            position: absolute;
-            left: 16px;
-            color: var(--text-muted);
-            pointer-events: none;
+        .info-box {
+            background: #fff5f6;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: color 0.3s;
+            gap: 12px;
         }
 
-        .input-icon svg { width: 20px; height: 20px; fill: currentColor; }
-
-        input, select {
-            width: 100%;
-            padding: 14px 16px 14px 48px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            color: var(--text-main);
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            appearance: none;
-            -webkit-appearance: none;
+        .info-box-icon {
+            font-size: 24px;
+            line-height: 1;
         }
 
-        select { cursor: pointer; }
+        .info-box-content {
+            flex: 1;
+        }
 
-        .select-wrapper { position: relative; width: 100%; }
-
-        .select-wrapper::after {
-            content: "\\25BC";
-            font-size: 10px;
+        .info-box-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
             color: var(--text-muted);
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
         }
 
-        input:focus, select:focus {
+        .info-box-val {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.4;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .required-star {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border-color);
+            background: #fffafb;
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="tel"]:focus {
+            background: #ffffff;
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 0 4px var(--primary-glow);
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
-        input:focus + .input-icon, select:focus + .input-icon { color: var(--primary); }
+        /* Minor Acudiente Section */
+        .minor-card {
+            display: none;
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.05) 0%, rgba(251, 113, 133, 0.08) 100%);
+            border: 1.5px dashed var(--primary-light);
+            border-radius: 14px;
+            padding: 18px 16px;
+            margin: 16px 0 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .minor-notice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 14px;
+        }
 
         .btn-submit {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #7b2cbf 0%, var(--primary) 100%);
-            border: none;
-            border-radius: 14px;
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #e11d48 100%);
             color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 8px 24px var(--primary-glow);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-top: 8px;
+            margin-top: 10px;
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(157, 78, 221, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.5);
         }
 
-        .btn-submit:active { transform: translateY(1px); }
-
-        .feedback-state {
-            display: none;
-            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        .btn-submit:active {
+            transform: translateY(1px);
         }
 
-        .feedback-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-        }
-
-        .success-icon {
-            background: rgba(0, 245, 212, 0.15);
-            border: 2px solid var(--success);
-            color: var(--success);
-            box-shadow: 0 0 20px rgba(0, 245, 212, 0.3);
-        }
-
-        .success-icon svg {
-            width: 36px;
-            height: 36px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 3;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .feedback-title { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
-
-        .feedback-desc {
-            color: var(--text-muted);
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 12px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
+        .btn-submit:disabled {
+            background: #fda4af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         .spinner {
@@ -300,171 +309,252 @@ export const getTeenFormHtml = () => {
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+
+        .feedback-state {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
         }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+
+        .success-icon-wrap {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(244, 63, 94, 0.12);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 24px var(--primary-glow);
         }
-        .shake { animation: shake 0.4s ease-in-out; }
+
+        .success-icon-wrap svg {
+            width: 40px;
+            height: 40px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feedback-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .feedback-desc {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .btn-secondary {
+            background: #fff5f6;
+            border: 1px solid var(--border-color);
+            color: var(--primary-dark);
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #ffe4e6;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-
     <div class="container">
-        <div id="form-state" class="card">
-            <div class="logo-container">
-                <div>
-                    <div class="logo-icon" style="margin: 0 auto 12px;">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                        </svg>
+        <!-- Banner Poster -->
+        <div class="banner-card">
+            <div class="banner-img-wrap">
+                <img src="${picnicLogoBase64}" alt="Picnic con Propósito" class="banner-img">
+            </div>
+        </div>
+
+        <div id="form-state">
+            <div class="card card-header">
+                <span class="tag-pill">🎀 Relaciones • Mujeres</span>
+                <h1>PICNIC CON PROPÓSITO</h1>
+                <p class="intro-text">
+                    "Una tarde especial para compartir, conectar y crear recuerdos juntas."
+                </p>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-box-icon">📅</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Fecha</div>
+                            <div class="info-box-val">Sábado 17 de octubre</div>
+                        </div>
                     </div>
-                    <h1>Formulario de Registro</h1>
+
+                    <div class="info-box">
+                        <div class="info-box-icon">⏰</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Horario</div>
+                            <div class="info-box-val">12:30 p. m. a 3:30 p. m.</div>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="grid-column: 1 / -1;">
+                        <div class="info-box-icon">📍</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Lugar del Evento</div>
+                            <div class="info-box-val">Senderos de Costa Verde</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <p class="subtitle">Ingresa la informaci\u00f3n detallada para completar el registro.</p>
-
+            <!-- Formulario Principal -->
             <form id="registroForm">
-                <div class="form-grid">
+                <div class="card">
                     <div class="input-group">
-                        <label for="nombre">Nombre</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                            </div>
-                        </div>
+                        <label class="field-label" for="nombreCompleto">
+                            Nombre y Apellido <span class="required-star">*</span>
+                        </label>
+                        <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ingresa tu nombre y apellido" required>
                     </div>
 
                     <div class="input-group">
-                        <label for="apellido">Apellido</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                            </div>
+                        <label class="field-label" for="edad">
+                            Edad <span class="required-star">*</span>
+                        </label>
+                        <input type="number" id="edad" name="edad" min="1" max="99" placeholder="Ingresa tu edad (Ej: 21)" oninput="handleAgeCheck(this.value)" required>
+                    </div>
+
+                    <!-- Sección Dinámica si es Menor de 18 -->
+                    <div class="minor-card" id="minorCard">
+                        <div class="minor-notice">
+                            <span>🌸</span>
+                            <span>Al ser menor de 18 años, por favor ingresa los datos de tu acudiente:</span>
+                        </div>
+
+                        <div class="input-group" style="margin-bottom: 14px;">
+                            <label class="field-label" for="nombreAcudiente">
+                                Nombre completo del acudiente o tutor <span class="required-star">*</span>
+                            </label>
+                            <input type="text" id="nombreAcudiente" name="nombreAcudiente" placeholder="Nombre del padre, madre o representante">
+                        </div>
+
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="field-label" for="telefonoAcudiente">
+                                Teléfono del acudiente <span class="required-star">*</span>
+                            </label>
+                            <input type="tel" id="telefonoAcudiente" name="telefonoAcudiente" placeholder="Ej: 6123-4567">
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label for="edad">Edad del Ni\u00f1o</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="edad" name="edad" min="1" max="99" placeholder="Ej: 14" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M9 11.75c-.41 0-.75-.34-.75-.75V9c0-.41.34-.75.75-.75h2c.41 0 .75.34.75.75v2c0 .41-.34.75-.75.75H9zm6 0c-.41 0-.75-.34-.75-.75V9c0-.41.34-.75.75-.75h2c.41 0 .75.34.75.75v2c0 .41-.34.75-.75.75H15zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-2.2c1.78 0 3.37-.91 4.31-2.3H7.69c.94 1.39 2.53 2.3 4.31 2.3z"/></svg>
-                            </div>
-                        </div>
+                        <label class="field-label" for="telefono">
+                            Teléfono de Contacto (WhatsApp) <span class="required-star">*</span>
+                        </label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="Ej: 6123-4567" required>
                     </div>
 
-                    <div class="input-group">
-                        <label for="tipoSangre">Tipo de Sangre</label>
-                        <div class="input-wrapper select-wrapper">
-                            <select id="tipoSangre" name="tipoSangre" required>
-                                <option value="" disabled selected>Selecciona tipo</option>
-                                <option value="O+">O Positivo (O+)</option>
-                                <option value="O-">O Negativo (O-)</option>
-                                <option value="A+">A Positivo (A+)</option>
-                                <option value="A-">A Negativo (A-)</option>
-                                <option value="B+">B Positivo (B+)</option>
-                                <option value="B-">B Negativo (B-)</option>
-                                <option value="AB+">AB Positivo (AB+)</option>
-                                <option value="AB-">AB Negativo (AB-)</option>
-                                <option value="Desconocido">No sabe / Desconocido</option>
-                            </select>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group full-width">
-                        <label for="escuela">Escuela / Colegio</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="escuela" name="escuela" placeholder="Nombre del colegio o escuela" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5.89 12.55L12 15.89l6.11-3.34c.66-.36 1.11-1.05 1.11-1.83V9.7L12 13.7 4.78 9.7v1.02c0 .78.45 1.47 1.11 1.83z"/></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group full-width">
-                        <label for="nombrePadres">Nombre del Padre / Madre / Tutor</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="nombrePadres" name="nombrePadres" placeholder="Nombre completo del representante" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group full-width">
-                        <label for="telefono">Tel\u00e9fono de Contacto</label>
-                        <div class="input-wrapper">
-                            <input type="tel" id="telefono" name="telefono" placeholder="Ej: 04121234567" required>
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group full-width">
-                        <label for="correo">Correo Electr\u00f3nico <span style="font-weight: normal; opacity: 0.6;">(Opcional)</span></label>
-                        <div class="input-wrapper">
-                            <input type="email" id="correo" name="correo" placeholder="correo@ejemplo.com">
-                            <div class="input-icon">
-                                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                            </div>
-                        </div>
-                    </div>
+                    <button type="submit" class="btn-submit" id="btnSubmit">
+                        <span id="btnText">Confirmar Asistencia 🌸</span>
+                        <span class="spinner" id="btnSpinner"></span>
+                    </button>
                 </div>
-
-                <button type="submit" class="btn-submit">
-                    <span class="spinner" id="btn-spinner"></span>
-                    <span id="btn-text">Completar Registro</span>
-                </button>
             </form>
         </div>
 
-        <div id="success-state" class="card feedback-state">
-            <div class="feedback-icon success-icon">
+        <!-- Success State -->
+        <div id="successState" class="card feedback-state">
+            <div class="success-icon-wrap">
                 <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
-            <h2 class="feedback-title" style="color: var(--success)">\u00a1Registro Exitoso!</h2>
-            <p class="feedback-desc">Tus datos han sido guardados correctamente. \u00a1Muchas gracias por tu registro!</p>
+            <h2 class="feedback-title">¡Registro Exitoso!</h2>
+            <p class="feedback-desc">
+                Tu asistencia para el <strong>Picnic con Propósito</strong> ha sido confirmada. ¡Nos vemos pronto para compartir una tarde maravillosa juntas!
+            </p>
+            <div style="background: #fff5f6; border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; text-align: left; max-width: 400px; margin: 0 auto 24px;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px;">Recordatorio del Evento:</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-dark);">📅 Sábado 17 de octubre • 12:30 p. m. a 3:30 p. m.</div>
+                <div style="font-size: 14px; color: var(--text-muted); margin-top: 2px;">📍 Senderos de Costa Verde</div>
+            </div>
             <button class="btn-secondary" onclick="resetForm()">Registrar a otra persona</button>
         </div>
     </div>
 
     <script>
+        function handleAgeCheck(val) {
+            const age = parseInt(val);
+            const minorCard = document.getElementById('minorCard');
+            const nombreAcudiente = document.getElementById('nombreAcudiente');
+            const telefonoAcudiente = document.getElementById('telefonoAcudiente');
+
+            if (!isNaN(age) && age < 18) {
+                minorCard.style.display = 'block';
+                nombreAcudiente.required = true;
+                telefonoAcudiente.required = true;
+            } else {
+                minorCard.style.display = 'none';
+                nombreAcudiente.required = false;
+                telefonoAcudiente.required = false;
+            }
+        }
+
         const form = document.getElementById('registroForm');
-        const card = document.getElementById('form-state');
-        const successState = document.getElementById('success-state');
-        const spinner = document.getElementById('btn-spinner');
-        const btnText = document.getElementById('btn-text');
+        const formState = document.getElementById('form-state');
+        const successState = document.getElementById('successState');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            spinner.style.display = 'block';
-            btnText.textContent = 'Enviando...';
-            document.querySelector('.btn-submit').disabled = true;
+            const edad = parseInt(document.getElementById('edad').value);
+            let acudiente = '';
+            let telAcudiente = '';
+
+            if (edad < 18) {
+                acudiente = document.getElementById('nombreAcudiente').value.trim();
+                telAcudiente = document.getElementById('telefonoAcudiente').value.trim();
+                if (!acudiente) {
+                    alert('Por favor ingrese el nombre del acudiente al ser menor de 18 años.');
+                    return;
+                }
+            }
+
+            btnSpinner.style.display = 'block';
+            btnText.style.display = 'none';
+            btnSubmit.disabled = true;
+
+            const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
+            const partes = nombreCompleto.split(' ');
+            const nombre = partes[0] || 'Asistente';
+            const apellido = partes.length > 1 ? partes.slice(1).join(' ') : '.';
 
             const payload = {
-                nombre: document.getElementById('nombre').value.trim(),
-                apellido: document.getElementById('apellido').value.trim(),
+                nombre: nombre,
+                apellido: apellido,
+                edad: edad || undefined,
+                adultoResponsable: acudiente || undefined,
                 telefono: document.getElementById('telefono').value.trim(),
-                edad: parseInt(document.getElementById('edad').value) || undefined,
-                escuela: document.getElementById('escuela').value.trim(),
-                tipoSangre: document.getElementById('tipoSangre').value,
-                nombrePadres: document.getElementById('nombrePadres').value.trim(),
-                correo: document.getElementById('correo').value.trim() || undefined
+                ministerio: telAcudiente ? ('Tel. Acudiente: ' + telAcudiente) : undefined,
+                departamento: 'Picnic con Propósito'
             };
 
             try {
@@ -475,33 +565,37 @@ export const getTeenFormHtml = () => {
                 });
 
                 if (response.ok) {
-                    card.style.display = 'none';
+                    formState.style.display = 'none';
                     successState.style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     const errData = await response.json();
-                    throw new Error(errData.message || 'Error en el servidor');
+                    throw new Error(errData.message || 'Error en el servidor al registrar.');
                 }
             } catch (error) {
                 console.error('Error registrando:', error);
                 alert('Hubo un error al guardar tu registro: ' + error.message);
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 400);
             } finally {
-                spinner.style.display = 'none';
-                btnText.textContent = 'Completar Registro';
-                document.querySelector('.btn-submit').disabled = false;
+                btnSpinner.style.display = 'none';
+                btnText.style.display = 'block';
+                btnSubmit.disabled = false;
             }
         });
 
         function resetForm() {
             form.reset();
+            document.getElementById('minorCard').style.display = 'none';
             successState.style.display = 'none';
-            card.style.display = 'block';
+            formState.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
 </html>`;
 };
+
+export const getTeenFormHtml = () => getPicnicFormHtml();
+export const getImagenFormHtml = () => getPicnicFormHtml();
 
 export const getMentorClubFormHtml = () => {
     return `<!DOCTYPE html>

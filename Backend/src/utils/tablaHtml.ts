@@ -1,3 +1,4 @@
+import { picnicLogoBase64 } from './picnicLogoBase64';
 import { rangerChefLogoBase64 } from './rangerChefLogoBase64';
 export const getTablaNinosHtml = (personas: any[], baseUrl: string) => {
     const rowsHtml = personas.map(p => {
@@ -2185,3 +2186,612 @@ export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
 </html>`;
 };
 
+
+
+export const getPicnicTableHtml = (personas: any[], baseUrl: string) => {
+    const normalizeText = (str: string = '') => 
+        str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const countMenores = personas.filter(p => (p.edad && p.edad < 18) || !!p.adultoResponsable).length;
+    const countMayores = personas.length - countMenores;
+
+    const rowsHtml = personas.map((p, idx) => {
+        const esMenor = (p.edad && p.edad < 18) || !!p.adultoResponsable;
+        const tipoBadge = esMenor 
+            ? '<span class="status-badge badge-menor">👧 Menor de Edad</span>'
+            : '<span class="status-badge badge-mayor">👩 Mayor de Edad</span>';
+
+        const acudiente = p.adultoResponsable || p.nombrePadres || '-';
+        const telefono = p.telefono || '-';
+        const fechaStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+        const searchTerms = normalizeText(p.nombre + ' ' + (p.apellido || '') + ' ' + (p.edad || '') + ' ' + acudiente + ' ' + telefono);
+        const pJson = JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+
+        return '<tr data-menor="' + esMenor + '" data-search="' + searchTerms + '">' +
+            '<td style="text-align: center; font-weight: 700; color: var(--text-muted);">' + (idx + 1) + '</td>' +
+            '<td><strong>' + p.nombre + ' ' + (p.apellido && p.apellido !== '.' ? p.apellido : '') + '</strong></td>' +
+            '<td style="text-align: center; font-weight: 600;">' + (p.edad || '-') + '</td>' +
+            '<td>' + tipoBadge + '</td>' +
+            '<td>' + (acudiente !== '-' ? ('<strong>' + acudiente + '</strong>' + (p.ministerio ? '<br><small style="color: var(--text-muted);">' + p.ministerio + '</small>' : '')) : '<span style="color: var(--text-muted);">-</span>') + '</td>' +
+            '<td><a href="tel:' + telefono + '" style="color: inherit; text-decoration: none; font-weight: 600;">' + telefono + '</a></td>' +
+            '<td style="font-size: 13px; color: var(--text-muted);">' + fechaStr + '</td>' +
+            '<td style="text-align: center; vertical-align: middle;">' +
+                '<button class="action-btn edit-btn" title="Editar" onclick="openEditModal(\'' + p._id + '\', \'' + pJson + '\')">✏️</button>' +
+                '<button class="action-btn delete-btn" title="Eliminar" onclick="deleteRecord(\'' + p._id + '\')">🗑️</button>' +
+            '</td>' +
+        '</tr>';
+    }).join('');
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directorio - Picnic con Propósito 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f43f5e;
+            --primary-dark: #e11d48;
+            --primary-light: #fb7185;
+            --primary-glow: rgba(244, 63, 94, 0.25);
+            --bg-color: #fff1f2;
+            --card-bg: #ffffff;
+            --text-main: #881337;
+            --text-dark: #4c0519;
+            --text-muted: #9f1239;
+            --border-color: #fecdd3;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+            background-image: radial-gradient(#fda4af 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: 8px solid var(--primary);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 60px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 2px;
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.15);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-register-link {
+            background: #fff5f6;
+            border: 1.5px solid #fecdd3;
+            color: var(--primary-dark);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-register-link:hover {
+            background: #ffe4e6;
+            border-color: var(--primary-light);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 50%, #e11d48 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(244, 63, 94, 0.35);
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.5);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 6px rgba(244, 63, 94, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-icon {
+            font-size: 28px;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        /* Search Card */
+        .controls-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(244, 63, 94, 0.04);
+        }
+
+        .search-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1.5px solid var(--border-color);
+            background: #fffafb;
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.05);
+            overflow-x: auto;
+            padding: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        th {
+            background: #fff5f6;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(244, 63, 94, 0.02); }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-mayor { background: rgba(16, 185, 129, 0.12); color: #047857; }
+        .badge-menor { background: rgba(244, 63, 94, 0.12); color: #be123c; }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            border-radius: 6px;
+            padding: 6px 8px;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .action-btn:hover { background: #ffe4e6; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(76, 5, 25, 0.5);
+            backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+            padding: 16px;
+        }
+        .modal {
+            background: var(--card-bg);
+            border-radius: 16px;
+            width: 100%; max-width: 480px; max-height: 90vh;
+            overflow-y: auto; padding: 24px;
+            box-shadow: 0 20px 40px rgba(76, 5, 25, 0.25);
+            border-top: 8px solid var(--primary);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .modal-header h2 { font-size: 20px; font-weight: 700; font-family: 'Playfair Display', serif; }
+        .close-btn { background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+        
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13.5px; font-weight: 700; color: var(--text-dark); }
+        .form-group input {
+            width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--border-color);
+            background: #fffafb; color: var(--text-dark); outline: none; font-size: 14px;
+        }
+        .form-group input:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+        
+        .btn-modal-save {
+            width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px;
+            font-weight: 700; cursor: pointer; font-size: 15px; margin-top: 10px;
+        }
+        .btn-modal-save:hover { background: var(--primary-dark); }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-card">
+            <div class="header-left">
+                <img src="${picnicLogoBase64}" alt="Picnic con Propósito" class="header-logo">
+                <div>
+                    <h1>Directorio Picnic con Propósito</h1>
+                    <div class="subtitle">"Una tarde especial para compartir, conectar y crear recuerdos juntas"</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="${baseUrl}/registro-picnic" target="_blank" class="btn-register-link">
+                    <span>➕</span> Nuevo Registro
+                </a>
+                <button id="exportExcelBtn" class="export-btn" onclick="exportToExcel()">
+                    <span>📥</span> Exportar a Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🌸</div>
+                <div class="stat-info">
+                    <div class="stat-label">Total Registradas</div>
+                    <div class="stat-value">${personas.length}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👩</div>
+                <div class="stat-info">
+                    <div class="stat-label">Mayores de 18</div>
+                    <div class="stat-value" style="color: #059669;">${countMayores}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👧</div>
+                <div class="stat-info">
+                    <div class="stat-label">Menores de 18</div>
+                    <div class="stat-value" style="color: var(--primary-dark);">${countMenores}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-card">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, edad, acudiente o teléfono..." oninput="filterTable()">
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: center; width: 40px;">#</th>
+                        <th>Nombre y Apellido</th>
+                        <th style="text-align: center;">Edad</th>
+                        <th>Condición</th>
+                        <th>Acudiente / Tutor</th>
+                        <th>Teléfono de Contacto</th>
+                        <th>Fecha Reg.</th>
+                        <th style="text-align: center; width: 90px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    ${rowsHtml}
+                </tbody>
+            </table>
+            ${personas.length === 0 ? '<div class="empty-state">No hay registros para Picnic con Propósito todavía.</div>' : ''}
+            <div id="noResultsState" class="empty-state" style="display: none;">No se encontraron registros que coincidan con la búsqueda.</div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Editar Registro</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" id="editApellido" required>
+                </div>
+                <div class="form-group">
+                    <label>Edad</label>
+                    <input type="number" id="editEdad" min="1" max="99" required>
+                </div>
+                <div class="form-group">
+                    <label>Acudiente / Tutor (si es menor)</label>
+                    <input type="text" id="editAcudiente">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono de Contacto</label>
+                    <input type="tel" id="editTelefono" required>
+                </div>
+                <button type="submit" class="btn-modal-save">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = '${baseUrl}';
+        const personasList = ${JSON.stringify(personas).replace(/</g, '\\u003c')};
+
+        function filterTable() {
+            const query = (document.getElementById('searchInput').value || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            const rows = document.querySelectorAll('#tableBody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowSearch = row.getAttribute('data-search') || '';
+                if (!query || rowSearch.includes(query)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('noResultsState').style.display = (visibleCount === 0 && rows.length > 0) ? 'block' : 'none';
+        }
+
+        let currentRecord = null;
+
+        function openEditModal(id, dataStr) {
+            currentRecord = JSON.parse(dataStr);
+            document.getElementById('editId').value = id;
+            document.getElementById('editNombre').value = currentRecord.nombre || '';
+            document.getElementById('editApellido').value = currentRecord.apellido || '';
+            document.getElementById('editEdad').value = currentRecord.edad || '';
+            document.getElementById('editAcudiente').value = currentRecord.adultoResponsable || currentRecord.nombrePadres || '';
+            document.getElementById('editTelefono').value = currentRecord.telefono || '';
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                ...currentRecord,
+                nombre: document.getElementById('editNombre').value.trim(),
+                apellido: document.getElementById('editApellido').value.trim(),
+                edad: parseInt(document.getElementById('editEdad').value) || undefined,
+                adultoResponsable: document.getElementById('editAcudiente').value.trim() || undefined,
+                telefono: document.getElementById('editTelefono').value.trim(),
+                departamento: 'Picnic con Propósito'
+            };
+
+            try {
+                const response = await fetch(baseUrl + '/api/registro-detallado/publico/' + payload._id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Error al actualizar el registro');
+                }
+            } catch (e) {
+                alert('Error de conexión');
+            }
+        });
+
+        async function deleteRecord(id) {
+            if (confirm('¿Está seguro de que desea eliminar este registro del Picnic?')) {
+                try {
+                    const response = await fetch(baseUrl + '/api/registro-detallado/publico/' + id, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar el registro');
+                    }
+                } catch (e) {
+                    alert('Error de conexión');
+                }
+            }
+        }
+
+        function exportToExcel() {
+            if (!personasList || personasList.length === 0) {
+                alert('No hay inscritas para exportar');
+                return;
+            }
+
+            const exportData = personasList.map((p, idx) => ({
+                'N°': idx + 1,
+                'Nombre Completo': (p.nombre || '') + ' ' + (p.apellido && p.apellido !== '.' ? p.apellido : ''),
+                'Edad': p.edad || '',
+                'Condición': (p.edad && p.edad < 18) || !!p.adultoResponsable ? 'Menor de Edad' : 'Mayor de Edad',
+                'Acudiente / Tutor': p.adultoResponsable || p.nombrePadres || '',
+                'Teléfono de Contacto': p.telefono || '',
+                'Fecha de Registro': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            
+            const max_len = exportData.reduce((acc, row) => {
+                Object.keys(row).forEach((key) => {
+                    const val = String(row[key] || '');
+                    const cell_len = val.length;
+                    const header_len = key.length;
+                    const current_max = Math.max(cell_len, header_len);
+                    acc[key] = Math.max(acc[key] || 0, current_max);
+                });
+                return acc;
+            }, {});
+            
+            worksheet['!cols'] = Object.keys(max_len).map(key => ({ wch: max_len[key] + 3 }));
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Picnic con Propósito');
+            XLSX.writeFile(workbook, 'Directorio_Picnic_Con_Proposito_2026.xlsx');
+        }
+    </script>
+</body>
+</html>`;
+};
+
+export const getTeenTableHtml = (personas: any[], baseUrl: string) => getPicnicTableHtml(personas, baseUrl);
+export const getImagenTableHtml = (personas: any[], baseUrl: string) => getPicnicTableHtml(personas, baseUrl);

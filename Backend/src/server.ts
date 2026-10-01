@@ -16,9 +16,9 @@ import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
-import { getTeenFormHtml, getMentorClubFormHtml, getCampamentoFormHtml, getConvencionFormHtml, getRangerChefFormHtml } from './utils/htmlForm';
+import { getTeenFormHtml, getMentorClubFormHtml, getCampamentoFormHtml, getConvencionFormHtml, getRangerChefFormHtml, getPicnicFormHtml } from './utils/htmlForm';
 import { getCarnetHtml } from './utils/carnetHtml';
-import { getTablaNinosHtml, getCampamentoTableHtml, getConvencionTableHtml, getRangerChefTableHtml } from './utils/tablaHtml';
+import { getTablaNinosHtml, getCampamentoTableHtml, getConvencionTableHtml, getRangerChefTableHtml, getPicnicTableHtml } from './utils/tablaHtml';
 import PersonaDetallada from './models/PersonaDetallada';
 
 const app = express();
@@ -73,9 +73,9 @@ app.use('/api/notificaciones', notificationRoutes);
 app.use('/api/registro-detallado', registroDetalladoRoutes);
 
 
-// Ruta de registro público JEF Teen
-app.get('/registro-teen', (req, res) => {
-    res.send(getTeenFormHtml());
+// Ruta de registro público Picnic con Propósito (y alias para compatibilidad)
+app.get(['/registro-picnic', '/registro-picnic-con-proposito', '/registro-teen', '/registro-imagen'], (req, res) => {
+    res.send(getPicnicFormHtml());
 });
 
 // Ruta de registro público Mentor Club (Kids)
@@ -104,6 +104,23 @@ app.get('/registro-convencion', (req, res) => {
 });
 app.get('/registro-juegos', (req, res) => {
     res.send(getConvencionFormHtml());
+});
+
+// Directorio HTML de Picnic con Propósito (y alias)
+app.get(['/directorio-picnic', '/directorio-picnic-con-proposito', '/directorio-teen', '/directorio-imagen'], async (req, res) => {
+    try {
+        const personas = await PersonaDetallada.find({ 
+            departamento: { $in: ['Picnic con Propósito', 'Picnic', 'picnic'] } 
+        }).sort({ createdAt: -1, nombre: 1 });
+        const host = req.get('host') || 'localhost:5000';
+        const protocol = req.protocol;
+        const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
+        const baseUrl = `${activeProtocol}://${host}`;
+
+        res.send(getPicnicTableHtml(personas, baseUrl));
+    } catch (error: any) {
+        res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
+    }
 });
 
 // Directorio HTML de Mentor Club (Kids) con QR
