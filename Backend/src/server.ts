@@ -16,9 +16,9 @@ import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import { seedRoles } from './seeders/roleSeeder';
 import { seedUsers } from './seeders/userSeeder';
-import { getTeenFormHtml, getMentorClubFormHtml, getCampamentoFormHtml, getConvencionFormHtml } from './utils/htmlForm';
+import { getTeenFormHtml, getMentorClubFormHtml, getCampamentoFormHtml, getConvencionFormHtml, getRangerChefFormHtml } from './utils/htmlForm';
 import { getCarnetHtml } from './utils/carnetHtml';
-import { getTablaNinosHtml, getCampamentoTableHtml, getConvencionTableHtml } from './utils/tablaHtml';
+import { getTablaNinosHtml, getCampamentoTableHtml, getConvencionTableHtml, getRangerChefTableHtml } from './utils/tablaHtml';
 import PersonaDetallada from './models/PersonaDetallada';
 
 const app = express();
@@ -83,9 +83,19 @@ app.get('/registro-mentor-club', (req, res) => {
     res.send(getMentorClubFormHtml());
 });
 
-// Ruta de registro público Campamento
+// Rutas de registro público Ranger Chef (General y por Categoría)
+app.get(['/registro-ranger-chef', '/registro-ranger-chef/:categoria'], (req, res) => {
+    const { categoria } = req.params;
+    res.send(getRangerChefFormHtml(categoria));
+});
+app.get('/registro-ranger-chef-navegantes', (req, res) => res.send(getRangerChefFormHtml('navegantes')));
+app.get('/registro-ranger-chef-pioneros', (req, res) => res.send(getRangerChefFormHtml('pioneros')));
+app.get('/registro-ranger-chef-seguidores', (req, res) => res.send(getRangerChefFormHtml('seguidores')));
+app.get('/registro-ranger-chef-exploradores', (req, res) => res.send(getRangerChefFormHtml('exploradores')));
+
+// Ruta anterior de Campamento (Redirige a Ranger Chef)
 app.get('/registro-campamento', (req, res) => {
-    res.send(getCampamentoFormHtml());
+    res.redirect('/registro-ranger-chef');
 });
 
 // Ruta de registro público Convención de Jóvenes (Juegos)
@@ -111,16 +121,18 @@ app.get('/directorio-mentor-club', async (req, res) => {
     }
 });
 
-// Directorio HTML de Campamento
-app.get('/directorio-campamento', async (req, res) => {
+// Directorio HTML de Ranger Chef (y alias para directorio-campamento)
+app.get(['/directorio-ranger-chef', '/directorio-campamento'], async (req, res) => {
     try {
-        const personas = await PersonaDetallada.find({ departamento: 'Campamento' }).sort({ nombre: 1 });
+        const personas = await PersonaDetallada.find({ 
+            departamento: { $in: ['Ranger Chef', 'RangerChef', 'Campamento'] } 
+        }).sort({ createdAt: -1, nombre: 1 });
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol;
         const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
         const baseUrl = `${activeProtocol}://${host}`;
 
-        res.send(getCampamentoTableHtml(personas, baseUrl));
+        res.send(getRangerChefTableHtml(personas, baseUrl));
     } catch (error: any) {
         res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
     }

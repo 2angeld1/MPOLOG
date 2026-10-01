@@ -1,3 +1,4 @@
+import { rangerChefLogoBase64 } from './rangerChefLogoBase64';
 export const getTablaNinosHtml = (personas: any[], baseUrl: string) => {
     const rowsHtml = personas.map(p => {
         const carnetUrl = `${baseUrl}/carnet/${p._id}`;
@@ -228,31 +229,59 @@ export const getTablaNinosHtml = (personas: any[], baseUrl: string) => {
 </html>`;
 };
 
-export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
-    const rowsHtml = personas.map(p => {
-        let comprobanteBtn = '-';
+export const getRangerChefTableHtml = (personas: any[], baseUrl: string) => {
+    // Clasificar y normalizar
+    const normalizeText = (str: string = '') => 
+        str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const getCategoryKey = (p: any) => {
+        const text = normalizeText((p.grupo || '') + ' ' + (p.departamento || ''));
+        if (text.includes('pion')) return 'Pioneros';
+        if (text.includes('seg')) return 'Seguidores';
+        if (text.includes('expl')) return 'Exploradores';
+        return 'Navegantes';
+    };
+
+    const countNavegantes = personas.filter(p => getCategoryKey(p) === 'Navegantes').length;
+    const countPioneros = personas.filter(p => getCategoryKey(p) === 'Pioneros').length;
+    const countSeguidores = personas.filter(p => getCategoryKey(p) === 'Seguidores').length;
+    const countExploradores = personas.filter(p => getCategoryKey(p) === 'Exploradores').length;
+    const totalRecaudado = personas.reduce((acc: number, p: any) => acc + (p.montoPago || 5), 0);
+
+    const rowsHtml = personas.map((p, idx) => {
+        const cat = getCategoryKey(p);
+        let badgeClass = 'badge-navegantes';
+        let catIcon = '🧭';
+        if (cat === 'Pioneros') { badgeClass = 'badge-pioneros'; catIcon = '🧗'; }
+        else if (cat === 'Seguidores') { badgeClass = 'badge-seguidores'; catIcon = '👣'; }
+        else if (cat === 'Exploradores') { badgeClass = 'badge-exploradores'; catIcon = '🏕️'; }
+
+        let comprobanteBtn = '<span style="color: var(--text-muted);">-</span>';
         if (p.comprobantePago) {
-            comprobanteBtn = '<a href="' + p.comprobantePago + '" target="_blank" class="btn-link">Ver Comprobante</a>';
+            comprobanteBtn = '<button class="comprobante-btn" onclick="openComprobanteModal(\'' + p.comprobantePago + '\', \'' + (p.nombre + ' ' + (p.apellido || '')) + '\')">📸 Ver Recibo</button>';
         }
-        
+
         const pJson = JSON.stringify(p).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-        
-        let montoTxt = '';
-        if (p.montoPago) {
-            montoTxt = '<br><small style="color:var(--success)">$' + p.montoPago + '</small>';
-        }
-        
-        return '<tr>' +
-            '<td><strong>' + p.nombre + ' ' + (p.apellido !== '.' ? p.apellido : '') + '</strong></td>' +
-            '<td>' + (p.sexo || '-') + '</td>' +
-            '<td><span class="badge">' + (p.ministerio || '-') + '</span></td>' +
-            '<td>' + (p.necesitaTransporte || '-') + '</td>' +
-            
-            '<td>' + (p.metodoPago || '-') + montoTxt + '</td>' +
+        const platillo = p.ministerio || 'Platillo asignado';
+        const tutor = p.adultoResponsable || p.nombrePadres || '-';
+        const telefono = p.telefono || '-';
+        const fechaStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+        const searchTerms = normalizeText(p.nombre + ' ' + (p.apellido || '') + ' ' + cat + ' ' + platillo + ' ' + tutor + ' ' + telefono);
+
+        return '<tr data-category="' + cat + '" data-search="' + searchTerms + '">' +
+            '<td style="text-align: center; font-weight: 700; color: var(--text-muted);">' + (idx + 1) + '</td>' +
+            '<td><strong>' + p.nombre + ' ' + (p.apellido && p.apellido !== '.' ? p.apellido : '') + '</strong></td>' +
+            '<td style="text-align: center;">' + (p.edad || '-') + '</td>' +
+            '<td><span class="cat-badge ' + badgeClass + '">' + catIcon + ' ' + cat + '</span></td>' +
+            '<td><span class="dish-badge">🍲 ' + platillo + '</span></td>' +
+            '<td>' + tutor + '</td>' +
+            '<td><a href="tel:' + telefono + '" style="color: inherit; text-decoration: none; font-weight: 500;">' + telefono + '</a></td>' +
+            '<td style="text-align: center;"><span class="paid-badge">$' + (p.montoPago ? p.montoPago.toFixed(2) : '5.00') + '</span></td>' +
             '<td style="text-align: center; vertical-align: middle;">' + comprobanteBtn + '</td>' +
+            '<td style="font-size: 13px; color: var(--text-muted);">' + fechaStr + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' +
-                '<button class="action-btn edit-btn" onclick="openEditModal(\'' + p._id + '\', \'' + pJson + '\')">✏️</button>' +
-                '<button class="action-btn delete-btn" onclick="deleteRecord(\'' + p._id + '\')">🗑️</button>' +
+                '<button class="action-btn edit-btn" title="Editar" onclick="openEditModal(\'' + p._id + '\', \'' + pJson + '\')">✏️</button>' +
+                '<button class="action-btn delete-btn" title="Eliminar" onclick="deleteRecord(\'' + p._id + '\')">🗑️</button>' +
             '</td>' +
         '</tr>';
     }).join('');
@@ -262,27 +291,34 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Directorio - Campamento de Servidores 2026</title>
+    <title>Directorio - Concurso Ranger Chef 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #FF8C00; 
-            --bg-color: #F0EBEC; 
-            --card-bg: #FFFFFF;
-            --text-main: #202124;
-            --text-muted: #5f6368;
-            --border-color: #dadce0;
-            --success: #1a73e8; 
-            --error: #d93025;
+            --primary: #ea580c;
+            --primary-dark: #c2410c;
+            --primary-light: #fb923c;
+            --primary-glow: rgba(234, 88, 12, 0.25);
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --navegantes-color: #ea580c;
+            --pioneros-color: #e11d48;
+            --seguidores-color: #7c3aed;
+            --exploradores-color: #059669;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Outfit', 'Roboto', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -290,208 +326,521 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 24px 12px;
+            padding: 24px 16px 60px;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1260px;
             margin: 0 auto;
         }
 
-        .header {
+        .header-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: 8px solid var(--primary);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 16px;
-            margin-bottom: 24px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: contain;
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-register-link {
+            background: #fff7ed;
+            border: 1.5px solid #fdba74;
+            color: #ea580c;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-register-link:hover {
+            background: #ffedd5;
+            border-color: #fb923c;
         }
 
         .export-btn {
-            background-color: #1e7e34;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
             border: none;
             padding: 10px 18px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+            transition: all 0.2s;
         }
+
         .export-btn:hover {
-            background-color: #155d27;
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-        }
-        .export-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 500;
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            font-size: 26px;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        /* Controls: Search & Tabs */
+        .controls-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .search-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1px solid var(--border-color);
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 14px;
             color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
         }
 
+        .search-input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .category-tabs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .cat-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cat-tab:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .cat-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px var(--primary-glow);
+        }
+
+        .tab-count {
+            background: rgba(0, 0, 0, 0.12);
+            padding: 2px 6px;
+            border-radius: 100px;
+            font-size: 11px;
+        }
+
+        .cat-tab.active .tab-count {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+        }
+
+        /* Table Styles */
         .table-container {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-top: 8px solid var(--primary);
-            border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            border-radius: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             overflow-x: auto;
-            padding: 20px;
+            padding: 4px;
         }
 
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: 800px;
+            border-collapse: collapse;
+            min-width: 1000px;
         }
 
         th, td {
-            padding: 16px;
+            padding: 14px 16px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
             font-size: 14px;
         }
 
         th {
+            background: #f8fafc;
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(0,0,0,0.02); }
+        tr:hover td { background: rgba(0, 0, 0, 0.015); }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            background: rgba(255, 140, 0, 0.1);
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            color: var(--primary);
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .btn-link {
+        .cat-badge {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 6px 12px;
-            background-color: var(--success);
-            border: none;
-            border-radius: 4px;
-            color: white;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 100px;
             font-size: 12px;
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            font-weight: 700;
         }
-        .btn-link:hover { opacity: 0.9; }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            font-size: 14px;
+
+        .badge-navegantes { background: rgba(234, 88, 12, 0.12); color: #c2410c; }
+        .badge-pioneros { background: rgba(225, 29, 72, 0.12); color: #be123c; }
+        .badge-seguidores { background: rgba(124, 58, 237, 0.12); color: #6d28d9; }
+        .badge-exploradores { background: rgba(5, 150, 105, 0.12); color: #047857; }
+
+        .dish-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .paid-badge {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .comprobante-btn {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .comprobante-btn:hover {
+            background: #dbeafe;
         }
 
         .action-btn {
             background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            border-radius: 4px;
-            padding: 6px;
+            border-radius: 6px;
+            padding: 6px 8px;
             cursor: pointer;
-            margin: 0 4px;
+            margin: 0 3px;
             transition: all 0.2s;
+            font-size: 13px;
         }
 
-        .action-btn:hover { background: rgba(0,0,0,0.05); }
+        .action-btn:hover { background: #f1f5f9; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
 
         /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             display: none; align-items: center; justify-content: center; z-index: 1000;
+            padding: 16px;
         }
         .modal {
             background: var(--card-bg);
-            border-radius: 8px;
-            width: 100%; max-width: 500px; max-height: 90vh;
+            border-radius: 14px;
+            width: 100%; max-width: 520px; max-height: 90vh;
             overflow-y: auto; padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
             border-top: 8px solid var(--primary);
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { font-size: 20px; font-weight: 500; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .modal-header h2 { font-size: 20px; font-weight: 700; }
         .close-btn { background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: var(--text-muted); }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13.5px; font-weight: 600; color: #334155; }
         .form-group input, .form-group select {
-            width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color);
-            background: transparent; color: var(--text-main); outline: none; font-size: 14px;
+            width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color);
+            background: #f8fafc; color: var(--text-main); outline: none; font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            background: #ffffff;
         }
         
-        .btn-submit {
-            width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 4px;
-            font-weight: 500; cursor: pointer; font-size: 14px; margin-top: 10px;
+        .btn-modal-save {
+            width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px;
+            font-weight: 700; cursor: pointer; font-size: 15px; margin-top: 10px;
         }
+        .btn-modal-save:hover { background: var(--primary-dark); }
 
-        /* Checkboxes */
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        /* Comprobante Image Modal */
+        .img-modal-content {
+            max-width: 600px;
+            text-align: center;
         }
-        .checkbox-option {
-            display: flex;
-            align-items: center;
-            font-size: 13px;
-        }
-        .checkbox-option input {
-            margin-right: 6px;
+        .img-modal-preview {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 8px;
+            object-fit: contain;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Directorio Campamento de Servidores 2026</h1>
-            <button id="exportExcelBtn" class="export-btn" onclick="exportToExcel()">📥 Exportar a Excel</button>
+        <!-- Header -->
+        <div class="header-card">
+            <div class="header-left">
+                <img src="${rangerChefLogoBase64}" alt="Ranger Chef" class="header-logo">
+                <div>
+                    <h1>Directorio Ranger Chef 2026</h1>
+                    <div class="subtitle">Lista de Participantes e Inscripciones Oficiales</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="${baseUrl}/registro-ranger-chef" target="_blank" class="btn-register-link">
+                    <span>➕</span> Nuevo Registro
+                </a>
+                <button id="exportExcelBtn" class="export-btn" onclick="exportToExcel()">
+                    <span>📥</span> Exportar a Excel
+                </button>
+            </div>
         </div>
 
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👨‍🍳</div>
+                <div class="stat-info">
+                    <div class="stat-label">Total Inscritos</div>
+                    <div class="stat-value">${personas.length}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧭</div>
+                <div class="stat-info">
+                    <div class="stat-label">Navegantes</div>
+                    <div class="stat-value" style="color: var(--navegantes-color);">${countNavegantes}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧗</div>
+                <div class="stat-info">
+                    <div class="stat-label">Pioneros</div>
+                    <div class="stat-value" style="color: var(--pioneros-color);">${countPioneros}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👣</div>
+                <div class="stat-info">
+                    <div class="stat-label">Seguidores</div>
+                    <div class="stat-value" style="color: var(--seguidores-color);">${countSeguidores}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏕️</div>
+                <div class="stat-info">
+                    <div class="stat-label">Exploradores</div>
+                    <div class="stat-value" style="color: var(--exploradores-color);">${countExploradores}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <div class="stat-label">Recaudado</div>
+                    <div class="stat-value" style="color: var(--success); font-size: 18px;">$${totalRecaudado.toFixed(2)}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls: Search & Category Tabs -->
+        <div class="controls-card">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, tutor, teléfono o platillo..." oninput="filterTable()">
+            </div>
+
+            <div class="category-tabs">
+                <button class="cat-tab active" onclick="setCategoryFilter('all', this)">
+                    🌟 Todas las Categorías <span class="tab-count">${personas.length}</span>
+                </button>
+                <button class="cat-tab" onclick="setCategoryFilter('Navegantes', this)">
+                    🧭 Navegantes <span class="tab-count">${countNavegantes}</span>
+                </button>
+                <button class="cat-tab" onclick="setCategoryFilter('Pioneros', this)">
+                    🧗 Pioneros <span class="tab-count">${countPioneros}</span>
+                </button>
+                <button class="cat-tab" onclick="setCategoryFilter('Seguidores', this)">
+                    👣 Seguidores <span class="tab-count">${countSeguidores}</span>
+                </button>
+                <button class="cat-tab" onclick="setCategoryFilter('Exploradores', this)">
+                    🏕️ Exploradores <span class="tab-count">${countExploradores}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Table -->
         <div class="table-container">
-            <table>
+            <table id="rangerChefTable">
                 <thead>
                     <tr>
-                        <th>Nombre Completo</th>
-                        <th>Sexo</th>
-                        <th>Ministerios</th>
-                        <th>Transporte</th>
-                        
-                        <th>Pago</th>
+                        <th style="text-align: center; width: 40px;">#</th>
+                        <th>Participante</th>
+                        <th style="text-align: center;">Edad</th>
+                        <th>Categoría</th>
+                        <th>Platillo Seleccionado</th>
+                        <th>Tutor / Acudiente</th>
+                        <th>Teléfono Tutor</th>
+                        <th style="text-align: center;">Pago</th>
                         <th style="text-align: center;">Comprobante</th>
-                        <th style="text-align: center;">Acciones</th>
+                        <th>Fecha Reg.</th>
+                        <th style="text-align: center; width: 90px;">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                     ${rowsHtml}
                 </tbody>
             </table>
-            ${personas.length === 0 ? '<div class="empty-state">No hay registros en el sistema todavía.</div>' : ''}
+            ${personas.length === 0 ? '<div class="empty-state">No hay inscripciones registradas para Ranger Chef todavía.</div>' : ''}
+            <div id="noResultsState" class="empty-state" style="display: none;">No se encontraron registros que coincidan con la búsqueda.</div>
         </div>
     </div>
 
@@ -499,74 +848,132 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
     <div class="modal-overlay" id="editModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>Editar Registro</h2>
+                <h2>Editar Inscripción</h2>
                 <button class="close-btn" onclick="closeEditModal()">&times;</button>
             </div>
             <form id="editForm">
                 <input type="hidden" id="editId">
                 <div class="form-group">
-                    <label>Nombre</label>
+                    <label>Nombre del Participante</label>
                     <input type="text" id="editNombre" required>
                 </div>
                 <div class="form-group">
-                    <label>Apellido</label>
+                    <label>Apellido del Participante</label>
                     <input type="text" id="editApellido" required>
                 </div>
                 <div class="form-group">
-                    <label>Sexo</label>
-                    <select id="editSexo" required>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Femenino">Femenino</option>
+                    <label>Edad</label>
+                    <input type="number" id="editEdad" min="1" max="99">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="editCategoria" onchange="updateEditDishes(this.value)" required>
+                        <option value="Navegantes">Navegantes</option>
+                        <option value="Pioneros">Pioneros</option>
+                        <option value="Seguidores">Seguidores</option>
+                        <option value="Exploradores">Exploradores</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Ministerios</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Media"> Media</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Cafetería"> Cafetería</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Protocolo"> Protocolo</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Logística"> Logística</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Seguridad"> Seguridad</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Música"> Música</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Casa de Luz"> Casa de Luz</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Jef (Jef Ten, Jef, Jef Plus +)"> Jef</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Génesis"> Génesis</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Evangelio Cambio"> Evangelio C.</label>
-                        <label class="checkbox-option"><input type="checkbox" name="editMin" value="Otros"> Otros</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Necesita Transporte</label>
-                    <select id="editTransporte" required>
-                        <option value="Sí">Sí</option>
-                        <option value="No">No</option>
+                    <label>Platillo Seleccionado</label>
+                    <select id="editPlatillo" required>
+                        <!-- Opciones dinámicas -->
                     </select>
                 </div>
-                
                 <div class="form-group">
-                    <label>Método de Pago</label>
-                    <select id="editMetodoPago" required>
-                        <option value="Yappy">Yappy</option>
-                        <option value="Transferencia">Transferencia</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Otro">Otro</option>
-                    </select>
+                    <label>Nombre del Tutor</label>
+                    <input type="text" id="editTutor" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono del Tutor</label>
+                    <input type="tel" id="editTelefono" required>
                 </div>
                 <div class="form-group">
                     <label>Monto Pagado ($)</label>
                     <input type="number" step="0.01" min="0" id="editMontoPago" required>
                 </div>
-                <button type="submit" class="btn-submit">Guardar Cambios</button>
+                <button type="submit" class="btn-modal-save">Guardar Cambios</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Comprobante View Modal -->
+    <div class="modal-overlay" id="comprobanteModal">
+        <div class="modal img-modal-content">
+            <div class="modal-header">
+                <h2 id="comprobanteTitle">Comprobante de Pago</h2>
+                <button class="close-btn" onclick="closeComprobanteModal()">&times;</button>
+            </div>
+            <img id="comprobanteImgPreview" src="" alt="Comprobante" class="img-modal-preview">
+            <div style="margin-top: 14px;">
+                <a id="comprobanteDirectLink" href="" target="_blank" class="export-btn" style="text-decoration: none; display: inline-flex;">
+                    🔗 Abrir imagen original
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
         const baseUrl = '${baseUrl}';
         const personasList = ${JSON.stringify(personas).replace(/</g, '\\u003c')};
-        const modal = document.getElementById('editModal');
-        const form = document.getElementById('editForm');
         
+        let currentFilterCategory = 'all';
+
+        const categoryDishes = {
+            'Navegantes': ['Derretidos de Jamón y Queso', 'Pancake con Huevo Revuelto'],
+            'Pioneros': ['Brioche de Pollo', 'Omelet con Tostadas'],
+            'Seguidores': ['Pasta Boloñesa', 'Club Sándwich'],
+            'Exploradores': ['Desayuno Panameño', 'Pollo o Bistec a Caballo']
+        };
+
+        function setCategoryFilter(cat, btnEl) {
+            currentFilterCategory = cat;
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            btnEl.classList.add('active');
+            filterTable();
+        }
+
+        function filterTable() {
+            const query = (document.getElementById('searchInput').value || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            const rows = document.querySelectorAll('#tableBody tr');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowCat = row.getAttribute('data-category');
+                const rowSearch = row.getAttribute('data-search') || '';
+
+                const matchesCat = currentFilterCategory === 'all' || rowCat === currentFilterCategory;
+                const matchesQuery = !query || rowSearch.includes(query);
+
+                if (matchesCat && matchesQuery) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('noResultsState').style.display = (visibleCount === 0 && rows.length > 0) ? 'block' : 'none';
+        }
+
+        function openComprobanteModal(imgUrl, nombre) {
+            document.getElementById('comprobanteTitle').textContent = 'Comprobante: ' + nombre;
+            document.getElementById('comprobanteImgPreview').src = imgUrl;
+            document.getElementById('comprobanteDirectLink').href = imgUrl;
+            document.getElementById('comprobanteModal').style.display = 'flex';
+        }
+
+        function closeComprobanteModal() {
+            document.getElementById('comprobanteModal').style.display = 'none';
+            document.getElementById('comprobanteImgPreview').src = '';
+        }
+
+        function updateEditDishes(category, selectedDish) {
+            const select = document.getElementById('editPlatillo');
+            const dishes = categoryDishes[category] || categoryDishes['Navegantes'];
+            select.innerHTML = dishes.map(d => '<option value="' + d + '" ' + (d === selectedDish ? 'selected' : '') + '>' + d + '</option>').join('');
+        }
+
         let currentRecord = null;
 
         function openEditModal(id, dataStr) {
@@ -574,43 +981,37 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             document.getElementById('editId').value = id;
             document.getElementById('editNombre').value = currentRecord.nombre || '';
             document.getElementById('editApellido').value = currentRecord.apellido || '';
-            document.getElementById('editSexo').value = currentRecord.sexo || 'Masculino';
-            document.getElementById('editTransporte').value = currentRecord.necesitaTransporte || 'No';
+            document.getElementById('editEdad').value = currentRecord.edad || '';
             
-            document.getElementById('editMetodoPago').value = currentRecord.metodoPago || 'Yappy';
-            document.getElementById('editMontoPago').value = currentRecord.montoPago || 0;
+            const cat = currentRecord.grupo || 'Navegantes';
+            document.getElementById('editCategoria').value = cat;
+            updateEditDishes(cat, currentRecord.ministerio);
             
-            const ministerios = (currentRecord.ministerio || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="editMin"]').forEach(cb => {
-                if (ministerios.includes(cb.value)) {
-                    cb.checked = true;
-                } else {
-                    cb.checked = false;
-                }
-            });
+            document.getElementById('editTutor').value = currentRecord.adultoResponsable || '';
+            document.getElementById('editTelefono').value = currentRecord.telefono || '';
+            document.getElementById('editMontoPago').value = currentRecord.montoPago || 5.00;
 
-            modal.style.display = 'flex';
+            document.getElementById('editModal').style.display = 'flex';
         }
 
         function closeEditModal() {
-            modal.style.display = 'none';
+            document.getElementById('editModal').style.display = 'none';
         }
 
-        form.addEventListener('submit', async (e) => {
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const checkedMin = Array.from(document.querySelectorAll('input[name="editMin"]:checked')).map(cb => cb.value);
 
             const payload = {
                 ...currentRecord,
-                nombre: document.getElementById('editNombre').value,
-                apellido: document.getElementById('editApellido').value,
-                sexo: document.getElementById('editSexo').value,
-                ministerio: checkedMin.join(', '),
-                necesitaTransporte: document.getElementById('editTransporte').value,
-                
-                metodoPago: document.getElementById('editMetodoPago').value,
-                montoPago: parseFloat(document.getElementById('editMontoPago').value) || 0
+                nombre: document.getElementById('editNombre').value.trim(),
+                apellido: document.getElementById('editApellido').value.trim(),
+                edad: parseInt(document.getElementById('editEdad').value) || undefined,
+                grupo: document.getElementById('editCategoria').value,
+                ministerio: document.getElementById('editPlatillo').value,
+                adultoResponsable: document.getElementById('editTutor').value.trim(),
+                telefono: document.getElementById('editTelefono').value.trim(),
+                montoPago: parseFloat(document.getElementById('editMontoPago').value) || 5.00,
+                departamento: 'Ranger Chef'
             };
 
             try {
@@ -619,57 +1020,56 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if(response.ok) {
+                if (response.ok) {
                     location.reload();
                 } else {
-                    alert('Error al actualizar');
+                    alert('Error al actualizar el registro');
                 }
-            } catch(e) {
-                alert('Error de red');
+            } catch (e) {
+                alert('Error de conexión');
             }
         });
 
         async function deleteRecord(id) {
-            if(confirm('¿Está seguro que desea eliminar este registro?')) {
+            if (confirm('¿Está seguro de que desea eliminar este registro de Ranger Chef?')) {
                 try {
                     const response = await fetch(baseUrl + '/api/registro-detallado/publico/' + id, {
                         method: 'DELETE'
                     });
-                    if(response.ok) {
+                    if (response.ok) {
                         location.reload();
                     } else {
-                        alert('Error al eliminar');
+                        alert('Error al eliminar el registro');
                     }
-                } catch(e) {
-                    alert('Error de red');
+                } catch (e) {
+                    alert('Error de conexión');
                 }
             }
         }
 
         function exportToExcel() {
             if (!personasList || personasList.length === 0) {
-                alert('No hay datos para exportar');
+                alert('No hay inscritos para exportar');
                 return;
             }
 
-            // Map standard and extra database fields to clean headers
-            const exportData = personasList.map(p => ({
-                'Nombre': p.nombre || '',
+            const exportData = personasList.map((p, idx) => ({
+                'N°': idx + 1,
+                'Nombre del Participante': p.nombre || '',
                 'Apellido': (p.apellido && p.apellido !== '.') ? p.apellido : '',
-                'Sexo': p.sexo || '',
-                'Ministerios': p.ministerio || '',
-                'Transporte': p.necesitaTransporte || '',
-                'Método de Pago': p.metodoPago || '',
-                'Monto Pago ($)': p.montoPago || 0,
-                'Comprobante': p.comprobantePago || '',
-                'Teléfono': p.telefono || '',
-                'Fecha Registro': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
+                'Edad': p.edad || '',
+                'Categoría': p.grupo || '',
+                'Platillo Asignado': p.ministerio || '',
+                'Nombre del Tutor': p.adultoResponsable || '',
+                'Teléfono del Tutor': p.telefono || '',
+                'Método de Pago': p.metodoPago || 'Yappy',
+                'Monto Pagado ($)': p.montoPago || 5.00,
+                'Comprobante (URL)': p.comprobantePago || '',
+                'Fecha de Registro': p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''
             }));
 
-            // Create worksheet from data
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             
-            // Auto-fit column widths
             const max_len = exportData.reduce((acc, row) => {
                 Object.keys(row).forEach((key) => {
                     const val = String(row[key] || '');
@@ -683,17 +1083,16 @@ export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => {
             
             worksheet['!cols'] = Object.keys(max_len).map(key => ({ wch: max_len[key] + 3 }));
 
-            // Create workbook and append worksheet
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Servidores');
-
-            // Download file
-            XLSX.writeFile(workbook, 'Directorio_Campamento_Servidores_2026.xlsx');
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Ranger Chef 2026');
+            XLSX.writeFile(workbook, 'Directorio_Ranger_Chef_2026.xlsx');
         }
     </script>
 </body>
 </html>`;
 };
+
+export const getCampamentoTableHtml = (personas: any[], baseUrl: string) => getRangerChefTableHtml(personas, baseUrl);
 
 export const getConvencionTableHtml = (personas: any[], baseUrl: string) => {
     // Normalizar texto eliminando tildes y diacríticos
