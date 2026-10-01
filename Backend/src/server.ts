@@ -121,12 +121,27 @@ app.get('/directorio-mentor-club', async (req, res) => {
     }
 });
 
-// Directorio HTML de Ranger Chef (y alias para directorio-campamento)
+// Directorio HTML de Ranger Chef
 app.get(['/directorio-ranger-chef', '/directorio-campamento'], async (req, res) => {
     try {
         const personas = await PersonaDetallada.find({ 
-            departamento: { $in: ['Ranger Chef', 'RangerChef', 'Campamento'] } 
+            departamento: { $in: ['Ranger Chef', 'RangerChef'] } 
         }).sort({ createdAt: -1, nombre: 1 });
+        const host = req.get('host') || 'localhost:5000';
+        const protocol = req.protocol;
+        const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
+        const baseUrl = `${activeProtocol}://${host}`;
+
+        res.send(getRangerChefTableHtml(personas, baseUrl));
+    } catch (error: any) {
+        res.status(500).send(`<h1 style="color: white; text-align: center; margin-top: 50px; font-family: sans-serif;">Error del servidor</h1><p style="color: grey; text-align: center; font-family: sans-serif;">${error.message}</p>`);
+    }
+});
+
+// Directorio Histórico del Campamento de Servidores (Consulta anterior)
+app.get('/directorio-campamento-historico', async (req, res) => {
+    try {
+        const personas = await PersonaDetallada.find({ departamento: 'Campamento' }).sort({ createdAt: -1, nombre: 1 });
         const host = req.get('host') || 'localhost:5000';
         const protocol = req.protocol;
         const activeProtocol = req.headers['x-forwarded-proto'] ? String(req.headers['x-forwarded-proto']) : protocol;
