@@ -1839,7 +1839,6 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
             <div class="card card-header">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
                     <span class="tag-pill">👨‍🍳 Concurso Culinario</span>
-                    <span class="category-tab-active-pill" id="headerCategoryBadge">Categoría: Navegantes</span>
                 </div>
                 
                 <h1>CONCURSO RANGER CHEF 2026</h1>
@@ -1890,7 +1889,7 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
                 <!-- Platillos Preliminares de la Categoría Activa -->
                 <div style="margin-top: 20px;">
                     <div style="font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
-                        🍲 Platillos Preliminares para <span id="sectionPlatillosCategoryName" style="color: var(--primary);">Navegantes</span>:
+                        🍲 Platillo Oficial para <span id="sectionPlatillosCategoryName" style="color: var(--primary);">Navegantes</span>:
                     </div>
                     <div class="platillos-showcase" id="platillosShowcaseContainer">
                         <!-- Generado dinámicamente -->
@@ -2107,10 +2106,6 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
                 icon: '🧭',
                 platillos: [
                     {
-                        nombre: 'Derretidos de Jamón y Queso',
-                        ingredientes: 'Pan molde, margarina, jamón y queso.'
-                    },
-                    {
                         nombre: 'Pancake con Huevo Revuelto',
                         ingredientes: 'Mezcla de pancake y dos huevos revueltos.'
                     }
@@ -2120,10 +2115,6 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
                 color: '#e11d48',
                 icon: '🧗',
                 platillos: [
-                    {
-                        nombre: 'Brioche de Pollo',
-                        ingredientes: 'Pan de hamburguesa / brioche, pechuga desmenuzada, mayonesa, lechuga y tomate, sal y pimienta.'
-                    },
                     {
                         nombre: 'Omelet con Tostadas',
                         ingredientes: 'Dos pan molde, mezcla de dos huevos con un toque de leche.'
@@ -2137,10 +2128,6 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
                     {
                         nombre: 'Pasta Boloñesa',
                         ingredientes: 'Pasta de su elección, carne molida, sal y pimienta, salsa pomodoro.'
-                    },
-                    {
-                        nombre: 'Club Sándwich',
-                        ingredientes: '3 und. pan molde, lechuga, tomate, jamón, queso, huevo, pechuga a la plancha, salsas de su preferencia.'
                     }
                 ]
             },
@@ -2148,10 +2135,6 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
                 color: '#059669',
                 icon: '🏕️',
                 platillos: [
-                    {
-                        nombre: 'Desayuno Panameño',
-                        ingredientes: 'Salchichas guisadas en salsa roja, dos tortillas fritas, dos rodajas de queso blanco.'
-                    },
                     {
                         nombre: 'Pollo o Bistec a Caballo',
                         ingredientes: 'Pechuga de pollo o carne, cebolla salteada, 1 huevo frito, 2 tortillas de base.'
@@ -2188,9 +2171,10 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
         function updateCategoryUI(catName) {
             const data = categoriasInfo[catName] || categoriasInfo['Navegantes'];
             
-            // Header badge
-            document.getElementById('headerCategoryBadge').textContent = 'Categoría: ' + catName;
-            document.getElementById('sectionPlatillosCategoryName').textContent = catName;
+            const sectionName = document.getElementById('sectionPlatillosCategoryName');
+            if (sectionName) {
+                sectionName.textContent = catName;
+            }
 
             // Update radio cards visual selection
             document.querySelectorAll('.cat-card').forEach(card => card.classList.remove('selected'));
@@ -2199,11 +2183,11 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
 
             // Render Platillos Showcase in Section 1
             const showcaseContainer = document.getElementById('platillosShowcaseContainer');
-            showcaseContainer.innerHTML = data.platillos.map((p, idx) => {
+            showcaseContainer.innerHTML = data.platillos.map((p) => {
                 return '<div class="platillo-card">' +
                     '<div class="platillo-header">' +
-                        '<span class="platillo-num">Opción ' + (idx + 1) + '</span>' +
-                        '<span style="font-size: 18px;">' + (idx === 0 ? '🍳' : '🥞') + '</span>' +
+                        '<span class="platillo-num">Platillo Oficial</span>' +
+                        '<span style="font-size: 18px;">🍳</span>' +
                     '</div>' +
                     '<div class="platillo-title">' + p.nombre + '</div>' +
                     '<div class="platillo-ingredientes">' +
@@ -2219,7 +2203,7 @@ export const getRangerChefFormHtml = (initialCategory: string = '') => {
                 return '<label class="platillo-choice-card ' + (isFirst ? 'selected' : '') + '" onclick="selectChoiceCard(this)">' +
                     '<input type="radio" name="platilloElegido" value="' + p.nombre + '" ' + (isFirst ? 'checked' : '') + ' required>' +
                     '<div class="platillo-choice-info">' +
-                        '<div class="platillo-choice-name">Opción ' + (idx + 1) + ': ' + p.nombre + '</div>' +
+                        '<div class="platillo-choice-name">' + p.nombre + '</div>' +
                         '<div class="platillo-choice-desc">' + p.ingredientes + '</div>' +
                     '</div>' +
                 '</label>';

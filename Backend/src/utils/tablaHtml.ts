@@ -921,10 +921,10 @@ export const getRangerChefTableHtml = (personas: any[], baseUrl: string) => {
         let currentFilterCategory = 'all';
 
         const categoryDishes = {
-            'Navegantes': ['Derretidos de Jamón y Queso', 'Pancake con Huevo Revuelto'],
-            'Pioneros': ['Brioche de Pollo', 'Omelet con Tostadas'],
-            'Seguidores': ['Pasta Boloñesa', 'Club Sándwich'],
-            'Exploradores': ['Desayuno Panameño', 'Pollo o Bistec a Caballo']
+            'Navegantes': ['Pancake con Huevo Revuelto'],
+            'Pioneros': ['Omelet con Tostadas'],
+            'Seguidores': ['Pasta Boloñesa'],
+            'Exploradores': ['Pollo o Bistec a Caballo']
         };
 
         function setCategoryFilter(cat, btnEl) {
